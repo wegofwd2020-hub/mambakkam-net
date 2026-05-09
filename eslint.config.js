@@ -25,6 +25,10 @@ export default [
         parser: '@typescript-eslint/parser',
         extraFileExtensions: ['.astro'],
       },
+      globals: {
+        // Astro-injected ambient types not visible to eslint's no-undef.
+        ImageMetadata: 'readonly',
+      },
     },
   },
   {
