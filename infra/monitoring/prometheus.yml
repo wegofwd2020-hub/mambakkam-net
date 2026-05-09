@@ -1,0 +1,149 @@
+# =============================================================================
+# infra/monitoring/prometheus.yml — production Prometheus config for the CX22.
+#
+# Local Prometheus scrapes:
+#   - itself (sanity)
+#   - nginx-exporter           (mambakkam request rate, 5xx, conns)
+#   - node-exporter            (CX22 host CPU / RAM / disk / network)
+#   - blackbox-exporter        (synthetic uptime probes for both public hostnames)
+#   - StudyBuddy /metrics      (sb_* application metrics; bearer-token gated)
+#
+# Local Prometheus then ships everything to Grafana Cloud free tier via
+# remote_write. The local TSDB retains 7 days for ad-hoc PromQL via :9090.
+#
+# Substituted env vars come from .env.monitoring on the host.
+# =============================================================================
+
+global:
+  scrape_interval:     15s
+  evaluation_interval: 15s
+  scrape_timeout:      10s
+
+  # Tagged onto every series shipped to Grafana Cloud. Helpful when you eventually
+  # add a second VPS or staging environment — series stay distinguishable.
+  external_labels:
+    env:      production
+    location: hetzner-cx22-co-tenant
+    operator: mambakkam
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Remote write to Grafana Cloud (Prometheus-compatible /api/prom/push endpoint)
+# ─────────────────────────────────────────────────────────────────────────────
+
+remote_write:
+  - url: ${GRAFANA_CLOUD_REMOTE_WRITE_URL}
+    basic_auth:
+      username: ${GRAFANA_CLOUD_USERNAME}
+      password: ${GRAFANA_CLOUD_API_KEY}
+
+    # Free tier is 10k active series — drop noisy series we don't care about
+    # to stay well under the cap. The keep list below is the minimum useful set.
+    # Add to it deliberately as you build dashboards.
+    write_relabel_configs:
+      # Always keep `up` for every job — it's how alerts know what's down.
+      - source_labels: [__name__]
+        regex: 'up'
+        action: keep
+      # Application metrics (StudyBuddy)
+      - source_labels: [__name__]
+        regex: 'sb_.*'
+        action: keep
+      # Nginx exporter request-rate / 5xx series
+      - source_labels: [__name__]
+        regex: 'nginx_(http_requests_total|connections_active|connections_writing|connections_reading|connections_waiting|up)'
+        action: keep
+      # Blackbox probe results
+      - source_labels: [__name__]
+        regex: 'probe_(success|duration_seconds|http_status_code|http_ssl)'
+        action: keep
+      # Node exporter — keep the small useful subset, not the full ~600 series
+      - source_labels: [__name__]
+        regex: 'node_(cpu_seconds_total|memory_(MemTotal|MemAvailable|MemFree|Cached|Buffers)_bytes|filesystem_(size|free|avail)_bytes|filesystem_files(_free)?|disk_(read|write)_bytes_total|network_(receive|transmit)_bytes_total|load1|load5|load15|boot_time_seconds|filefd_(allocated|maximum)|context_switches_total)'
+        action: keep
+      # Prometheus self-monitoring (cheap; we want to know if scrape stops)
+      - source_labels: [__name__]
+        regex: 'prometheus_(target_sync_length_seconds.*|tsdb_head_series|tsdb_head_samples_appended_total|remote_storage_(samples|bytes)_total|remote_storage_failed_samples_total)'
+        action: keep
+      # Drop everything else — saves a lot of headroom under the 10k cap.
+      - source_labels: [__name__]
+        regex: '.*'
+        action: drop
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Scrape configurations
+# ─────────────────────────────────────────────────────────────────────────────
+
+scrape_configs:
+
+  # ── Self-monitoring ──────────────────────────────────────────────────────────
+  - job_name: prometheus
+    static_configs:
+      - targets: ["localhost:9090"]
+
+  # ── mambakkam nginx (via nginx-prometheus-exporter sidecar) ─────────────────
+  - job_name: mambakkam-nginx
+    static_configs:
+      - targets: ["nginx-exporter:9113"]
+    relabel_configs:
+      - target_label: service
+        replacement: mambakkam-nginx
+      - target_label: project
+        replacement: mambakkam-net
+
+  # ── CX22 host metrics (node-exporter on host network) ──────────────────────
+  - job_name: cx22-host
+    static_configs:
+      - targets: ["host.docker.internal:9100"]
+    relabel_configs:
+      - target_label: service
+        replacement: cx22-host
+      - target_label: project
+        replacement: shared-infra
+
+  # ── Synthetic uptime probes (blackbox) ──────────────────────────────────────
+  - job_name: blackbox-https
+    metrics_path: /probe
+    params:
+      module: [http_2xx]
+    static_configs:
+      - targets:
+          - https://mambakkam.net
+          - https://mambakkam.net/people/siva-m
+          - https://mambakkam.net/sitemap-index.xml
+          - https://demo.studybuddy.app
+          - https://demo.studybuddy.app/healthz
+    relabel_configs:
+      # Pass the actual target URL through `__param_target` so blackbox-
+      # exporter knows what to probe; the `instance` label ends up as the URL.
+      - source_labels: [__address__]
+        target_label: __param_target
+      - source_labels: [__param_target]
+        target_label: instance
+      - target_label: __address__
+        replacement: blackbox-exporter:9115
+      - target_label: probe_kind
+        replacement: https-uptime
+
+  # ── StudyBuddy /metrics ─────────────────────────────────────────────────────
+  # The StudyBuddy stack (second tenant) exposes /metrics on its compose-internal
+  # nginx. We reach it via the host loopback because the monitoring stack and
+  # StudyBuddy live in separate compose projects.
+  - job_name: studybuddy-api
+    static_configs:
+      - targets: ["host.docker.internal:8443"]
+    metrics_path: /metrics
+    scheme: http
+    authorization:
+      type: Bearer
+      credentials: ${STUDYBUDDY_METRICS_TOKEN}
+    relabel_configs:
+      - target_label: service
+        replacement: studybuddy-api
+      - target_label: project
+        replacement: studybuddy
+
+# Note: `host.docker.internal` resolves on Linux only when the container is
+# started with `extra_hosts: ["host.docker.internal:host-gateway"]`. The
+# monitoring compose sets that on the prometheus service (see
+# docker-compose.monitoring.yml). node-exporter uses host networking
+# directly so it doesn't need the alias.

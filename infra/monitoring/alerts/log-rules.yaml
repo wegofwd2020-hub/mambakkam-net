@@ -1,0 +1,159 @@
+# =============================================================================
+# infra/monitoring/alerts/log-rules.yaml — Loki alert rules
+#
+# Uploaded to Grafana Cloud Loki's ruler API by infra/monitoring/alerts/apply.sh
+# under namespace `studybuddy-alerts` (parallel to metric-rules.yaml).
+#
+# LogQL alert format mirrors Prometheus's: groups → rules → alert/expr/for.
+# Loki's ruler evaluates these the same way Mimir evaluates Prometheus rules.
+#
+# Severity convention identical to metric-rules.yaml (see header there).
+# =============================================================================
+
+groups:
+
+  # ── content-side errors ────────────────────────────────────────────────────
+  - name: content-errors
+    interval: 1m
+    rules:
+
+      - alert: Demo5xxRateHigh
+        # 5xx hits in the host nginx demo.studybuddy.app access log.
+        # >0.5/sec = 30/min = ~one user per minute hitting an error.
+        expr: |
+          sum by (vhost) (
+            rate({vhost="demo.studybuddy.app", kind="access"} |~ `" 5\d\d ` [5m])
+          ) > 0.5
+        for: 5m
+        labels:
+          severity: page
+          site: studybuddy
+        annotations:
+          summary: "demo.studybuddy.app 5xx rate >0.5/sec for 5 min"
+          description: "Sustained 5xx responses in the public access log. Cross-reference with `sb_requests_total{status=~\"5..\"}` in Grafana to identify which routes are failing."
+          runbook_url: "https://github.com/wegofwd2020-hub/mambakkam-net/blob/main/Plans/RUNBOOK.md#demo5xxratehigh"
+
+      - alert: StudyBuddyErrorBurst
+        # Aggregate structlog error events across all StudyBuddy services.
+        # >1/sec for 5 min is "something is consistently broken", not a one-off.
+        expr: |
+          sum(rate({project="studybuddy", level="error"}[5m])) > 1
+        for: 5m
+        labels:
+          severity: warn
+          site: studybuddy
+        annotations:
+          summary: "StudyBuddy error log rate >1/sec for 5 min"
+          description: "Aggregate structlog `level=error` rate sustained. Could be backend, celery, or web. Use `{project=\"studybuddy\", level=\"error\"} | json` in Loki to pivot by `logger`."
+          runbook_url: "https://github.com/wegofwd2020-hub/mambakkam-net/blob/main/Plans/RUNBOOK.md#studybuddyerrorburst"
+
+      - alert: MambakkamErrorLogs
+        # Host nginx error_log entries for the mambakkam vhost.
+        # Real upstream errors (502/504) emit here; the vhost being mostly
+        # static means this is rare and worth knowing about.
+        expr: |
+          sum(rate({vhost="mambakkam.net", kind="error"}[10m])) > 0.1
+        for: 10m
+        labels:
+          severity: warn
+          site: mambakkam
+        annotations:
+          summary: "mambakkam.net nginx error log rate >0.1/sec for 10 min"
+          description: "Host nginx is logging errors against the mambakkam vhost. Common causes: astrowind container restart, upstream unreachable, certificate path mismatch."
+          runbook_url: "https://github.com/wegofwd2020-hub/mambakkam-net/blob/main/Plans/RUNBOOK.md#mambakkamerrorlogs"
+
+  # ── backups ────────────────────────────────────────────────────────────────
+  - name: backups
+    interval: 5m
+    rules:
+
+      - alert: BackupSilent
+        # We expect ~10 lines per nightly backup × 2 sites = ~20 lines / 24 h
+        # at minimum, plus the weekly check. <5 lines means the cron didn't
+        # fire, which is a DR-grade silent-failure.
+        expr: |
+          count_over_time({job="backups"}[24h]) < 5
+        for: 1h
+        labels:
+          severity: page
+          site: backups
+        annotations:
+          summary: "Backups have produced <5 log lines in 24h"
+          description: "Either the cron didn't fire, both backups silently failed, or Promtail stopped tailing the log. Check /etc/cron.d/{mambakkam,studybuddy-demo}-backup; check `systemctl status cron`; check `docker compose logs promtail` (in monitoring stack)."
+          runbook_url: "https://github.com/wegofwd2020-hub/mambakkam-net/blob/main/Plans/RUNBOOK.md#backupsilent"
+
+      - alert: ResticCheckFailed
+        # backup-check.sh exits with "CHECK FAILED" on bit-rot detection.
+        # Even one occurrence = page.
+        expr: |
+          count_over_time({job="backups"} |~ `CHECK FAILED` [1d]) > 0
+        for: 0m
+        labels:
+          severity: page
+          site: backups
+        annotations:
+          summary: "restic check detected possible bit-rot or repo corruption"
+          description: "`restic check --read-data-subset 5%` failed. Recent snapshots may not be restorable. Run `restic check --read-data-subset 100%` for a full audit; consider restoring from off-box if available, or rotating the password and re-init'ing the repo."
+          runbook_url: "https://github.com/wegofwd2020-hub/mambakkam-net/blob/main/Plans/RUNBOOK.md#resticcheckfailed"
+
+      - alert: ResticPruneFailed
+        expr: |
+          count_over_time({job="backups"} |~ `prune FAILED` [1d]) > 0
+        for: 0m
+        labels:
+          severity: warn
+          site: backups
+        annotations:
+          summary: "restic prune failed during weekly check"
+          description: "Disk space won't be reclaimed from forgotten snapshots until the next successful prune. Repo size will continue to grow. Likely cause: lock file from a prior crashed run — see runbook for cleanup."
+          runbook_url: "https://github.com/wegofwd2020-hub/mambakkam-net/blob/main/Plans/RUNBOOK.md#resticprunefailed"
+
+      - alert: BackupSizeRunaway
+        # Heuristic: any line with "repo on-disk size: <2-digit-or-more>G" in the
+        # last 24h. Adjust the threshold once a baseline is established (after
+        # ~30 days of operation). See runbook for proper Prometheus exporter.
+        expr: |
+          count_over_time({job="backups"} |~ `repo on-disk size: [0-9]{2,}G` [1d]) > 0
+        for: 1h
+        labels:
+          severity: warn
+          site: backups
+        annotations:
+          summary: "Backup repo size has crossed 10GB"
+          description: "Heuristic alert — the backup script's logged repo size matched a 2+ digit GB string. If sustained, the dedup ratio has degraded or daily content churn has spiked. Investigate via `restic stats` and adjust the keep-policy if needed."
+          runbook_url: "https://github.com/wegofwd2020-hub/mambakkam-net/blob/main/Plans/RUNBOOK.md#backupsizerunaway"
+
+  # ── security ──────────────────────────────────────────────────────────────
+  - name: security
+    interval: 1m
+    rules:
+
+      - alert: SSHBruteForce
+        # >1/sec sustained = something automated. Single-IP attempts get
+        # banned by fail2ban; this catches the case where the attack is
+        # distributed.
+        expr: |
+          sum(rate({job="systemd-journal", unit="sshd.service"} |~ `Failed password` [5m])) > 1
+        for: 5m
+        labels:
+          severity: warn
+          site: cx22-host
+        annotations:
+          summary: "Sustained SSH brute-force attempts >1/sec for 5 min"
+          description: "fail2ban will ban single-source attempts; this fires on distributed attempts. Confirm SSH is key-only (`grep PasswordAuthentication /etc/ssh/sshd_config`); audit recent ban list with `fail2ban-client status sshd`."
+          runbook_url: "https://github.com/wegofwd2020-hub/mambakkam-net/blob/main/Plans/RUNBOOK.md#sshbruteforce"
+
+      - alert: Fail2banBurst
+        # When fail2ban itself is logging many bans in a short window, that's
+        # a signal the attack pattern is large — worth a heads-up even though
+        # the immediate response is "fail2ban handled it".
+        expr: |
+          sum(rate({job="systemd-journal", unit="fail2ban.service"} |~ `Ban` [10m])) > 5
+        for: 10m
+        labels:
+          severity: warn
+          site: cx22-host
+        annotations:
+          summary: "fail2ban issuing >5 bans/10min"
+          description: "Indicates a meaningful incoming attack pattern. fail2ban has it covered for SSH, but if you see a flurry on a different jail (auth, web), audit the corresponding service for application-layer brute force."
+          runbook_url: "https://github.com/wegofwd2020-hub/mambakkam-net/blob/main/Plans/RUNBOOK.md#fail2banburst"

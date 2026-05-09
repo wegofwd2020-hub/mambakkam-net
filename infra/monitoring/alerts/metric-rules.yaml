@@ -1,0 +1,104 @@
+# =============================================================================
+# infra/monitoring/alerts/metric-rules.yaml — Prometheus alert rules
+#
+# Uploaded to Grafana Cloud Mimir's ruler API by infra/monitoring/alerts/apply.sh.
+# The namespace `studybuddy-alerts` keeps these rules separated from
+# anything Grafana Cloud autogenerates.
+#
+# Severity convention (single operator, best-effort coverage):
+#   page  — paying-customer or DR impact; immediate Gmail with [PAGE] prefix
+#   warn  — investigate next time you're at the keyboard; 4-hour digest
+#
+# Notification routing is configured in Grafana Cloud UI as click-ops because
+# Grafana Cloud's free-tier Alertmanager UI is faster than the API for a
+# 2-channel-1-destination setup. See Plans/RUNBOOK.md §"Notification routing".
+# Each rule sets `severity:` so the routing tree can branch on it.
+#
+# Runbook entries: every rule's `runbook_url` annotation points at the
+# matching anchor in Plans/RUNBOOK.md. Keep names in sync.
+# =============================================================================
+
+groups:
+
+  # ── site availability (synthetic uptime) ───────────────────────────────────
+  - name: site-availability
+    interval: 1m
+    rules:
+
+      - alert: MambakkamDown
+        expr: probe_success{instance="https://mambakkam.net"} == 0
+        for: 2m
+        labels:
+          severity: page
+          site: mambakkam
+        annotations:
+          summary: "mambakkam.net not responding to blackbox probes"
+          description: "blackbox-exporter has reported probe_success=0 for >2 min on https://mambakkam.net. Likely host nginx down, container unhealthy, or Cloudflare→origin path broken."
+          runbook_url: "https://github.com/wegofwd2020-hub/mambakkam-net/blob/main/Plans/RUNBOOK.md#mambakkamdown"
+
+      - alert: StudyBuddyDown
+        expr: probe_success{instance="https://demo.studybuddy.app/healthz"} == 0
+        for: 2m
+        labels:
+          severity: page
+          site: studybuddy
+        annotations:
+          summary: "demo.studybuddy.app /healthz not responding"
+          description: "blackbox /healthz probe failing >2 min. /healthz returns 200 only when DB+Redis are reachable; this catches both API outages and DB/Redis failures."
+          runbook_url: "https://github.com/wegofwd2020-hub/mambakkam-net/blob/main/Plans/RUNBOOK.md#studybuddydown"
+
+  # ── application errors (StudyBuddy /metrics) ───────────────────────────────
+  - name: app-errors
+    interval: 1m
+    rules:
+
+      - alert: StudyBuddyHighErrorRate
+        # Fraction of 5xx responses out of all responses over 5 min.
+        # Avoid divide-by-zero by adding a tiny epsilon in the denominator.
+        expr: |
+          sum(rate(sb_requests_total{status=~"5.."}[5m]))
+          / clamp_min(sum(rate(sb_requests_total[5m])), 0.001)
+          > 0.05
+        for: 5m
+        labels:
+          severity: page
+          site: studybuddy
+        annotations:
+          summary: "StudyBuddy 5xx rate > 5% for 5 min"
+          description: "Aggregate 5xx response rate is over 5% of total traffic. Check /admin/audit, recent deploys, and Sentry."
+          runbook_url: "https://github.com/wegofwd2020-hub/mambakkam-net/blob/main/Plans/RUNBOOK.md#studybuddyhigherrorrate"
+
+  # ── host capacity (CX22 node-exporter) ─────────────────────────────────────
+  - name: host-capacity
+    interval: 1m
+    rules:
+
+      - alert: CX22DiskFull
+        # / partition <10% free for >5 min. 90% trips the page; if below 95%
+        # alert escalates to "lights out" because Postgres + Loki rotation
+        # may stall.
+        expr: |
+          (node_filesystem_avail_bytes{mountpoint="/"} /
+           node_filesystem_size_bytes{mountpoint="/"}) < 0.10
+        for: 5m
+        labels:
+          severity: page
+          site: cx22-host
+        annotations:
+          summary: "CX22 root partition <10% free"
+          description: "Less than 10% of / is free. Postgres and restic repos will start failing soon. Check du -sh /opt/* /var/log/* and prune accordingly."
+          runbook_url: "https://github.com/wegofwd2020-hub/mambakkam-net/blob/main/Plans/RUNBOOK.md#cx22diskfull"
+
+      - alert: CX22LowMemory
+        # Available <10% of total for >5 min — usually self-recovers when
+        # bursty workload settles, so warn rather than page.
+        expr: |
+          (node_memory_MemAvailable_bytes / node_memory_MemTotal_bytes) < 0.10
+        for: 5m
+        labels:
+          severity: warn
+          site: cx22-host
+        annotations:
+          summary: "CX22 memory <10% available"
+          description: "MemAvailable below 10% for >5 min. Likely a bursty workload — confirm no OOM-kill in journald (`journalctl -k | grep oom`). If sustained, consider upgrading to CX32 (€10/mo) or shedding the celery-worker."
+          runbook_url: "https://github.com/wegofwd2020-hub/mambakkam-net/blob/main/Plans/RUNBOOK.md#cx22lowmemory"

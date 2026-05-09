@@ -1,0 +1,35 @@
+# =============================================================================
+# infra/monitoring/blackbox.yml — blackbox-exporter probe modules.
+#
+# The "module" param in prometheus.yml's blackbox job (e.g. http_2xx) selects
+# the recipe used. Two modules suffice for the demo:
+#
+#   - http_2xx:        any 2xx response within 5s (covers /, /healthz, /sitemap)
+#   - http_2xx_redir:  follow redirects up to 5 (covers /www → apex)
+# =============================================================================
+
+modules:
+  http_2xx:
+    prober: http
+    timeout: 5s
+    http:
+      method: GET
+      preferred_ip_protocol: ip4
+      valid_status_codes: []         # default: any 2xx
+      fail_if_not_ssl: true          # cert chain must verify
+      tls_config:
+        insecure_skip_verify: false
+      # The Cloudflare-fronted demo URLs WILL show a valid cert because Cloudflare
+      # terminates TLS at the edge and re-encrypts to the origin. blackbox sees
+      # the edge cert.
+
+  http_2xx_redir:
+    prober: http
+    timeout: 5s
+    http:
+      method: GET
+      preferred_ip_protocol: ip4
+      max_redirects: 5
+      fail_if_not_ssl: true
+      tls_config:
+        insecure_skip_verify: false

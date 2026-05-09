@@ -1,0 +1,187 @@
+# =============================================================================
+# infra/monitoring/promtail.yml — Promtail config for the shared CX22.
+#
+# Promtail is the log-shipping agent — same role for Loki as Prometheus's
+# remote_write plays for metrics. Tails 4 sources locally and pushes to
+# Grafana Cloud Loki:
+#
+#   1. docker      — every container's stdout/stderr (auto-discovered)
+#   2. nginx-host  — host nginx access + error logs (per-vhost files)
+#   3. journal     — systemd journal (sshd, fail2ban, ufw, docker, cron)
+#   4. backups     — /var/log/{mambakkam,studybuddy}-backup.log
+#
+# Free-tier Loki: 50 GB ingest / 14 d retention. Plenty of headroom for
+# this traffic shape; the global `pipeline_stages` block drops noisy
+# debug-level lines before they ship.
+#
+# Substituted env vars come from .env.monitoring on the host (same file
+# Prometheus reads).
+# =============================================================================
+
+server:
+  http_listen_port: 9080
+  grpc_listen_port: 0
+  log_level: warn   # don't ship Promtail's own DEBUG lines to Loki
+
+# Where Promtail tracks how far it's read from each file. Persisted to a
+# Docker volume so a Promtail restart doesn't re-ship logs (would burn
+# free-tier ingest quota and pollute Loki with duplicates).
+positions:
+  filename: /tmp/positions.yaml
+
+# Single push target: Grafana Cloud Loki.
+# Pattern is identical to Prometheus remote_write — see prometheus.yml.
+clients:
+  - url: ${GRAFANA_CLOUD_LOKI_URL}/loki/api/v1/push
+    basic_auth:
+      username: ${GRAFANA_CLOUD_LOKI_USERNAME}
+      password: ${GRAFANA_CLOUD_API_KEY}
+    # Default batch is 1 MB / 1 s; bump to reduce push frequency at low
+    # log volume (cheaper on the free-tier rate limits).
+    batchwait: 5s
+    batchsize: 1048576
+
+# Cluster-wide labels stamped on every line — same external_labels pattern
+# as Prometheus. Helpful when you eventually run a staging environment.
+# (Promtail attaches these via the global stage.)
+
+scrape_configs:
+
+  # ── 1. docker — auto-discover every container ──────────────────────────────
+  # docker_sd_configs reads from the Docker socket and emits a target per
+  # running container. The relabel rules below project compose-project-name
+  # and container-name as Loki labels so you can filter by them in LogQL:
+  #
+  #   {project="studybuddy",container="api"}      # one service
+  #   {project="mambakkam-net"}                    # all of mambakkam
+  #
+  - job_name: docker
+    docker_sd_configs:
+      - host: unix:///var/run/docker.sock
+        refresh_interval: 15s
+
+    relabel_configs:
+      # Container name (compose adds a leading slash; strip it)
+      - source_labels: ['__meta_docker_container_name']
+        regex: '/(.*)'
+        target_label: 'container'
+
+      # Compose project (one of: mambakkam-net, studybuddy, monitoring)
+      - source_labels: ['__meta_docker_container_label_com_docker_compose_project']
+        target_label: 'project'
+
+      # Compose service name (api, web, celery-worker, etc.)
+      - source_labels: ['__meta_docker_container_label_com_docker_compose_service']
+        target_label: 'service'
+
+      # stdout vs stderr
+      - source_labels: ['__meta_docker_container_log_stream']
+        target_label: 'stream'
+
+      # Static label for filtering in LogQL — easier than checking project
+      - target_label: 'job'
+        replacement: 'docker'
+
+      # Static env label — matches Prometheus external_labels for cross-correlation
+      - target_label: 'env'
+        replacement: 'production'
+
+    pipeline_stages:
+      # StudyBuddy emits structlog JSON. Parse so the JSON keys become
+      # Loki labels / fields. mambakkam astrowind emits plain nginx logs;
+      # the json stage is best-effort (skips lines that aren't JSON).
+      - match:
+          selector: '{project="studybuddy"}'
+          stages:
+            - json:
+                expressions:
+                  level: level
+                  logger: logger
+                  event: event
+                  ts: timestamp
+            # Promote `level` to a label so you can do `{level="error"}` queries.
+            # Cardinality bound: ~5 levels × ~50 services = 250 streams. Fine.
+            - labels:
+                level:
+                logger:
+            # Use the structlog timestamp instead of Promtail's read time.
+            - timestamp:
+                source: ts
+                format: RFC3339Nano
+            # Drop debug noise at ingest — saves ~half the volume.
+            - drop:
+                source: level
+                value: debug
+
+  # ── 2. nginx-host — host nginx vhost access + error logs ───────────────────
+  # The host nginx (installed by mambakkam first-tenant provision) writes
+  # per-vhost access + error logs at /var/log/nginx/. Promtail tails them
+  # via a host-mount.
+  #
+  # Note: docker-compose.monitoring.yml MUST mount /var/log read-only into
+  # the Promtail container. See that file's Promtail service block.
+  - job_name: nginx-host
+    static_configs:
+      - targets: [localhost]
+        labels:
+          job: nginx-host
+          env: production
+          __path__: /var/log/nginx/*.log
+
+    pipeline_stages:
+      # The default nginx access log format is space-separated; we don't
+      # parse fields here (LogQL can do that on the Grafana Cloud side).
+      # We only stamp host (which vhost) from the filename.
+      - regex:
+          source: filename
+          expression: '/var/log/nginx/(?P<vhost>[^.]+\.[^.]+(?:\.[^.]+)?)\.(?P<kind>access|error)\.log'
+      - labels:
+          vhost:
+          kind:
+
+  # ── 3. journal — systemd journal ───────────────────────────────────────────
+  # Catches sshd auth attempts, fail2ban bans, ufw blocks, docker daemon
+  # warnings, cron output that didn't make it to the per-job log file.
+  #
+  # docker-compose.monitoring.yml mounts /var/log/journal read-only so
+  # Promtail can read the binary journal files.
+  - job_name: journal
+    journal:
+      json: false
+      max_age: 12h
+      path: /var/log/journal
+      labels:
+        job: systemd-journal
+        env: production
+
+    relabel_configs:
+      - source_labels: ['__journal__systemd_unit']
+        target_label: 'unit'
+      - source_labels: ['__journal__hostname']
+        target_label: 'hostname'
+      - source_labels: ['__journal_priority']
+        target_label: 'priority'
+
+    pipeline_stages:
+      # Drop journal lines below INFO (priority 6 = info, 7 = debug).
+      # Saves ~30% volume; debug from systemd is rarely useful at runtime.
+      - drop:
+          source: priority
+          expression: '^7$'
+
+  # ── 4. backups — cron-installed backup scripts ─────────────────────────────
+  - job_name: backups
+    static_configs:
+      - targets: [localhost]
+        labels:
+          job: backups
+          env: production
+          __path__: /var/log/*-backup.log
+
+    pipeline_stages:
+      # Stamp which backup (mambakkam vs studybuddy) from the filename.
+      - regex:
+          source: filename
+          expression: '/var/log/(?P<which>[a-z]+)-backup\.log'
+      - labels:
+          which:
