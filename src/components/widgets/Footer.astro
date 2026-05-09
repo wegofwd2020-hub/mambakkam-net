@@ -1,6 +1,5 @@
 ---
 import { Icon } from 'astro-icon/components';
-import { SITE } from 'astrowind:config';
 import { getHomePermalink } from '~/utils/permalinks';
 
 interface Link {
@@ -33,14 +32,23 @@ const { socialLinks = [], secondaryLinks = [], links = [], footNote = '', theme 
   >
     <div class="grid grid-cols-12 gap-4 gap-y-8 sm:gap-8 py-8 md:py-12">
       <div class="col-span-12 lg:col-span-4">
-        <div class="mb-2">
-          <a class="inline-block font-bold text-xl" href={getHomePermalink()}>{SITE?.name}</a>
-        </div>
-        <div class="text-sm text-muted flex gap-1">
+        <a href={getHomePermalink()} class="inline-block mb-3 group">
+          <span
+            class="block text-xl font-bold font-heading text-gray-900 dark:text-white group-hover:text-primary transition-colors"
+          >
+            Mambakkam
+          </span>
+          <span class="block text-sm text-muted font-sans tracking-wide">மாம்பாக்கம்</span>
+        </a>
+        <p class="text-sm text-muted leading-relaxed mb-3 max-w-xs">
+          The digital home of Mambakkam — a farming village in Ranipet District, Tamil Nadu.
+        </p>
+        <p class="text-xs font-mono text-muted/70">12.6810°N · 79.3970°E</p>
+        <div class="text-sm text-muted flex gap-1 mt-3">
           {
             secondaryLinks.map(({ text, href }, index) => (
               <>
-                {index !== 0 ? ' · ' : ''}
+                {index !== 0 ? <span class="text-muted/50">·</span> : ''}
                 <a
                   class="text-muted hover:text-gray-700 dark:text-gray-400 hover:underline transition duration-150 ease-in-out"
                   href={href}

@@ -1,0 +1,78 @@
+---
+interface Props {
+  lat?: number;
+  lng?: number;
+  zoom?: number;
+  label?: string;
+}
+
+const { lat = 12.681044, lng = 79.396965, zoom = 13, label = 'Mambakkam' } = Astro.props;
+---
+
+<div class="mx-auto max-w-4xl px-6 py-8">
+  <div
+    id="village-map"
+    class="w-full rounded-2xl overflow-hidden shadow-md border border-gray-200 dark:border-gray-700"
+    style="height: 240px;"
+    data-lat={lat}
+    data-lng={lng}
+    data-zoom={zoom}
+    data-label={label}
+  >
+  </div>
+  <p class="text-center text-xs text-muted mt-2 font-mono">
+    {lat.toFixed(4)}°N, {lng.toFixed(4)}°E · Kalavai Taluk, Ranipet District
+  </p>
+</div>
+
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" is:inline></script>
+
+<script is:inline>
+  function initVillageMap() {
+    const el = document.getElementById('village-map');
+    if (!el || el._leaflet_id) return;
+
+    const lat = parseFloat(el.dataset.lat);
+    const lng = parseFloat(el.dataset.lng);
+    const zoom = parseInt(el.dataset.zoom);
+    const label = el.dataset.label;
+
+    const map = L.map('village-map', {
+      center: [lat, lng],
+      zoom,
+      scrollWheelZoom: false,
+    });
+
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      attribution: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+      maxZoom: 19,
+    }).addTo(map);
+
+    const icon = L.divIcon({
+      className: '',
+      html: `<div style="
+        background: #4a6b3c;
+        border: 3px solid white;
+        border-radius: 50% 50% 50% 0;
+        transform: rotate(-45deg);
+        width: 24px;
+        height: 24px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+      "></div>`,
+      iconSize: [24, 24],
+      iconAnchor: [12, 24],
+      popupAnchor: [0, -28],
+    });
+
+    L.marker([lat, lng], { icon })
+      .addTo(map)
+      .bindPopup(
+        `<strong style="font-family:sans-serif">${label}</strong><br><span style="font-size:12px;color:#666">Kalavai Taluk, Ranipet District<br>Tamil Nadu, India</span>`
+      )
+      .openPopup();
+  }
+
+  document.addEventListener('DOMContentLoaded', initVillageMap);
+  document.addEventListener('astro:after-swap', initVillageMap);
+</script>

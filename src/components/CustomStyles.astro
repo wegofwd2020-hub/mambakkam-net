@@ -1,63 +1,135 @@
 ---
 import '@fontsource-variable/inter';
-
-// 'DM Sans'
-// Nunito
-// Dosis
-// Outfit
-// Roboto
-// Literata
-// 'IBM Plex Sans'
-// Karla
-// Poppins
-// 'Fira Sans'
-// 'Libre Franklin'
-// Inconsolata
-// Raleway
-// Oswald
-// 'Space Grotesk'
-// Urbanist
+import '@fontsource/merriweather';
+import '@fontsource/merriweather/300.css';
+import '@fontsource-variable/jetbrains-mono';
+import '@fontsource/opendyslexic';
 ---
 
 <style is:inline>
   :root {
     --aw-font-sans: 'Inter Variable';
-    --aw-font-serif: 'Inter Variable';
+    --aw-font-serif: 'Merriweather';
     --aw-font-heading: 'Inter Variable';
+    --aw-font-mono: 'JetBrains Mono Variable';
 
-    --aw-color-primary: rgb(1 97 239);
-    --aw-color-secondary: rgb(1 84 207);
-    --aw-color-accent: rgb(109 40 217);
+    /* Village palette — light mode */
+    --aw-color-primary: rgb(74 107 60);
+    --aw-color-secondary: rgb(55 82 44);
+    --aw-color-accent: rgb(176 80 36);
 
-    --aw-color-text-heading: rgb(0 0 0);
-    --aw-color-text-default: rgb(16 16 16);
-    --aw-color-text-muted: rgb(16 16 16 / 66%);
-    --aw-color-bg-page: rgb(255 255 255);
+    --aw-color-gold: rgb(190 145 20);
 
-    --aw-color-bg-page-dark: rgb(3 6 32);
+    --aw-color-text-heading: rgb(30 24 16);
+    --aw-color-text-default: rgb(45 36 24);
+    --aw-color-text-muted: rgb(45 36 24 / 60%);
+    --aw-color-bg-page: rgb(250 247 240);
+
+    --aw-color-bg-page-dark: rgb(18 16 12);
 
     ::selection {
-      background-color: lavender;
+      background-color: rgb(74 107 60 / 20%);
     }
   }
 
   .dark {
     --aw-font-sans: 'Inter Variable';
-    --aw-font-serif: 'Inter Variable';
+    --aw-font-serif: 'Merriweather';
     --aw-font-heading: 'Inter Variable';
+    --aw-font-mono: 'JetBrains Mono Variable';
 
-    --aw-color-primary: rgb(1 97 239);
-    --aw-color-secondary: rgb(1 84 207);
-    --aw-color-accent: rgb(109 40 217);
+    --aw-color-primary: rgb(110 150 88);
+    --aw-color-secondary: rgb(90 128 70);
+    --aw-color-accent: rgb(210 110 60);
 
-    --aw-color-text-heading: rgb(247, 248, 248);
-    --aw-color-text-default: rgb(229 236 246);
-    --aw-color-text-muted: rgb(229 236 246 / 66%);
-    --aw-color-bg-page: rgb(3 6 32);
+    --aw-color-gold: rgb(210 168 50);
+
+    --aw-color-text-heading: rgb(240 234 220);
+    --aw-color-text-default: rgb(220 212 196);
+    --aw-color-text-muted: rgb(220 212 196 / 60%);
+    --aw-color-bg-page: rgb(18 16 12);
 
     ::selection {
-      background-color: black;
-      color: snow;
+      background-color: rgb(110 150 88 / 30%);
+      color: rgb(240 234 220);
     }
+  }
+
+  /* Body text uses serif light; headings and UI use sans */
+  body {
+    font-family: var(--aw-font-serif);
+    font-weight: 300;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6,
+  nav,
+  button,
+  label,
+  .font-heading {
+    font-family: var(--aw-font-sans);
+    font-weight: inherit;
+  }
+
+  code,
+  kbd,
+  pre,
+  .font-mono,
+  [data-mono],
+  time {
+    font-family: var(--aw-font-mono);
+  }
+
+  /* ── Hero background ───────────────────────────────── */
+  .village-hero-bg {
+    background-color: var(--aw-color-bg-page);
+    background-image:
+      radial-gradient(ellipse 90% 60% at 70% 0%, rgb(74 107 60 / 12%) 0%, transparent 60%),
+      radial-gradient(ellipse 50% 40% at 0% 100%, rgb(176 80 36 / 8%) 0%, transparent 50%),
+      repeating-linear-gradient(
+        180deg,
+        transparent 0px,
+        transparent 47px,
+        rgb(74 107 60 / 5%) 47px,
+        rgb(74 107 60 / 5%) 49px
+      );
+  }
+
+  .dark .village-hero-bg {
+    background-color: var(--aw-color-bg-page);
+    background-image:
+      radial-gradient(ellipse 90% 60% at 70% 0%, rgb(110 150 88 / 10%) 0%, transparent 60%),
+      radial-gradient(ellipse 50% 40% at 0% 100%, rgb(210 110 60 / 6%) 0%, transparent 50%),
+      repeating-linear-gradient(
+        180deg,
+        transparent 0px,
+        transparent 47px,
+        rgb(110 150 88 / 4%) 47px,
+        rgb(110 150 88 / 4%) 49px
+      );
+  }
+
+  /* ── Dyslexia mode ──────────────────────────────────── */
+  html.dyslexic {
+    --aw-font-sans: 'OpenDyslexic';
+    --aw-font-serif: 'OpenDyslexic';
+    --aw-font-heading: 'OpenDyslexic';
+    --aw-font-mono: 'OpenDyslexic';
+  }
+
+  html.dyslexic body,
+  html.dyslexic p,
+  html.dyslexic li,
+  html.dyslexic blockquote,
+  html.dyslexic td,
+  html.dyslexic th {
+    letter-spacing: 0.05em;
+    word-spacing: 0.1em;
+    line-height: 1.8;
+    font-weight: 400;
   }
 </style>

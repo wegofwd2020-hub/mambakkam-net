@@ -17,6 +17,15 @@ import { UI } from 'astrowind:config';
     }
   }
 
+  function applyDyslexicMode() {
+    if (localStorage.getItem('dyslexic') === 'true') {
+      document.documentElement.classList.add('dyslexic');
+    } else {
+      document.documentElement.classList.remove('dyslexic');
+    }
+  }
+  applyDyslexicMode();
+
   const initTheme = function () {
     if ((defaultTheme && defaultTheme.endsWith(':only')) || (!localStorage.theme && defaultTheme !== 'system')) {
       applyTheme(defaultTheme.replace(':only', ''));
@@ -73,6 +82,18 @@ import { UI } from 'astrowind:config';
 
       document.documentElement.classList.toggle('dark');
       localStorage.theme = document.documentElement.classList.contains('dark') ? 'dark' : 'light';
+    });
+
+    attachEvent('[data-aw-toggle-dyslexic]', 'click', function () {
+      document.documentElement.classList.toggle('dyslexic');
+      localStorage.setItem('dyslexic', document.documentElement.classList.contains('dyslexic') ? 'true' : 'false');
+    });
+
+    attachEvent([document], 'keydown', function (e) {
+      if (e.altKey && e.key === 'd') {
+        document.documentElement.classList.toggle('dyslexic');
+        localStorage.setItem('dyslexic', document.documentElement.classList.contains('dyslexic') ? 'true' : 'false');
+      }
     });
 
     attachEvent('[data-aw-social-share]', 'click', function (_, elem) {
@@ -158,6 +179,7 @@ import { UI } from 'astrowind:config';
   window.onpageshow = onPageShow;
 
   document.addEventListener('astro:after-swap', () => {
+    applyDyslexicMode();
     initTheme();
     onLoad();
     onPageShow();
