@@ -243,25 +243,29 @@ Green checkboxes on each of these means we enter the test phase clean:
 - `.env.demo` populated (only analytics ID needed at launch; SMTP placeholders OK)
 - SSH key for `deploy@mambakkam` registered as a GitHub repo secret
 
-### Day -1 (Sat May 16) 17:00–19:00 EDT — Account + Email Setup
+### Day -1 (Sat May 16) 17:00–20:30 EDT — Account + Email Setup
 
-Out-of-repo work, done the evening before launch from your laptop. ~2 hr
-total. None of these touch the VPS — they create accounts and DNS records
-that the next morning's `provision.sh` depends on.
+Operator-side work, done the evening before launch from your laptop.
+**Full chronological checklist in [`ACCOUNT_SETUP.md`](ACCOUNT_SETUP.md)** — 9
+sections covering every account, the values to copy into the password
+manager, and a §10 cheat-sheet for which value goes into which `.env`
+line tomorrow morning.
 
-| Time | Action | Owner | Pass criterion |
-|---|---|---|---|
-| 17:00 | **Cloudflare** — register `mambakkam.net` (or move existing zone to Cloudflare nameservers); generate an Origin Certificate with SAN list `mambakkam.net, *.mambakkam.net, demo.studybuddy.app`; save cert + key to a password manager (you'll paste them tomorrow) | Operator | `dig NS mambakkam.net` shows `*.ns.cloudflare.com`; cert + key saved |
-| 17:15 | **Hetzner Cloud** — sign up; add SSH public key to account; note billing region (Falkenstein recommended, EU/GDPR + cheapest); generate API token if you'll use HCLOUD_TOKEN for snapshots | Operator | Hetzner console reachable; SSH key listed |
-| 17:30 | **Zoho Mail** — create org; add `mambakkam.net` as primary domain; add the verification TXT record at Cloudflare DNS; create mailbox `siva@mambakkam.net`; add MX (`mx.zoho.com` 10/20/50), SPF (`v=spf1 include:zoho.com ~all`), DKIM (`zmail._domainkey`), DMARC at Cloudflare | Operator | Zoho UI: all four (verify, MX, SPF, DKIM) green |
-| 18:00 | **Gmail send-as** — generate Zoho App Password; add `siva@mambakkam.net` as send-as in Gmail (SMTP `smtp.zoho.com:465`, SSL on); send a test from Gmail to your personal account, confirm round-trip | Operator | Gmail "From" dropdown shows `siva@mambakkam.net`; round-trip works |
-| 18:20 | **Grafana Cloud** — sign up at https://grafana.com (free, no card); create stack; navigate to Connections → Hosted Prometheus + Hosted Logs to obtain the remote_write URLs and numeric usernames; create an Access Policy with scopes `MetricsPublisher + LogsWriter + RulesWriter`; save token to password manager | Operator | All values copied for tomorrow's `.env.monitoring` |
-| 18:40 | **Pre-stage DNS** at Cloudflare — create the apex A record for `mambakkam.net` pointed to a placeholder IP (or 192.0.2.1) with TTL=300s and proxy **off** for now; this prepares the record so tomorrow's cutover is just a value change, not a record creation | Operator | DNS panel shows the A record at TTL=5min |
-| 18:50 | **Wrap-up** — write the Cloudflare Origin Cert + Hetzner SSH passphrase + Grafana Cloud token to your password manager; close laptop | Operator | All secrets in 1Password / equivalent |
+**One-paragraph summary:**
+17:00 Cloudflare account + Origin Cert generation (SAN list = mambakkam.net
++ *.mambakkam.net + demo.studybuddy.app); 17:15 Hetzner sign-up + SSH
+key (no CX22 yet); 17:25 Zoho Mail with mambakkam.net mailbox + MX/SPF/
+DKIM/DMARC; 17:55 Gmail send-as; 18:15 Grafana Cloud account + Access
+Policy token (3 scopes); 18:40 pre-stage mambakkam DNS A record at
+TTL=300s; 19:00 register studybuddy.app + add mailboxes; 19:25 Auth0
+dev tenant + 3 applications; 19:50 Stripe test mode + webhook + Sentry.
+20:30 final go/no-go before bed. Total 3.5 hours; budget 4 if Zoho DKIM
+verification stalls.
 
-The Day -1 evening is roughly 2 hours when nothing goes wrong; budget 3
-hours for the first time since DKIM verification at Zoho can take 30 min
-to propagate.
+**Hard "no" tonight:**
+- Don't actually provision the Hetzner CX22 (that's Day 0 at 08:00 EDT)
+- Don't enable Cloudflare proxy on either pre-staged A record (would 502)
+- Don't push past 21:00 EDT — sleep beats finishing
 
 ---
 
