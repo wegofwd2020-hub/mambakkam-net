@@ -15,6 +15,14 @@ name: Deploy mambakkam.net
 #   MAMBAKKAM_VPS_HOST  — hostname or IP (often same VPS as StudyBuddy)
 #   MAMBAKKAM_VPS_USER  — typically `deploy`
 #   MAMBAKKAM_VPS_SSH_KEY  — private SSH key for the deploy user
+#
+# Required repo variable (Settings → Variables → Actions):
+#   MAMBAKKAM_DEPLOY_ENABLED  — set to "true" only after the Day 0
+#                                cold-start when the VPS exists and the
+#                                three secrets above are populated.
+#                                Unset (default) → this workflow's job
+#                                skips with "skipped" status, keeping
+#                                the CI badge green during pre-launch.
 
 on:
   push:
@@ -31,6 +39,10 @@ concurrency:
 
 jobs:
   deploy:
+    # Gated until Day 0 (Sun 2026-05-17): the VPS doesn't exist yet and the
+    # repo secrets aren't populated. Setting MAMBAKKAM_DEPLOY_ENABLED=true in
+    # repo Variables on Day 0 morning enables auto-deploy.
+    if: vars.MAMBAKKAM_DEPLOY_ENABLED == 'true'
     runs-on: ubuntu-latest
     permissions:
       contents: read
