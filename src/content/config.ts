@@ -65,6 +65,113 @@ const postCollection = defineCollection({
   }),
 });
 
+const landmarkCollection = defineCollection({
+  loader: glob({ pattern: ['*.md', '*.mdx'], base: 'src/data/landmarks' }),
+  schema: z.object({
+    name: z.string(),
+    nameTamil: z.string().optional(),
+
+    type: z.enum(['temple', 'water-body', 'historical', 'natural', 'community']),
+
+    description: z.string(),
+    excerpt: z.string().optional(),
+
+    image: z.string().optional(),
+    images: z.array(z.object({ src: z.string(), alt: z.string().optional() })).optional(),
+
+    location: z
+      .object({
+        lat: z.number().optional(),
+        lng: z.number().optional(),
+        description: z.string().optional(),
+      })
+      .optional(),
+
+    status: z.enum(['active', 'under-construction', 'historical']).default('active'),
+
+    constructionUpdates: z
+      .array(
+        z.object({
+          date: z.date(),
+          note: z.string(),
+        })
+      )
+      .optional(),
+
+    publishDate: z.date().optional(),
+    draft: z.boolean().optional(),
+
+    metadata: metadataDefinition(),
+  }),
+});
+
+const peopleCollection = defineCollection({
+  loader: glob({ pattern: ['*.md', '*.mdx'], base: 'src/data/people' }),
+  schema: z.object({
+    name: z.string(),
+    nameTamil: z.string().optional(),
+
+    role: z.string(),
+    bio: z.string(),
+
+    image: z.string().optional(),
+
+    work: z
+      .array(
+        z.object({
+          title: z.string(),
+          description: z.string(),
+          url: z.string().url().optional(),
+        })
+      )
+      .optional(),
+
+    links: z
+      .object({
+        website: z.string().url().optional(),
+        github: z.string().url().optional(),
+        linkedin: z.string().url().optional(),
+        instagram: z.string().url().optional(),
+        twitter: z.string().url().optional(),
+      })
+      .optional(),
+
+    featured: z.boolean().default(false),
+    publishDate: z.date().optional(),
+    draft: z.boolean().optional(),
+
+    metadata: metadataDefinition(),
+  }),
+});
+
+const workCollection = defineCollection({
+  loader: glob({ pattern: ['*.md', '*.mdx'], base: 'src/data/work' }),
+  schema: z.object({
+    title: z.string(),
+    excerpt: z.string(),
+
+    author: z.string(), // matches person file slug e.g. 'siva-m'
+
+    type: z.enum(['product', 'project', 'open-source', 'research']),
+    status: z.enum(['live', 'in-progress', 'archived']).default('live'),
+
+    url: z.string().url().optional(),
+
+    image: z.string().optional(),
+    tags: z.array(z.string()).optional(),
+
+    featured: z.boolean().default(false),
+    comingSoon: z.boolean().default(false),
+    publishDate: z.date().optional(),
+    draft: z.boolean().optional(),
+
+    metadata: metadataDefinition(),
+  }),
+});
+
 export const collections = {
   post: postCollection,
+  landmarks: landmarkCollection,
+  people: peopleCollection,
+  work: workCollection,
 };

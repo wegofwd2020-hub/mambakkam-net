@@ -1,0 +1,118 @@
+---
+import { getCollection, render } from 'astro:content';
+import Layout from '~/layouts/PageLayout.astro';
+
+export async function getStaticPaths() {
+  const work = await getCollection('work', ({ data }) => !data.draft && !data.comingSoon);
+  return work.map((item) => ({
+    params: { slug: item.id },
+    props: { item },
+  }));
+}
+
+const { item } = Astro.props;
+const { Content } = await render(item);
+
+const allPeople = await getCollection('people', ({ data }) => !data.draft);
+const author = allPeople.find((p) => p.id === item.data.author);
+
+const { title, excerpt, type, status, url, tags } = item.data;
+
+const typeLabel: Record<string, string> = {
+  product: 'Product',
+  project: 'Project',
+  'open-source': 'Open Source',
+  research: 'Research',
+};
+
+const statusColor: Record<string, string> = {
+  live: 'text-green-700 bg-green-50 dark:text-green-300 dark:bg-green-900/30',
+  'in-progress': 'text-amber-700 bg-amber-50 dark:text-amber-300 dark:bg-amber-900/30',
+  archived: 'text-gray-600 bg-gray-100 dark:text-gray-300 dark:bg-gray-800',
+};
+
+const statusLabel: Record<string, string> = {
+  live: 'Live',
+  'in-progress': 'In Progress',
+  archived: 'Archived',
+};
+
+const metadata = { title, description: excerpt };
+---
+
+<Layout metadata={metadata}>
+  <div class="mx-auto max-w-3xl px-6 py-16">
+    <!-- Header -->
+    <header class="mb-12">
+      <div class="flex items-center gap-3 mb-4">
+        <span class="text-sm font-heading font-medium text-muted uppercase tracking-widest">
+          {typeLabel[type] ?? type}
+        </span>
+        <span class={`text-xs font-heading font-medium px-2.5 py-1 rounded-full ${statusColor[status] ?? ''}`}>
+          {statusLabel[status] ?? status}
+        </span>
+      </div>
+
+      <h1 class="text-4xl font-heading font-bold text-gray-900 dark:text-white mb-4">
+        {title}
+      </h1>
+
+      <p class="text-xl leading-relaxed text-muted mb-6">{excerpt}</p>
+
+      <div class="flex flex-wrap gap-3">
+        {
+          url && (
+            <a
+              href={url}
+              target="_blank"
+              rel="noopener noreferrer"
+              class="inline-flex items-center gap-2 btn btn-primary text-sm"
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                class="w-4 h-4"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+              >
+                <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
+                <polyline points="15 3 21 3 21 9" />
+                <line x1="10" y1="14" x2="21" y2="3" />
+              </svg>
+              Visit site
+            </a>
+          )
+        }
+        {
+          author && (
+            <a href={`/people/${author.id}`} class="btn btn-secondary text-sm">
+              By {author.data.name}
+            </a>
+          )
+        }
+      </div>
+    </header>
+
+    <!-- Tags -->
+    {
+      tags && tags.length > 0 && (
+        <div class="flex flex-wrap gap-2 mb-10">
+          {tags.map((tag) => (
+            <span class="text-xs font-mono px-2.5 py-1 rounded bg-gray-100 dark:bg-gray-800 text-muted">{tag}</span>
+          ))}
+        </div>
+      )
+    }
+
+    <!-- Body content -->
+    <section class="prose dark:prose-invert max-w-none mb-12">
+      <Content />
+    </section>
+
+    <!-- Back -->
+    <div class="pt-8 border-t border-gray-200 dark:border-gray-700">
+      <a href="/work" class="text-sm font-heading font-medium text-primary hover:underline"> ← All work </a>
+    </div>
+  </div>
+</Layout>

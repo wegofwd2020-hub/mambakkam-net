@@ -1,0 +1,122 @@
+---
+import { getCollection } from 'astro:content';
+import Layout from '~/layouts/PageLayout.astro';
+import Hero from '~/components/widgets/Hero.astro';
+
+const allWork = await getCollection('work', ({ data }) => !data.draft);
+const allPeople = await getCollection('people', ({ data }) => !data.draft);
+
+const peopleMap = Object.fromEntries(allPeople.map((p) => [p.id, p.data]));
+
+const featured = allWork.filter((w) => w.data.featured);
+const rest = allWork.filter((w) => !w.data.featured);
+const ordered = [...featured, ...rest];
+
+const typeLabel: Record<string, string> = {
+  product: 'Product',
+  project: 'Project',
+  'open-source': 'Open Source',
+  research: 'Research',
+};
+
+const statusColor: Record<string, string> = {
+  live: 'text-green-700 bg-green-50 dark:text-green-300 dark:bg-green-900/30',
+  'in-progress': 'text-amber-700 bg-amber-50 dark:text-amber-300 dark:bg-amber-900/30',
+  archived: 'text-gray-600 bg-gray-100 dark:text-gray-300 dark:bg-gray-800',
+};
+
+const statusLabel: Record<string, string> = {
+  live: 'Live',
+  'in-progress': 'In Progress',
+  archived: 'Archived',
+};
+
+const metadata = { title: 'Work from Mambakkam' };
+---
+
+<Layout metadata={metadata}>
+  <Hero tagline="Software & Projects">
+    <Fragment slot="title">Work</Fragment>
+    <Fragment slot="subtitle">
+      Software products and projects from people of Mambakkam — built with care, shipped to the world.
+    </Fragment>
+  </Hero>
+
+  <section class="px-6 py-12 mx-auto max-w-5xl">
+    {
+      ordered.length === 0 ? (
+        <p class="text-center text-muted py-16">Products coming soon.</p>
+      ) : (
+        <div class="grid gap-6 sm:grid-cols-2">
+          {ordered.map((item) => {
+            const person = peopleMap[item.data.author];
+            const comingSoon = item.data.comingSoon;
+            const Tag = comingSoon ? 'div' : 'a';
+            const tagProps = comingSoon
+              ? {
+                  class:
+                    'block rounded-2xl border border-gray-200 dark:border-gray-700 p-6 bg-white dark:bg-gray-900 opacity-90',
+                }
+              : {
+                  href: `/work/${item.id}`,
+                  class:
+                    'group block rounded-2xl border border-gray-200 dark:border-gray-700 p-6 hover:border-primary hover:shadow-md transition-all duration-200 bg-white dark:bg-gray-900',
+                };
+            return (
+              <Tag {...tagProps}>
+                <div class="flex items-center justify-between mb-3">
+                  <span class="text-xs font-heading font-medium text-muted uppercase tracking-wider">
+                    {typeLabel[item.data.type] ?? item.data.type}
+                  </span>
+                  <div class="flex items-center gap-2">
+                    {comingSoon && (
+                      <span class="text-xs font-heading font-medium px-2.5 py-0.5 rounded-full text-blue-700 bg-blue-50 dark:text-blue-300 dark:bg-blue-900/30">
+                        Coming soon
+                      </span>
+                    )}
+                    <span
+                      class={`text-xs font-heading font-medium px-2.5 py-0.5 rounded-full ${statusColor[item.data.status] ?? ''}`}
+                    >
+                      {statusLabel[item.data.status] ?? item.data.status}
+                    </span>
+                  </div>
+                </div>
+
+                <h2
+                  class={`text-xl font-heading font-bold text-gray-900 dark:text-white mb-2 ${comingSoon ? '' : 'group-hover:text-primary transition-colors'}`}
+                >
+                  {item.data.title}
+                </h2>
+
+                <p class="text-sm leading-relaxed text-muted mb-4 line-clamp-3">{item.data.excerpt}</p>
+
+                {item.data.tags && item.data.tags.length > 0 && (
+                  <div class="flex flex-wrap gap-1.5 mb-4">
+                    {item.data.tags.map((tag) => (
+                      <span class="text-xs font-mono px-2 py-0.5 rounded bg-gray-100 dark:bg-gray-800 text-muted">
+                        {tag}
+                      </span>
+                    ))}
+                  </div>
+                )}
+
+                {person && (
+                  <div class="flex items-center gap-2 pt-4 border-t border-gray-100 dark:border-gray-800">
+                    <span class="text-xs text-muted">by</span>
+                    <a
+                      href={`/people/${item.data.author}`}
+                      class="text-xs font-heading font-medium text-primary hover:underline"
+                      onclick="event.stopPropagation()"
+                    >
+                      {person.name}
+                    </a>
+                  </div>
+                )}
+              </Tag>
+            );
+          })}
+        </div>
+      )
+    }
+  </section>
+</Layout>

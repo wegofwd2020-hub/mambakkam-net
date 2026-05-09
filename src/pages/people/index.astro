@@ -1,0 +1,72 @@
+---
+import { getCollection } from 'astro:content';
+import { Image } from 'astro:assets';
+import Layout from '~/layouts/PageLayout.astro';
+import Hero from '~/components/widgets/Hero.astro';
+
+const images = import.meta.glob<{ default: ImageMetadata }>('/src/assets/images/people/*.{jpg,jpeg,png,webp}');
+
+const allPeople = await getCollection('people', ({ data }) => !data.draft);
+const featured = allPeople.filter((p) => p.data.featured);
+const others = allPeople.filter((p) => !p.data.featured);
+const ordered = [...featured, ...others];
+
+const metadata = { title: 'People of Mambakkam' };
+---
+
+<Layout metadata={metadata}>
+  <Hero tagline="From Mambakkam">
+    <Fragment slot="title">People</Fragment>
+    <Fragment slot="subtitle">
+      Farmers, architects, builders, teachers — people from Mambakkam and the work they carry into the world.
+    </Fragment>
+  </Hero>
+
+  <section class="px-6 py-12 mx-auto max-w-5xl">
+    {
+      ordered.length === 0 ? (
+        <p class="text-center text-muted py-16">People pages coming soon.</p>
+      ) : (
+        <div class="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+          {await Promise.all(
+            ordered.map(async (person) => {
+              const imageKey = person.data.image ? person.data.image.replace('~/', '/src/') : null;
+              const img = imageKey && images[imageKey] ? (await images[imageKey]()).default : null;
+
+              return (
+                <a
+                  href={`/people/${person.id}`}
+                  class="group block rounded-2xl border border-gray-200 dark:border-gray-700 p-6 hover:border-primary hover:shadow-md transition-all duration-200 bg-white dark:bg-gray-900"
+                >
+                  <div class="flex items-center gap-4 mb-4">
+                    {img ? (
+                      <Image
+                        src={img}
+                        alt={`Photo of ${person.data.name}`}
+                        width={56}
+                        height={56}
+                        class="w-14 h-14 rounded-xl object-cover object-top shrink-0"
+                      />
+                    ) : (
+                      <div class="w-14 h-14 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
+                        <span class="text-xl font-heading font-bold text-primary">{person.data.name.charAt(0)}</span>
+                      </div>
+                    )}
+                    <div>
+                      <h2 class="text-lg font-heading font-bold text-gray-900 dark:text-white group-hover:text-primary transition-colors leading-tight">
+                        {person.data.name}
+                      </h2>
+                      {person.data.nameTamil && <p class="text-xs text-muted">{person.data.nameTamil}</p>}
+                    </div>
+                  </div>
+                  <p class="text-sm font-heading font-medium text-accent mb-3">{person.data.role}</p>
+                  <p class="text-sm leading-relaxed text-muted line-clamp-3">{person.data.bio}</p>
+                </a>
+              );
+            })
+          )}
+        </div>
+      )
+    }
+  </section>
+</Layout>

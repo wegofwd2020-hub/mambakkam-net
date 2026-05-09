@@ -1,0 +1,150 @@
+---
+import { getCollection, render } from 'astro:content';
+import Layout from '~/layouts/PageLayout.astro';
+import type { ImageMetadata } from 'astro';
+
+export async function getStaticPaths() {
+  const landmarks = await getCollection('landmarks', ({ data }) => !data.draft);
+  return landmarks.map((landmark) => ({
+    params: { slug: landmark.id },
+    props: { landmark },
+  }));
+}
+
+const { landmark } = Astro.props;
+const { Content } = await render(landmark);
+const { name, nameTamil, type, description, status, constructionUpdates, location, images } = landmark.data;
+
+const allImages = import.meta.glob<{ default: ImageMetadata }>('/src/assets/images/**/*.{jpg,jpeg,png,webp}');
+
+type ResolvedImage = { src: ImageMetadata; alt: string };
+const resolvedImages: ResolvedImage[] = [];
+if (images) {
+  for (const img of images) {
+    const key = img.src.replace('~/', '/src/');
+    if (allImages[key]) {
+      const mod = await allImages[key]();
+      resolvedImages.push({ src: mod.default, alt: img.alt ?? name });
+    }
+  }
+}
+
+const typeLabel: Record<string, string> = {
+  temple: 'Temple',
+  'water-body': 'Water Body',
+  historical: 'Historical',
+  natural: 'Natural',
+  community: 'Community',
+};
+
+const statusLabel: Record<string, string> = {
+  active: 'Active',
+  'under-construction': 'Under Construction',
+  historical: 'Historical',
+};
+
+const statusColor: Record<string, string> = {
+  active: 'text-green-700 bg-green-50 dark:text-green-300 dark:bg-green-900/30',
+  'under-construction': 'text-amber-700 bg-amber-50 dark:text-amber-300 dark:bg-amber-900/30',
+  historical: 'text-gray-600 bg-gray-100 dark:text-gray-300 dark:bg-gray-800',
+};
+
+const metadata = {
+  title: name,
+  description: description,
+};
+---
+
+<Layout metadata={metadata}>
+  <div class="mx-auto max-w-3xl px-6 py-16">
+    <!-- Header -->
+    <header class="mb-12">
+      <div class="flex items-center gap-3 mb-4">
+        <span class="text-sm font-heading font-medium text-muted uppercase tracking-widest">
+          {typeLabel[type] ?? type}
+        </span>
+        <span class={`text-xs font-heading font-medium px-2.5 py-1 rounded-full ${statusColor[status] ?? ''}`}>
+          {statusLabel[status] ?? status}
+        </span>
+      </div>
+      <h1 class="text-4xl font-heading font-bold text-gray-900 dark:text-white mb-1">
+        {name}
+      </h1>
+      {nameTamil && <p class="text-lg text-muted">{nameTamil}</p>}
+    </header>
+
+    <!-- Description -->
+    <section class="mb-12">
+      <p class="text-lg leading-relaxed">{description}</p>
+    </section>
+
+    <!-- Extended content from markdown body -->
+    <section class="prose dark:prose-invert max-w-none mb-12">
+      <Content />
+    </section>
+
+    <!-- Photos -->
+    {
+      resolvedImages.length > 0 && (
+        <section class="mb-12">
+          <h2 class="text-2xl font-heading font-bold text-gray-900 dark:text-white mb-6">Photos</h2>
+          <div class="grid gap-4 sm:grid-cols-2">
+            {resolvedImages.map(({ src, alt }) => (
+              <figure class="rounded-xl overflow-hidden border border-gray-200 dark:border-gray-700">
+                <img
+                  src={src.src}
+                  alt={alt}
+                  width={src.width}
+                  height={src.height}
+                  class="w-full object-cover"
+                  loading="lazy"
+                />
+                <figcaption class="px-4 py-2 text-xs text-muted leading-snug">{alt}</figcaption>
+              </figure>
+            ))}
+          </div>
+        </section>
+      )
+    }
+
+    <!-- Construction updates -->
+    {
+      constructionUpdates && constructionUpdates.length > 0 && (
+        <section class="mb-12">
+          <h2 class="text-2xl font-heading font-bold text-gray-900 dark:text-white mb-6">Construction Updates</h2>
+          <ol class="relative border-l border-gray-200 dark:border-gray-700 space-y-6 ml-3">
+            {constructionUpdates
+              .slice()
+              .reverse()
+              .map((update) => (
+                <li class="ml-6">
+                  <span class="absolute -left-3 flex items-center justify-center w-6 h-6 rounded-full bg-primary/10 ring-4 ring-white dark:ring-gray-900">
+                    <span class="w-2 h-2 rounded-full bg-primary" />
+                  </span>
+                  <time class="block text-xs font-mono text-muted mb-1">
+                    {update.date.toLocaleDateString('en-IN', { year: 'numeric', month: 'long', day: 'numeric' })}
+                  </time>
+                  <p class="text-sm leading-relaxed">{update.note}</p>
+                </li>
+              ))}
+          </ol>
+        </section>
+      )
+    }
+
+    <!-- Location -->
+    {
+      location?.description && (
+        <section class="mb-12">
+          <h2 class="text-2xl font-heading font-bold text-gray-900 dark:text-white mb-3">Location</h2>
+          <p class="text-sm text-muted">{location.description}</p>
+        </section>
+      )
+    }
+
+    <!-- Back -->
+    <div class="mt-16 pt-8 border-t border-gray-200 dark:border-gray-700">
+      <a href="/landmarks" class="text-sm font-heading font-medium text-primary hover:underline"> ← All landmarks </a>
+    </div>
+  </div>
+</Layout>

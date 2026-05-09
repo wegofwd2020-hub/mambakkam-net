@@ -1,0 +1,73 @@
+---
+import { getCollection } from 'astro:content';
+import Layout from '~/layouts/PageLayout.astro';
+import Hero from '~/components/widgets/Hero.astro';
+
+const allLandmarks = await getCollection('landmarks', ({ data }) => !data.draft);
+
+const typeLabel: Record<string, string> = {
+  temple: 'Temple',
+  'water-body': 'Water Body',
+  historical: 'Historical',
+  natural: 'Natural',
+  community: 'Community',
+};
+
+const statusLabel: Record<string, string> = {
+  active: 'Active',
+  'under-construction': 'Under Construction',
+  historical: 'Historical',
+};
+
+const statusColor: Record<string, string> = {
+  active: 'text-green-700 bg-green-50 dark:text-green-300 dark:bg-green-900/30',
+  'under-construction': 'text-amber-700 bg-amber-50 dark:text-amber-300 dark:bg-amber-900/30',
+  historical: 'text-gray-600 bg-gray-100 dark:text-gray-300 dark:bg-gray-800',
+};
+
+const metadata = { title: 'Landmarks' };
+---
+
+<Layout metadata={metadata}>
+  <Hero tagline="Places of Mambakkam">
+    <Fragment slot="title"> Landmarks </Fragment>
+    <Fragment slot="subtitle">
+      Temples, water bodies, and places of significance — the landmarks that define Mambakkam and the surrounding area.
+    </Fragment>
+  </Hero>
+
+  <section class="px-6 py-12 mx-auto max-w-5xl">
+    {
+      allLandmarks.length === 0 ? (
+        <p class="text-center text-muted py-16">Landmark pages coming soon.</p>
+      ) : (
+        <div class="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+          {allLandmarks.map((landmark) => (
+            <a
+              href={`/landmarks/${landmark.id}`}
+              class="group block rounded-2xl border border-gray-200 dark:border-gray-700 p-6 hover:border-primary hover:shadow-md transition-all duration-200 bg-white dark:bg-gray-900"
+            >
+              <div class="flex items-center justify-between mb-3">
+                <span class="text-xs font-heading font-medium text-muted uppercase tracking-wider">
+                  {typeLabel[landmark.data.type] ?? landmark.data.type}
+                </span>
+                <span
+                  class={`text-xs font-heading font-medium px-2 py-0.5 rounded-full ${statusColor[landmark.data.status] ?? ''}`}
+                >
+                  {statusLabel[landmark.data.status] ?? landmark.data.status}
+                </span>
+              </div>
+              <h2 class="text-xl font-heading font-bold text-gray-900 dark:text-white group-hover:text-primary transition-colors mb-1">
+                {landmark.data.name}
+              </h2>
+              {landmark.data.nameTamil && <p class="text-sm text-muted mb-3">{landmark.data.nameTamil}</p>}
+              <p class="text-sm leading-relaxed text-muted line-clamp-3">
+                {landmark.data.excerpt ?? landmark.data.description}
+              </p>
+            </a>
+          ))}
+        </div>
+      )
+    }
+  </section>
+</Layout>
