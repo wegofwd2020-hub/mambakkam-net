@@ -1,0 +1,57 @@
+# =============================================================================
+# docker-compose.demo.yml — production compose for the launch VPS (standalone)
+#
+# Used ALONE (not layered on docker-compose.yml). The base compose binds to
+# 0.0.0.0:8080 for local dev convenience; this one is production-shaped:
+# binds to 127.0.0.1:8081 only, behind the host nginx vhost.
+#
+# Used by:
+#   - scripts/launch/deploy.sh on the Hetzner box
+#   - .github/workflows/deploy-mambakkam.yml in CI
+#
+# Run as:
+#   docker compose -f docker-compose.demo.yml --env-file .env.demo \
+#     up -d --build --remove-orphans
+#
+# Production-shape choices:
+#   - Bind to 127.0.0.1:8081 only (host nginx terminates SSL on :443 and
+#     proxies to this port). Never publish to 0.0.0.0 — that would expose
+#     the container directly and bypass Cloudflare + the host nginx.
+#   - restart: always (survives docker daemon restarts on boot)
+#   - healthcheck (so docker compose ps reports Up (healthy))
+#   - resource limits — mambakkam is small; cap so a runaway astrowind
+#     container can't starve the co-tenant StudyBuddy stack
+#   - named volume for nginx access logs so backup.sh can ship them
+# =============================================================================
+
+services:
+  astrowind:
+    image: mambakkam-net:latest
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: mambakkam-astrowind
+    restart: always
+    ports:
+      - '127.0.0.1:8081:8080'
+    healthcheck:
+      test: ['CMD', 'wget', '-qO-', 'http://127.0.0.1:8080/']
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+    deploy:
+      resources:
+        limits:
+          cpus: '0.25'
+          memory: 128M
+    volumes:
+      - mambakkam_nginx_logs:/var/log/nginx
+    logging:
+      driver: json-file
+      options:
+        max-size: '10m'
+        max-file: '5'
+
+volumes:
+  mambakkam_nginx_logs:

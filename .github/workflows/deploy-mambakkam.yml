@@ -1,0 +1,91 @@
+name: Deploy mambakkam.net
+
+# Auto-deploy mambakkam.net to the Hetzner VPS on every push to main, plus
+# manual trigger for forced redeploys.
+#
+# Sequence (~3 min):
+#   1. SSH to VPS as `deploy` user using MAMBAKKAM_VPS_SSH_KEY secret
+#   2. Run /opt/mambakkam/scripts/launch/deploy.sh (git pull, compose build,
+#      compose up -d, local smoke)
+#   3. Run scripts/launch/smoke.sh against the public domain from the runner
+#   4. On smoke failure: open a GitHub issue tagged `incident:mambakkam`;
+#      auto-rollback is intentionally NOT wired — operator must triage.
+#
+# Required repo secrets:
+#   MAMBAKKAM_VPS_HOST  — hostname or IP (often same VPS as StudyBuddy)
+#   MAMBAKKAM_VPS_USER  — typically `deploy`
+#   MAMBAKKAM_VPS_SSH_KEY  — private SSH key for the deploy user
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+# A second push while a deploy is in flight would race against itself on the
+# VPS (two `docker compose up --build` running concurrently). Cancel the older
+# run; the newer SHA will deploy.
+concurrency:
+  group: deploy-mambakkam
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      issues: write   # for the failure-issue step
+
+    env:
+      PUBLIC_URL: https://mambakkam.net
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up SSH
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.MAMBAKKAM_VPS_SSH_KEY }}" > ~/.ssh/id_deploy
+          chmod 600 ~/.ssh/id_deploy
+          ssh-keyscan -H "${{ secrets.MAMBAKKAM_VPS_HOST }}" >> ~/.ssh/known_hosts
+
+      - name: Run deploy.sh on VPS
+        run: |
+          ssh -i ~/.ssh/id_deploy \
+            "${{ secrets.MAMBAKKAM_VPS_USER }}@${{ secrets.MAMBAKKAM_VPS_HOST }}" \
+            'bash /opt/mambakkam/scripts/launch/deploy.sh'
+
+      - name: Public-side smoke
+        id: smoke
+        run: |
+          bash scripts/launch/smoke.sh "$PUBLIC_URL"
+
+      - name: File incident issue on smoke failure
+        if: failure() && steps.smoke.conclusion == 'failure'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const runUrl = `${context.serverUrl}/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId}`;
+            await github.rest.issues.create({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              title: `[incident] mambakkam.net deploy smoke failed @ ${context.sha.substring(0,7)}`,
+              labels: ['incident:mambakkam', 'priority:high'],
+              body: [
+                `Smoke check failed after auto-deploy.`,
+                ``,
+                `**Workflow run:** ${runUrl}`,
+                `**Commit:** ${context.sha}`,
+                ``,
+                `**Triage checklist:**`,
+                `- [ ] Open the workflow run; read the smoke output to see which check failed`,
+                `- [ ] SSH to the VPS: \`ssh deploy@${{ secrets.MAMBAKKAM_VPS_HOST }}\``,
+                `- [ ] Inspect: \`docker compose -f docker-compose.demo.yml --env-file .env.demo logs --tail 200\``,
+                `- [ ] If the build succeeded but content is wrong: \`cd /opt/mambakkam && git log --oneline -5\``,
+                `- [ ] If a rollback is needed: \`sudo git -C /opt/mambakkam reset --hard <previous-sha> && bash scripts/launch/deploy.sh\``,
+                `- [ ] Re-run the smoke locally on the VPS: \`bash scripts/launch/smoke.sh http://127.0.0.1:8081\``,
+                ``,
+                `Auto-rollback is intentionally not wired — an operator must decide.`,
+              ].join('\n'),
+            });
