@@ -1,0 +1,150 @@
+---
+import Layout from '~/layouts/PageLayout.astro';
+import Hero from '~/components/widgets/Hero.astro';
+import Features2 from '~/components/widgets/Features2.astro';
+import Content from '~/components/widgets/Content.astro';
+import Note from '~/components/widgets/Note.astro';
+import VillageMap from '~/components/widgets/VillageMap.astro';
+
+const metadata = { title: 'The Village' };
+---
+
+<Layout metadata={metadata}>
+  <Hero tagline="Kalavai Taluk · Ranipet District · Tamil Nadu">
+    <Fragment slot="title">
+      Mambakkam
+      <span class="block text-2xl font-sans font-normal text-muted mt-2">மாம்பாக்கம்</span>
+    </Fragment>
+    <Fragment slot="subtitle">
+      Sitting near the Palar River in Ranipet District — shaped by paddy fields, temple bells, and the families who've
+      called it home for generations.
+    </Fragment>
+  </Hero>
+
+  <!-- Map -->
+  <VillageMap />
+
+  <!-- Location -->
+  <Content
+    title="Where you'll find us"
+    items={[
+      {
+        title: 'Ranipet District',
+        description:
+          'A young district carved from Vellore in 2019 — where farming villages like ours sit alongside the industry that has grown up around Ranipet town.',
+      },
+      {
+        title: 'Near the Palar River',
+        description:
+          'The Palar River runs close by, and its waters have quietly shaped the farms and fields here for a long time.',
+      },
+      {
+        title: 'Close to Kalavai',
+        description:
+          'Kalavai is our taluk headquarters and nearest town — good for commerce, transport, and the larger temples that bring everyone together.',
+      },
+    ]}
+  >
+    <Fragment slot="content">
+      <h3 class="text-2xl font-bold tracking-tight dark:text-white sm:text-3xl mb-2">
+        Tucked into the agricultural belt of Ranipet District.
+      </h3>
+    </Fragment>
+  </Content>
+
+  <!-- Agriculture -->
+  <Content
+    isReversed
+    title="The village lives by its land"
+    items={[
+      {
+        title: 'Groundwater farming',
+        description:
+          'The fields here run on groundwater, with help from irrigation schemes supported by the Ranipet Agriculture Department.',
+      },
+      {
+        title: 'What we grow',
+        description:
+          'Rice, cotton, sugarcane — the crops that define the year. Millets, pulses, and vegetables fill the gaps and feed the household.',
+      },
+      {
+        title: 'New livelihoods',
+        description:
+          'Horticulture programmes have opened new possibilities. Fish farming and poultry are picking up too.',
+      },
+    ]}
+  >
+    <Fragment slot="content">
+      <h3 class="text-2xl font-bold tracking-tight dark:text-white sm:text-3xl mb-2">
+        Every season, the fields remind us where we come from.
+      </h3>
+    </Fragment>
+    <Fragment slot="bg">
+      <div class="absolute inset-0 bg-green-50/30 dark:bg-transparent"></div>
+    </Fragment>
+  </Content>
+
+  <!-- Temples -->
+  <Note
+    title="Faith & community:"
+    description="Our village is home to shrines for Amman and Ayyanar, and a Pillaiyar temple that's part of everyday life here."
+  />
+
+  <Features2
+    title="Faith is part of daily life here"
+    columns={3}
+    items={[
+      {
+        title: 'Amman Temples',
+        description:
+          "Our goddess shrines — Ellaiyamman and Angalaparameswari — sit at the heart of community worship, marking the village's spiritual edges.",
+        icon: 'tabler:building-arch',
+      },
+      {
+        title: 'Ayyanar Shrine',
+        description:
+          'Ayyanar watches over the village. His shrine at the threshold has been here as long as people can remember.',
+        icon: 'tabler:building-arch',
+      },
+      {
+        title: 'Pillaiyar Temple',
+        description:
+          'Pillaiyar comes first. Before every harvest, ceremony, or new beginning, this temple is where people start.',
+        icon: 'tabler:building-arch',
+      },
+    ]}
+  >
+    <Fragment slot="bg">
+      <div class="absolute inset-0 bg-amber-50/30 dark:bg-transparent"></div>
+    </Fragment>
+  </Features2>
+
+  <!-- Pilgrimage -->
+  <Content
+    title="We go on pilgrimage"
+    items={[
+      {
+        title: 'A living tradition',
+        description:
+          'People from Mambakkam take part in local pilgrimages with real commitment — a thread that connects the village to the wider Tamil Nadu.',
+      },
+      {
+        title: 'Temples nearby',
+        description:
+          'Kalavai is close, and its temples dedicated to Siva and Vishnu draw people from across the villages.',
+      },
+      {
+        title: 'New temple going up',
+        description:
+          'A new temple is being built in Mambakkam right now — something the community has been working toward together.',
+        href: '/landmarks/new-temple',
+      },
+    ]}
+  >
+    <Fragment slot="content">
+      <h3 class="text-2xl font-bold tracking-tight dark:text-white sm:text-3xl mb-2">
+        The temple calendar shapes how we move through the year.
+      </h3>
+    </Fragment>
+  </Content>
+</Layout>

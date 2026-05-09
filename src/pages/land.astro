@@ -1,0 +1,98 @@
+---
+import Layout from '~/layouts/PageLayout.astro';
+import Hero from '~/components/widgets/Hero.astro';
+import Features from '~/components/widgets/Features.astro';
+import Content from '~/components/widgets/Content.astro';
+import Note from '~/components/widgets/Note.astro';
+
+const metadata = { title: 'Land & Agriculture' };
+---
+
+<Layout metadata={metadata}>
+  <Hero tagline="Agriculture">
+    <Fragment slot="title">
+      The land of <span class="text-accent">Mambakkam</span>
+    </Fragment>
+    <Fragment slot="subtitle">
+      Our fields run on groundwater and the Palar River — rice, cotton, sugarcane, and the rhythms that shape every
+      season.
+    </Fragment>
+  </Hero>
+
+  <Note
+    title="Rooted in the ground:"
+    description="Mambakkam's farming depends on groundwater and the Palar River, supported by irrigation schemes from the Ranipet Agriculture Department."
+  />
+
+  <Content
+    title="Water makes this village"
+    items={[
+      {
+        title: 'The Palar River',
+        description:
+          'The Palar runs close to Mambakkam — a quiet but steady presence that has shaped the fields and farms here for generations.',
+      },
+      {
+        title: 'Ranipet Agriculture Department',
+        description:
+          'Irrigation schemes and horticulture support from the Department have helped farmers here grow more, and more reliably.',
+      },
+      {
+        title: 'Other livelihoods',
+        description:
+          'Beyond the fields, aquaculture and poultry are taking root — new ways to make a living alongside the traditional crops.',
+      },
+    ]}
+  >
+    <Fragment slot="content">
+      <h3 class="text-2xl font-bold tracking-tight dark:text-white sm:text-3xl mb-2">
+        Water is the foundation of everything grown here.
+      </h3>
+    </Fragment>
+    <Fragment slot="bg">
+      <div class="absolute inset-0 bg-green-50/30 dark:bg-transparent"></div>
+    </Fragment>
+  </Content>
+
+  <Features
+    title="What grows here"
+    subtitle="Commercial crops and household crops — each season has its own rhythm"
+    items={[
+      {
+        title: 'Rice (Paddy)',
+        description:
+          'The main crop. When the monsoon comes, the fields flood and the paddy goes in. It sets the rhythm of the year.',
+        icon: 'tabler:plant-2',
+      },
+      {
+        title: 'Cotton',
+        description: 'A commercial crop that connects Mambakkam farmers to the textile economy of northern Tamil Nadu.',
+        icon: 'tabler:plant',
+      },
+      {
+        title: 'Sugarcane',
+        description:
+          'Tall rows of cane mark the edges of many farms. Grown for the nearby mills, it brings in steady income across a long season.',
+        icon: 'tabler:leaf',
+      },
+      {
+        title: 'Millets',
+        description:
+          'Hardy and reliable. Millets keep households fed through the drier months when the main crops need more careful watching.',
+        icon: 'tabler:grain',
+      },
+      {
+        title: 'Pulses',
+        description:
+          'Good for the table and good for the soil. Pulses are grown between the main cycles and help keep the land healthy.',
+        icon: 'tabler:leaf',
+      },
+      {
+        title: 'Vegetables & Horticulture',
+        description:
+          'Seasonal vegetables grown with support from horticulture schemes — feeding the village and adding to household income.',
+        icon: 'tabler:salad',
+      },
+    ]}
+  />
+</Layout>
