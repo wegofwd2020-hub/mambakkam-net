@@ -4,6 +4,7 @@
 **Date:** 2026-05-09
 **Status:** Scaffolded; operator brings it up after pasting Grafana Cloud creds.
 **Companion docs:**
+
 - [`DEMO_LAUNCH_PLAN.md`](DEMO_LAUNCH_PLAN.md) — day-by-day cutover runbook (this file is referenced in §Observability)
 - [`DEPLOYMENT_PLAN.md`](DEPLOYMENT_PLAN.md) — hosting architecture
 - [`StudyBuddy_OnDemand/docs/DEMO_LAUNCH_PLAN.md`](https://github.com/wegofwd2020-hub/StudyBuddy_OnDemand/blob/main/docs/DEMO_LAUNCH_PLAN.md) — second-tenant runbook
@@ -13,15 +14,15 @@
 
 ## TL;DR
 
-| What | Where | How to reach |
-|---|---|---|
-| **Grafana** (dashboards + alerts) | Grafana Cloud free tier — `https://<your-stack>.grafana.net` | Grafana SSO (Google / GitHub / email) |
-| **Prometheus UI** (ad-hoc PromQL) | Local on the CX22 — `127.0.0.1:9090` | `ssh -L 9090:127.0.0.1:9090 deploy@<vps-ip>` |
-| **mambakkam scrape target** | nginx_exporter sidecar on container net | scraped only by local Prometheus |
-| **StudyBuddy `/metrics`** | bearer-token-protected, `127.0.0.1:8443/metrics` (loopback) | scraped only by local Prometheus |
-| **Public `/metrics`** (optional) | `https://mambakkam.net/metrics`, `https://demo.studybuddy.app/metrics` | Cloudflare Access policy required |
-| **Synthetic uptime** | blackbox-exporter on the CX22 | probes 5 public URLs every 15s |
-| **Host metrics** | node-exporter on host net | scraped only by local Prometheus |
+| What                              | Where                                                                  | How to reach                                 |
+| --------------------------------- | ---------------------------------------------------------------------- | -------------------------------------------- |
+| **Grafana** (dashboards + alerts) | Grafana Cloud free tier — `https://<your-stack>.grafana.net`           | Grafana SSO (Google / GitHub / email)        |
+| **Prometheus UI** (ad-hoc PromQL) | Local on the CX22 — `127.0.0.1:9090`                                   | `ssh -L 9090:127.0.0.1:9090 deploy@<vps-ip>` |
+| **mambakkam scrape target**       | nginx_exporter sidecar on container net                                | scraped only by local Prometheus             |
+| **StudyBuddy `/metrics`**         | bearer-token-protected, `127.0.0.1:8443/metrics` (loopback)            | scraped only by local Prometheus             |
+| **Public `/metrics`** (optional)  | `https://mambakkam.net/metrics`, `https://demo.studybuddy.app/metrics` | Cloudflare Access policy required            |
+| **Synthetic uptime**              | blackbox-exporter on the CX22                                          | probes 5 public URLs every 15s               |
+| **Host metrics**                  | node-exporter on host net                                              | scraped only by local Prometheus             |
 
 Free-tier Grafana Cloud limits (2026-05): 10k active series, 13-month retention, no card required.
 
@@ -68,13 +69,14 @@ Free-tier Grafana Cloud limits (2026-05): 10k active series, 13-month retention,
 **Prometheus runs locally; Grafana lives in the cloud.**
 
 - **Prometheus on the VPS** is small (~150 MB RAM, 7d local retention, 2 GB disk cap). It's the cheapest way to scrape co-located targets without a network round-trip per scrape, and it gives the operator a `127.0.0.1:9090` UI for ad-hoc PromQL when something is on fire.
-- **Grafana Cloud free tier** at *.grafana.net is where dashboards + long-term retention + alerting live. No local Grafana service to host means ~150 MB RAM saved on the CX22.
+- **Grafana Cloud free tier** at \*.grafana.net is where dashboards + long-term retention + alerting live. No local Grafana service to host means ~150 MB RAM saved on the CX22.
 - **`remote_write`** ships every series Prometheus collects to Grafana Cloud. This is Prometheus's standard pattern for "send to managed backend"; same wire protocol Grafana Cloud documents.
 - **`write_relabel_configs` in `prometheus.yml`** drops noisy series (especially node-exporter's ~600 default metrics) before they ship — keeps active-series count well under the 10k free-tier cap.
 
 **Cloudflare Access gates the public `/metrics` URLs.**
 
 Public `/metrics` exposure isn't required for the local-Prometheus scrape path (which uses loopback / docker-network), but the host nginx vhosts ship a `/metrics` location anyway so:
+
 - Grafana Cloud (or another external scraper) can pull metrics over the public internet via Cloudflare Tunnel if needed
 - The operator can curl from anywhere with their CF Access cookie
 - Defence in depth: CF IP allowlist + CF Access JWT check + (for StudyBuddy) the application-level bearer token
@@ -89,12 +91,12 @@ The `/metrics` location refuses anything not coming from a Cloudflare IP and ref
 
 Source: the astrowind container's `/stub_status` location (loopback inside the compose network).
 
-| Metric | Type | Use |
-|---|---|---|
+| Metric                      | Type    | Use                                    |
+| --------------------------- | ------- | -------------------------------------- |
 | `nginx_http_requests_total` | counter | request rate, useful for traffic shape |
-| `nginx_connections_active` | gauge | concurrent connections |
-| `nginx_connections_writing` | gauge | latency hint — tail of slow clients |
-| `nginx_up` | gauge | 1 if nginx is responding |
+| `nginx_connections_active`  | gauge   | concurrent connections                 |
+| `nginx_connections_writing` | gauge   | latency hint — tail of slow clients    |
+| `nginx_up`                  | gauge   | 1 if nginx is responding               |
 
 `stub_status` is the upstream nginx feature, not custom — works on the stock `nginx:stable-alpine` image already used by the astrowind Dockerfile.
 
@@ -104,16 +106,16 @@ Source: the StudyBuddy compose-internal nginx at `127.0.0.1:8443`, which proxies
 
 Already documented in [`OBSERVABILITY.md`](https://github.com/wegofwd2020-hub/studybuddy-docs/blob/main/OBSERVABILITY.md). Series we keep:
 
-| Prefix | Examples |
-|---|---|
-| `sb_requests_total` | per (method, path, status) — bound to ~750 series via FastAPI route templates |
-| `sb_request_duration_seconds` | histogram with 10 buckets |
-| `sb_db_pool_connections` | min / max / size / free |
-| `sb_redis_connected` | 1/0 |
-| `sb_auth_exchanges_total` | per track |
-| `sb_auth_failures_total` | per reason |
-| `sb_events_total` | per (category, event_type) |
-| `process_*`, `python_gc_*` | auto-emitted by `prometheus_client` |
+| Prefix                        | Examples                                                                      |
+| ----------------------------- | ----------------------------------------------------------------------------- |
+| `sb_requests_total`           | per (method, path, status) — bound to ~750 series via FastAPI route templates |
+| `sb_request_duration_seconds` | histogram with 10 buckets                                                     |
+| `sb_db_pool_connections`      | min / max / size / free                                                       |
+| `sb_redis_connected`          | 1/0                                                                           |
+| `sb_auth_exchanges_total`     | per track                                                                     |
+| `sb_auth_failures_total`      | per reason                                                                    |
+| `sb_events_total`             | per (category, event_type)                                                    |
+| `process_*`, `python_gc_*`    | auto-emitted by `prometheus_client`                                           |
 
 ### `cx22-host` job — node-exporter
 
@@ -198,11 +200,11 @@ If nothing shows up after 60 s, check `prometheus_remote_storage_failed_samples_
 
 Suggested starter dashboards in Grafana Cloud:
 
-| Dashboard | Top panels |
-|---|---|
-| **CX22 Host** | CPU, memory available, disk free, load avg, network throughput |
-| **Public Uptime** | `probe_success` per target as a status timeline; `probe_duration_seconds` p50/p95 |
-| **mambakkam.net** | nginx requests/sec, active connections, 5xx rate (derived from nginx access log if you wire mtail later) |
+| Dashboard          | Top panels                                                                                                                                       |
+| ------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------ |
+| **CX22 Host**      | CPU, memory available, disk free, load avg, network throughput                                                                                   |
+| **Public Uptime**  | `probe_success` per target as a status timeline; `probe_duration_seconds` p50/p95                                                                |
+| **mambakkam.net**  | nginx requests/sec, active connections, 5xx rate (derived from nginx access log if you wire mtail later)                                         |
 | **StudyBuddy API** | `sb_requests_total` rate by status, `sb_request_duration_seconds` p50/p95, `sb_db_pool_connections{state="free"}`, `sb_auth_failures_total` rate |
 
 The `sb_*` dashboard already exists in StudyBuddy's dev setup ([`studybuddy-health` JSON](https://github.com/wegofwd2020-hub/studybuddy-docs/blob/main/OBSERVABILITY.md)) — it can be imported wholesale once you point its data source at the Grafana Cloud Prometheus.
@@ -256,6 +258,6 @@ issues; `[WARN]` for everything else. Single Gmail destination
 
 ## Change Log
 
-| Date | Version | Change |
-|---|---|---|
-| 2026-05-09 | 1.0 | Initial — Prometheus on CX22 + remote_write to Grafana Cloud free tier; nginx-prometheus-exporter for mambakkam; bearer-token /metrics for StudyBuddy; blackbox-exporter for synthetic uptime; node-exporter for host; Cloudflare-Access-gated public /metrics surfaces. |
+| Date       | Version | Change                                                                                                                                                                                                                                                                   |
+| ---------- | ------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| 2026-05-09 | 1.0     | Initial — Prometheus on CX22 + remote_write to Grafana Cloud free tier; nginx-prometheus-exporter for mambakkam; bearer-token /metrics for StudyBuddy; blackbox-exporter for synthetic uptime; node-exporter for host; Cloudflare-Access-gated public /metrics surfaces. |

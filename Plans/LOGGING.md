@@ -4,6 +4,7 @@
 **Date:** 2026-05-09
 **Status:** Scaffolded; brought up alongside Prometheus by the same operator runbook.
 **Companion docs:**
+
 - [`MONITORING.md`](MONITORING.md) — metrics architecture + dashboards (sibling document)
 - [`DEMO_LAUNCH_PLAN.md`](DEMO_LAUNCH_PLAN.md) — launch runbook (this file is referenced from §8)
 - StudyBuddy's structlog setup: [`backend/src/utils/logger.py`](https://github.com/wegofwd2020-hub/StudyBuddy_OnDemand/blob/main/backend/src/utils/logger.py)
@@ -12,14 +13,14 @@
 
 ## TL;DR
 
-| What | Where | How to query |
-|---|---|---|
-| **Live tail (any source)** | Grafana Cloud Explore — Loki data source | LogQL via `<stack>.grafana.net/explore` |
-| **App logs** (StudyBuddy) | Grafana Cloud Loki + local `docker logs` fallback | `{project="studybuddy"}` |
-| **Static-site logs** (mambakkam) | same | `{project="mambakkam-net"}` |
-| **HTTP access logs** | Host nginx vhost files + Loki | `{job="nginx-host"}` |
-| **System logs** (sshd, ufw, etc.) | journald + Loki | `{job="systemd-journal"}` |
-| **Backup script output** | `/var/log/*-backup.log` + Loki | `{job="backups"}` |
+| What                              | Where                                             | How to query                            |
+| --------------------------------- | ------------------------------------------------- | --------------------------------------- |
+| **Live tail (any source)**        | Grafana Cloud Explore — Loki data source          | LogQL via `<stack>.grafana.net/explore` |
+| **App logs** (StudyBuddy)         | Grafana Cloud Loki + local `docker logs` fallback | `{project="studybuddy"}`                |
+| **Static-site logs** (mambakkam)  | same                                              | `{project="mambakkam-net"}`             |
+| **HTTP access logs**              | Host nginx vhost files + Loki                     | `{job="nginx-host"}`                    |
+| **System logs** (sshd, ufw, etc.) | journald + Loki                                   | `{job="systemd-journal"}`               |
+| **Backup script output**          | `/var/log/*-backup.log` + Loki                    | `{job="backups"}`                       |
 
 Free-tier Loki: 50 GB monthly ingest + 14-day retention.
 
@@ -99,16 +100,17 @@ Promtail's `docker_sd_configs` polls the Docker socket every 15 s and emits
 a target for every running container across all three compose stacks. Each
 log line gets these Loki labels:
 
-| Label | Source | Example |
-|---|---|---|
-| `container` | container name | `mambakkam-astrowind`, `studybuddy-api-1` |
-| `project` | compose project label | `mambakkam-net`, `studybuddy`, `monitoring` |
-| `service` | compose service label | `api`, `web`, `astrowind`, `prometheus` |
-| `stream` | stdout vs stderr | `stdout`, `stderr` |
-| `level` | structlog `level` field (StudyBuddy only, via JSON parser) | `info`, `warning`, `error` |
-| `logger` | structlog `logger` field (StudyBuddy only) | `auth`, `content`, `pipeline` |
+| Label       | Source                                                     | Example                                     |
+| ----------- | ---------------------------------------------------------- | ------------------------------------------- |
+| `container` | container name                                             | `mambakkam-astrowind`, `studybuddy-api-1`   |
+| `project`   | compose project label                                      | `mambakkam-net`, `studybuddy`, `monitoring` |
+| `service`   | compose service label                                      | `api`, `web`, `astrowind`, `prometheus`     |
+| `stream`    | stdout vs stderr                                           | `stdout`, `stderr`                          |
+| `level`     | structlog `level` field (StudyBuddy only, via JSON parser) | `info`, `warning`, `error`                  |
+| `logger`    | structlog `logger` field (StudyBuddy only)                 | `auth`, `content`, `pipeline`               |
 
 Drop rules in `pipeline_stages`:
+
 - StudyBuddy lines with `level=debug` are dropped at ingest (~halves the
   StudyBuddy log volume; debug-noise rarely useful at runtime).
 
@@ -117,12 +119,12 @@ Drop rules in `pipeline_stages`:
 Tails `/var/log/nginx/*.log`. The filename is parsed into `vhost` and `kind`
 labels:
 
-| Filename | `vhost` | `kind` |
-|---|---|---|
-| `mambakkam.net.access.log` | `mambakkam.net` | `access` |
-| `mambakkam.net.error.log` | `mambakkam.net` | `error` |
+| Filename                         | `vhost`               | `kind`   |
+| -------------------------------- | --------------------- | -------- |
+| `mambakkam.net.access.log`       | `mambakkam.net`       | `access` |
+| `mambakkam.net.error.log`        | `mambakkam.net`       | `error`  |
 | `demo.studybuddy.app.access.log` | `demo.studybuddy.app` | `access` |
-| `demo.studybuddy.app.error.log` | `demo.studybuddy.app` | `error` |
+| `demo.studybuddy.app.error.log`  | `demo.studybuddy.app` | `error`  |
 
 The compose-internal nginx (inside the StudyBuddy stack and the mambakkam
 astrowind container) also writes access logs, but they go to stdout and
@@ -132,6 +134,7 @@ get picked up by job 1 above — no double-counting.
 
 Reads `/var/log/journal` (binary). Per-line labels: `unit`, `hostname`,
 `priority`. Drop rules:
+
 - Priority 7 (`debug`) journal lines are dropped at ingest.
 
 Coverage: `sshd.service`, `fail2ban.service`, `ufw`, `docker.service`,
@@ -161,37 +164,45 @@ pick streams, `|=` / `!=` / `|~` to filter substrings, `|` followed by a parser
 ### LogQL cheatsheet — common queries
 
 **StudyBuddy errors only, last 1 h:**
+
 ```logql
 {project="studybuddy", level="error"}
 ```
 
 **Tail StudyBuddy auth-related logs:**
+
 ```logql
 {project="studybuddy", logger="auth"}
 ```
 
 **All 5xx responses on demo.studybuddy.app, sorted by URL:**
+
 ```logql
 {vhost="demo.studybuddy.app", kind="access"} |~ "\" 5\\d\\d "
 ```
+
 (LogQL regex; the `\` needs doubling in YAML/JSON contexts.)
 
 **fail2ban bans in the last 24 h:**
+
 ```logql
 {job="systemd-journal", unit="fail2ban.service"} |~ "Ban|Unban"
 ```
 
 **5xx rate from mambakkam, last 5 min, as a counter for alerting:**
+
 ```logql
 sum by (vhost) (rate({vhost="mambakkam.net", kind="access"} |~ "\" 5\\d\\d " [5m]))
 ```
 
 **Backup failures last 7 d:**
+
 ```logql
 {job="backups"} |~ "(?i)error|fail|abort"
 ```
 
 **Search across both sites for an IP address (incident triage):**
+
 ```logql
 {job="nginx-host"} |= "1.2.3.4"
 ```
@@ -234,13 +245,13 @@ sudo tail -f /var/log/studybuddy-backup.log
 
 ### When to use which surface
 
-| Question | Surface |
-|---|---|
-| "Why is `/api/v1/X` returning 500?" | Grafana Cloud — search by URL, filter by `level=error`, see surrounding context |
-| "Is fail2ban actively banning during a probe?" | journalctl on the box (real-time) OR Loki with a tight time range |
-| "Did last night's backup succeed?" | Loki query for `{job="backups"} | last 8h`; fallback `cat /var/log/studybuddy-backup.log` |
-| "Show me the last 50 lines from `api`, right now" | `docker logs --tail 50 studybuddy-api-1` (faster than Loki round-trip) |
-| "What was the request rate at 14:30 UTC three days ago?" | Loki / Grafana Cloud (local files have rotated) |
+| Question                                                 | Surface                                                                         |
+| -------------------------------------------------------- | ------------------------------------------------------------------------------- | ------------------------------------------------------- |
+| "Why is `/api/v1/X` returning 500?"                      | Grafana Cloud — search by URL, filter by `level=error`, see surrounding context |
+| "Is fail2ban actively banning during a probe?"           | journalctl on the box (real-time) OR Loki with a tight time range               |
+| "Did last night's backup succeed?"                       | Loki query for `{job="backups"}                                                 | last 8h`; fallback `cat /var/log/studybuddy-backup.log` |
+| "Show me the last 50 lines from `api`, right now"        | `docker logs --tail 50 studybuddy-api-1` (faster than Loki round-trip)          |
+| "What was the request rate at 14:30 UTC three days ago?" | Loki / Grafana Cloud (local files have rotated)                                 |
 
 ---
 
@@ -263,6 +274,7 @@ GRAFANA_CLOUD_LOKI_USERNAME=<your-numeric-loki-stack-id>
 ```
 
 Find the values:
+
 - Grafana Cloud portal → your stack → **Connections → Hosted Logs** → "Send Logs"
 - Copy the `URL` and the numeric `User`
 - The token (`GRAFANA_CLOUD_API_KEY`) is the same one already configured for
@@ -294,6 +306,7 @@ Then in Grafana Cloud:
 4. Run `{project="studybuddy"}` — should show structlog JSON
 
 If Loki shows no data after 60 s:
+
 - Check `promtail_dropped_entries_total` (should be 0)
 - Check `promtail_request_duration_seconds_count{status_code="204"}` —
   204 means "accepted by Loki"; any other status code means push failure
@@ -324,7 +337,7 @@ The set as of 2026-05-09: `StudyBuddyErrorBurst` (warn),
   [`backend/src/utils/logger.py`](https://github.com/wegofwd2020-hub/StudyBuddy_OnDemand/blob/main/backend/src/utils/logger.py).
   Audit your structlog calls during code review.
 - **Promtail runs as root** on the host because it needs the Docker socket
-  + `/var/log/journal`. It mounts everything else read-only.
+  - `/var/log/journal`. It mounts everything else read-only.
 - **Cloud Access Policy token** — separate token from any user login.
   Scope it `MetricsPublisher` + `LogsWriter` only; revoke + rotate if the
   VPS is compromised.
@@ -373,6 +386,6 @@ The set as of 2026-05-09: `StudyBuddyErrorBurst` (warn),
 
 ## Change Log
 
-| Date | Version | Change |
-|---|---|---|
-| 2026-05-09 | 1.0 | Initial — Promtail on the CX22 ships docker / nginx / journald / backup logs to Grafana Cloud Loki free tier; LogQL cheatsheet + local-fallback runbook; suggested log-based alerts; Loki creds added to `.env.monitoring` template via mambakkam `provision.sh`. |
+| Date       | Version | Change                                                                                                                                                                                                                                                            |
+| ---------- | ------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 2026-05-09 | 1.0     | Initial — Promtail on the CX22 ships docker / nginx / journald / backup logs to Grafana Cloud Loki free tier; LogQL cheatsheet + local-fallback runbook; suggested log-based alerts; Loki creds added to `.env.monitoring` template via mambakkam `provision.sh`. |

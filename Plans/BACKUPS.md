@@ -4,6 +4,7 @@
 **Date:** 2026-05-09
 **Status:** Scaffolded; both repos initialised by their respective `provision.sh`.
 **Companion docs:**
+
 - [`MONITORING.md`](MONITORING.md) — metrics architecture
 - [`LOGGING.md`](LOGGING.md) — log shipping + the `BackupSilent` alert
 - [`DEMO_LAUNCH_PLAN.md`](DEMO_LAUNCH_PLAN.md) — launch runbook (this file is referenced from §9)
@@ -13,12 +14,12 @@
 
 ## TL;DR
 
-| What | Where | When | Restore via |
-|---|---|---|---|
-| **mambakkam repo** | `/opt/mambakkam/backups/restic/` (encrypted, deduped) | Daily 02:30 UTC | `restic restore <snapshot-id> --target /tmp/restore` |
-| **StudyBuddy repo** | `/opt/studybuddy/backups/restic/` (encrypted, deduped) | Daily 02:00 UTC | same syntax, different password file |
-| **Integrity check** | both repos, `--read-data-subset 5%` + `prune` | Weekly Sun 03:00 (SB) / 03:30 (mb) UTC | log: `/var/log/{site}-backup.log` |
-| **Hetzner snapshot** | StudyBuddy only, optional via `HCLOUD_TOKEN` | Daily after restic, if token set | Hetzner console |
+| What                 | Where                                                  | When                                   | Restore via                                          |
+| -------------------- | ------------------------------------------------------ | -------------------------------------- | ---------------------------------------------------- |
+| **mambakkam repo**   | `/opt/mambakkam/backups/restic/` (encrypted, deduped)  | Daily 02:30 UTC                        | `restic restore <snapshot-id> --target /tmp/restore` |
+| **StudyBuddy repo**  | `/opt/studybuddy/backups/restic/` (encrypted, deduped) | Daily 02:00 UTC                        | same syntax, different password file                 |
+| **Integrity check**  | both repos, `--read-data-subset 5%` + `prune`          | Weekly Sun 03:00 (SB) / 03:30 (mb) UTC | log: `/var/log/{site}-backup.log`                    |
+| **Hetzner snapshot** | StudyBuddy only, optional via `HCLOUD_TOKEN`           | Daily after restic, if token set       | Hetzner console                                      |
 
 Retention: `--keep-daily 7 --keep-weekly 4 --keep-monthly 3 --keep-yearly 1` ≈ 15 snapshots, ~1.2× a single full snapshot on disk thanks to dedup.
 
@@ -30,20 +31,20 @@ Passwords: `/etc/restic/{mambakkam,studybuddy}.password` (mode 600 root). **Lost
 
 ### mambakkam repo — `/opt/mambakkam/backups/restic/`
 
-| Source | Why it's backed up |
-|---|---|
-| `/opt/mambakkam/src/assets/images/` | Large media, occasionally dropped on the VPS without git commit |
-| `/opt/mambakkam/.env.demo` | Analytics ID + (future) SMTP creds; tedious to reconstruct |
+| Source                                      | Why it's backed up                                                                       |
+| ------------------------------------------- | ---------------------------------------------------------------------------------------- |
+| `/opt/mambakkam/src/assets/images/`         | Large media, occasionally dropped on the VPS without git commit                          |
+| `/opt/mambakkam/.env.demo`                  | Analytics ID + (future) SMTP creds; tedious to reconstruct                               |
 | `/etc/ssl/cloudflare/origin-{cert,key}.pem` | Origin Cert + key (15-yr validity, regeneratable from Cloudflare but cleaner to back up) |
-| `/var/log/nginx/mambakkam.net.*.log[.gz]` | Host nginx access + error logs incl. logrotate's archives |
+| `/var/log/nginx/mambakkam.net.*.log[.gz]`   | Host nginx access + error logs incl. logrotate's archives                                |
 
 ### StudyBuddy repo — `/opt/studybuddy/backups/restic/`
 
-| Source | Why it's backed up |
-|---|---|
-| `/opt/studybuddy/backups/staging/db-latest.dump.gz` | Postgres `pg_dump -Fc` of the studybuddy database, written fresh before each restic run (dedup means many "daily" dumps cost <2x one dump on disk) |
-| `/data/content/` | Content store — pre-generated lessons / quizzes / tutorials / experiments / MP3s. Costly to regenerate (~$215 of Anthropic spend per `studybuddy-docs/COST_PLAN.md`) |
-| `/opt/studybuddy/.env.demo` | Server-generated secrets + Auth0 + Stripe-test + Gmail App Password values; expensive to reconstruct from scratch |
+| Source                                              | Why it's backed up                                                                                                                                                   |
+| --------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `/opt/studybuddy/backups/staging/db-latest.dump.gz` | Postgres `pg_dump -Fc` of the studybuddy database, written fresh before each restic run (dedup means many "daily" dumps cost <2x one dump on disk)                   |
+| `/data/content/`                                    | Content store — pre-generated lessons / quizzes / tutorials / experiments / MP3s. Costly to regenerate (~$215 of Anthropic spend per `studybuddy-docs/COST_PLAN.md`) |
+| `/opt/studybuddy/.env.demo`                         | Server-generated secrets + Auth0 + Stripe-test + Gmail App Password values; expensive to reconstruct from scratch                                                    |
 
 ### What's deliberately NOT in either repo
 
@@ -79,6 +80,7 @@ mambakkam: `02:30 UTC` cron → `bash /opt/mambakkam/scripts/launch/backup.sh`
 StudyBuddy: `02:00 UTC` cron → `bash /opt/studybuddy/scripts/demo/backup.sh`
 
 Steps each script does:
+
 1. (StudyBuddy only) `pg_dump -Fc | gzip` → staging file (overwritten daily; dedup handles retention)
 2. `restic backup` snapshot of all sources, tagged `daily` + `host=<hostname>`
 3. `restic forget` to apply the keep-policy (no `prune` — see below)
@@ -92,6 +94,7 @@ mambakkam: `Sun 03:30 UTC` → `bash backup-check.sh`
 StudyBuddy: `Sun 03:00 UTC` → `bash backup-check.sh`
 
 Steps:
+
 1. `restic check --read-data-subset 5%` — verifies repo metadata + reads 5% of pack files to catch silent bit-rot. 100% would take too long on the daily disk; 5% weekly cycles every pack within ~5 months.
 2. `restic prune --max-unused 5%` — reclaims disk that the daily forgets have marked as unreferenced.
 
@@ -99,12 +102,13 @@ Both append to the same log file the daily run uses, so the `BackupSilent` Loki 
 
 ### Where the logs land
 
-| Site | Log file | LogQL query (Grafana Cloud) |
-|---|---|---|
-| mambakkam | `/var/log/mambakkam-backup.log` | `{job="backups", which="mambakkam"}` |
+| Site       | Log file                         | LogQL query (Grafana Cloud)           |
+| ---------- | -------------------------------- | ------------------------------------- |
+| mambakkam  | `/var/log/mambakkam-backup.log`  | `{job="backups", which="mambakkam"}`  |
 | StudyBuddy | `/var/log/studybuddy-backup.log` | `{job="backups", which="studybuddy"}` |
 
 Grep recipes for the on-box fallback:
+
 ```bash
 sudo grep -E "FAIL|FATAL|error" /var/log/mambakkam-backup.log | tail
 sudo grep "snapshot" /var/log/studybuddy-backup.log | tail
@@ -122,7 +126,7 @@ This runs automatically as part of `provision.sh` (steps 12 in mambakkam, 8 in S
 1. `apt install restic` happens in step 1
 2. Step 12 generates `/etc/restic/mambakkam.password` if absent
 3. Step 12 initialises `/opt/mambakkam/backups/restic/`
-4. **Final operator screen prints the password ONCE.** Save it to a password manager *now*.
+4. **Final operator screen prints the password ONCE.** Save it to a password manager _now_.
 5. The first daily-backup cron fires at 02:30 UTC the next day.
 
 ### Second-tenant (StudyBuddy) — Day 0 (Sun May 17) join
@@ -270,7 +274,7 @@ sudo RESTIC_PASSWORD_FILE=/etc/restic/mambakkam.password \
 sudo nginx -t && sudo systemctl reload nginx
 ```
 
-If both the on-disk repo and your password manager copy are gone: regenerate the cert at Cloudflare → SSL/TLS → Origin Server (15-min recreate path), making sure the SAN list still includes mambakkam.net + *.mambakkam.net + demo.studybuddy.app.
+If both the on-disk repo and your password manager copy are gone: regenerate the cert at Cloudflare → SSL/TLS → Origin Server (15-min recreate path), making sure the SAN list still includes mambakkam.net + \*.mambakkam.net + demo.studybuddy.app.
 
 ### Scenario 5 — historical access-log search (mambakkam)
 
@@ -320,6 +324,6 @@ exporter that runs `restic stats --json` periodically and emits
 
 ## Change Log
 
-| Date | Version | Change |
-|---|---|---|
-| 2026-05-09 | 1.0 | Initial — restic-based local-only backups for both sites; daily snapshots + weekly integrity check + prune; password generation in provision.sh; 5-scenario restore runbook; residual-risk note + path to off-box destination when needed. |
+| Date       | Version | Change                                                                                                                                                                                                                                     |
+| ---------- | ------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| 2026-05-09 | 1.0     | Initial — restic-based local-only backups for both sites; daily snapshots + weekly integrity check + prune; password generation in provision.sh; 5-scenario restore runbook; residual-risk note + path to off-box destination when needed. |

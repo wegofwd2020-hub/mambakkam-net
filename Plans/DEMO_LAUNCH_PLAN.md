@@ -3,6 +3,7 @@
 **Audience:** Sivakumar (operator) · future on-call deputy
 **Document type:** End-to-end runbook from "today's main branch" → "live site at `https://mambakkam.net`"
 **Companion docs:**
+
 - [`DEMO_LAUNCH_PLAN.md`](https://github.com/wegofwd2020-hub/StudyBuddy_OnDemand/blob/main/docs/DEMO_LAUNCH_PLAN.md) (StudyBuddy_OnDemand — co-tenant on the same Hetzner CX22)
 - [`DEMO_HOSTING_GUIDE.md`](https://github.com/wegofwd2020-hub/studybuddy-docs/blob/main/docs/dev/DEMO_HOSTING_GUIDE.md) (Hetzner-based architecture rationale)
 - [`dns-and-email-setup.md`](https://github.com/wegofwd2020-hub/studybuddy-docs/blob/main/docs/operations/dns-and-email-setup.md) (Cloudflare DNS + Zoho Mail pattern, applied here to `mambakkam.net`)
@@ -110,16 +111,16 @@ Three categories: **automation** (must), **content** (must), **polish** (nice-to
 
 These ship with this PR. Use them as-is; no further code work needed.
 
-| Deliverable | File | Purpose |
-|---|---|---|
-| Production compose | [`docker-compose.demo.yml`](../docker-compose.demo.yml) | Standalone production-shaped compose: binds to `127.0.0.1:8081`, `restart: always`, named log volume, healthcheck |
-| First-time provisioning | [`scripts/launch/provision.sh`](../scripts/launch/provision.sh) | Idempotent Hetzner CX22 add-on — host nginx install, `/opt/mambakkam` clone, deploy user, vhost dropped, daily-backup cron |
-| Manual / CI deploy | [`scripts/launch/deploy.sh`](../scripts/launch/deploy.sh) | `git pull && docker compose build && up -d` + post-deploy smoke |
-| Post-deploy smoke check | [`scripts/launch/smoke.sh`](../scripts/launch/smoke.sh) | Curl-based: `/`, `/sitemap-index.xml`, key landing-page words present, 404 returns 404 |
-| Daily content backup | [`scripts/launch/backup.sh`](../scripts/launch/backup.sh) | `rsync` of `src/assets/images` + nginx access logs; retains last 7 days; cron-friendly |
-| Host nginx vhost | [`infra/nginx/mambakkam.net.conf`](../infra/nginx/mambakkam.net.conf) | SSL termination via Cloudflare Origin Cert; proxy_pass to `127.0.0.1:8081`; HSTS; gzip; long-cache for `/_astro/*` |
-| Auto-deploy on merge to main | [`.github/workflows/deploy-mambakkam.yml`](../.github/workflows/deploy-mambakkam.yml) | SSH to Hetzner → `scripts/launch/deploy.sh` → smoke against public domain → open issue on failure |
-| Env skeleton | [`.env.demo.example`](../.env.demo.example) | Placeholders for analytics ID + Zoho SMTP (future contact form) |
+| Deliverable                  | File                                                                                  | Purpose                                                                                                                    |
+| ---------------------------- | ------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------- |
+| Production compose           | [`docker-compose.demo.yml`](../docker-compose.demo.yml)                               | Standalone production-shaped compose: binds to `127.0.0.1:8081`, `restart: always`, named log volume, healthcheck          |
+| First-time provisioning      | [`scripts/launch/provision.sh`](../scripts/launch/provision.sh)                       | Idempotent Hetzner CX22 add-on — host nginx install, `/opt/mambakkam` clone, deploy user, vhost dropped, daily-backup cron |
+| Manual / CI deploy           | [`scripts/launch/deploy.sh`](../scripts/launch/deploy.sh)                             | `git pull && docker compose build && up -d` + post-deploy smoke                                                            |
+| Post-deploy smoke check      | [`scripts/launch/smoke.sh`](../scripts/launch/smoke.sh)                               | Curl-based: `/`, `/sitemap-index.xml`, key landing-page words present, 404 returns 404                                     |
+| Daily content backup         | [`scripts/launch/backup.sh`](../scripts/launch/backup.sh)                             | `rsync` of `src/assets/images` + nginx access logs; retains last 7 days; cron-friendly                                     |
+| Host nginx vhost             | [`infra/nginx/mambakkam.net.conf`](../infra/nginx/mambakkam.net.conf)                 | SSL termination via Cloudflare Origin Cert; proxy_pass to `127.0.0.1:8081`; HSTS; gzip; long-cache for `/_astro/*`         |
+| Auto-deploy on merge to main | [`.github/workflows/deploy-mambakkam.yml`](../.github/workflows/deploy-mambakkam.yml) | SSH to Hetzner → `scripts/launch/deploy.sh` → smoke against public domain → open issue on failure                          |
+| Env skeleton                 | [`.env.demo.example`](../.env.demo.example)                                           | Placeholders for analytics ID + Zoho SMTP (future contact form)                                                            |
 
 ### 1.A.bis Domain + Email — must-have
 
@@ -133,26 +134,26 @@ The work here is moving DNS to Cloudflare nameservers (or, if already there,
 verifying the zone is healthy).
 
 - [ ] `mambakkam.net` zone is on Cloudflare nameservers
-  · *verify:* `dig NS mambakkam.net` returns `*.ns.cloudflare.com`
+      · _verify:_ `dig NS mambakkam.net` returns `*.ns.cloudflare.com`
 - [ ] Universal SSL is **Active** in Cloudflare → SSL/TLS → Edge Certificates
-  · *verify:* `curl -vI https://mambakkam.net` shows a valid Cloudflare-edge cert (until DNS cutover, this is on the existing host — a 200/301 from anywhere is fine)
+      · _verify:_ `curl -vI https://mambakkam.net` shows a valid Cloudflare-edge cert (until DNS cutover, this is on the existing host — a 200/301 from anywhere is fine)
 - [ ] Existing DNS records audited; any stale Netlify/Vercel A/AAAA records flagged for deletion at cutover
-  · *verify:* Cloudflare DNS UI lists exactly the records this plan calls for
+      · _verify:_ Cloudflare DNS UI lists exactly the records this plan calls for
 
 #### Phase 2 — Cloudflare DNS for `mambakkam.net` + `www` (~10 min)
 
 - [ ] A record `@` (apex) → VPS public IP, **Proxied** (orange cloud)
-  · *verify:* `dig mambakkam.net +short` returns a Cloudflare-edge IP (104.21.x.x or 172.67.x.x), **NOT** the raw VPS IP
+      · _verify:_ `dig mambakkam.net +short` returns a Cloudflare-edge IP (104.21.x.x or 172.67.x.x), **NOT** the raw VPS IP
 - [ ] CNAME `www` → `mambakkam.net`, **Proxied**
-  · *verify:* `dig www.mambakkam.net +short` resolves through Cloudflare
+      · _verify:_ `dig www.mambakkam.net +short` resolves through Cloudflare
 - [ ] Page Rule (or Bulk Redirect): `www.mambakkam.net/*` → `https://mambakkam.net/$1`, 301
-  · *verify:* `curl -sI https://www.mambakkam.net/` returns `301` to the apex
+      · _verify:_ `curl -sI https://www.mambakkam.net/` returns `301` to the apex
 - [ ] SSL/TLS mode set to **Full (strict)**; **Always Use HTTPS** toggled on
-  · *verify:* `curl -sI http://mambakkam.net/` returns `301` to https
+      · _verify:_ `curl -sI http://mambakkam.net/` returns `301` to https
 - [ ] Cloudflare Origin Certificate generated with SAN = `mambakkam.net, *.mambakkam.net, demo.studybuddy.app`; cert + key installed at `/etc/ssl/cloudflare/origin-{cert,key}.pem` on the VPS (shared with StudyBuddy)
-  · *verify:* host nginx reloads cleanly; `curl https://mambakkam.net/` returns 200
+      · _verify:_ host nginx reloads cleanly; `curl https://mambakkam.net/` returns 200
 - [ ] Pre-launch (Day -1 / Sat May 16 EOD): TTL on the apex A record lowered to 300s
-  · *verify:* Cloudflare DNS UI shows "TTL: 5 min" instead of "Auto"
+      · _verify:_ Cloudflare DNS UI shows "TTL: 5 min" instead of "Auto"
 
 #### Phase 3 — Zoho Mail free-tier (~30 min)
 
@@ -161,24 +162,24 @@ will be added as a second domain on its launch day. Each domain has its
 own MX/SPF/DKIM/DMARC records; the Zoho **tenant** is shared across both.
 
 - [ ] `mambakkam.net` added to Zoho; domain-verification TXT record added to Cloudflare DNS
-  · *verify:* `dig TXT mambakkam.net +short` shows `zoho-verification=zb...`
+      · _verify:_ `dig TXT mambakkam.net +short` shows `zoho-verification=zb...`
 - [ ] One mailbox live: `siva@mambakkam.net` (operator can extend later)
-  · *verify:* Send a test from Zoho webmail to your personal Gmail; reply arrives back in Zoho
+      · _verify:_ Send a test from Zoho webmail to your personal Gmail; reply arrives back in Zoho
 - [ ] MX records (mx.zoho.com priorities 10/20/50) added to Cloudflare DNS
-  · *verify:* `dig MX mambakkam.net +short` lists `mx.zoho.com`, `mx2.zoho.com`, `mx3.zoho.com`
+      · _verify:_ `dig MX mambakkam.net +short` lists `mx.zoho.com`, `mx2.zoho.com`, `mx3.zoho.com`
 - [ ] SPF record `v=spf1 include:zoho.com ~all` added (single TXT at apex)
-  · *verify:* `dig TXT mambakkam.net +short | grep spf1` returns the record
+      · _verify:_ `dig TXT mambakkam.net +short | grep spf1` returns the record
 - [ ] DKIM record `zmail._domainkey` added with the Zoho-supplied public key
-  · *verify:* All three (MX, SPF, DKIM) show green checkmarks in Zoho's verification UI
+      · _verify:_ All three (MX, SPF, DKIM) show green checkmarks in Zoho's verification UI
 - [ ] DMARC record `_dmarc` added with `v=DMARC1; p=quarantine; rua=mailto:siva@mambakkam.net`
-  · *verify:* `dig TXT _dmarc.mambakkam.net +short` returns the policy
+      · _verify:_ `dig TXT _dmarc.mambakkam.net +short` returns the policy
 
 #### Phase 4 — Gmail send-as (~10 min, optional but recommended)
 
 - [ ] Zoho App Password generated for the Gmail integration
-  · *verify:* App Password copied to a password manager
+      · _verify:_ App Password copied to a password manager
 - [ ] `siva@mambakkam.net` added as a send-as identity in Gmail (SMTP `smtp.zoho.com:465`, SSL on)
-  · *verify:* Compose new mail in Gmail; From dropdown shows `Siva Mambakkam <siva@mambakkam.net>`
+      · _verify:_ Compose new mail in Gmail; From dropdown shows `Siva Mambakkam <siva@mambakkam.net>`
 
 #### Phase 5 — Wire SMTP into the site (deferred — no contact form on day 1)
 
@@ -193,28 +194,28 @@ The site is a static Astro build. "Content" here is the markdown collections
 (landmarks, people, work) and image assets in `src/assets/images/`. No
 external pipeline, no API keys.
 
-| Item | Owner | Verify by |
-|---|---|---|
-| All currently-staged village images present and rotated for orientation/size | Operator | `ls src/assets/images/village/*.jpeg \| wc -l` matches expected; spot-check a build |
-| `src/data/people/siva-m.md` complete with bio + headshot | Operator | `npm run build` includes the page; opens at `/people/siva-m` |
-| All four landmarks in `src/data/landmarks/` build cleanly | Operator | Lighthouse `/landmarks` returns 200 + each landmark page renders its body |
-| All four work items in `src/data/work/` build cleanly | Operator | `/work` lists all four; each detail page returns 200 |
-| `studybuddy-ondemand.md` work item links to `https://demo.studybuddy.app` | Operator | `grep -l 'demo.studybuddy.app' src/data/work/*.md` returns the file |
-| Hero copy + nav final-pass for typos | Operator | Manual read; or `npx cspell '**/*.{md,astro}'` if added later |
-| `npm run build` exits clean — zero broken-link warnings, zero typecheck errors | Operator | `npm run check && npm run build` exit code 0 |
+| Item                                                                           | Owner    | Verify by                                                                           |
+| ------------------------------------------------------------------------------ | -------- | ----------------------------------------------------------------------------------- |
+| All currently-staged village images present and rotated for orientation/size   | Operator | `ls src/assets/images/village/*.jpeg \| wc -l` matches expected; spot-check a build |
+| `src/data/people/siva-m.md` complete with bio + headshot                       | Operator | `npm run build` includes the page; opens at `/people/siva-m`                        |
+| All four landmarks in `src/data/landmarks/` build cleanly                      | Operator | Lighthouse `/landmarks` returns 200 + each landmark page renders its body           |
+| All four work items in `src/data/work/` build cleanly                          | Operator | `/work` lists all four; each detail page returns 200                                |
+| `studybuddy-ondemand.md` work item links to `https://demo.studybuddy.app`      | Operator | `grep -l 'demo.studybuddy.app' src/data/work/*.md` returns the file                 |
+| Hero copy + nav final-pass for typos                                           | Operator | Manual read; or `npx cspell '**/*.{md,astro}'` if added later                       |
+| `npm run build` exits clean — zero broken-link warnings, zero typecheck errors | Operator | `npm run check && npm run build` exit code 0                                        |
 
 ### 1.C Polish — nice-to-have (skip if blocking)
 
-| Item | Effort | Skip if |
-|---|---|---|
-| Custom 404 page tied to village photography | 30 min | Default AstroWind 404 acceptable for launch |
-| Open Graph image set per page (currently global only) | 1 hour | Global `default.png` is acceptable |
-| `manifest.webmanifest` + Apple touch icons | 30 min | Browser-default favicon is acceptable |
-| Plausible / GA4 wired via `analytics.vendors` in `src/config.yaml` | 15 min | Should ship — single config change |
-| robots.txt sanity check (no `Disallow: /` left from staging) | 5 min | Never skip |
-| `dist/sitemap-index.xml` smoke-tested in the smoke script | 5 min | Never skip — already in this PR |
-| Dyslexia-mode toggle final-pass on every layout | 30 min | Already shipped (`ToggleDyslexic.astro`) — verify, don't rebuild |
-| VillageMap loads without console errors on Safari iOS | 20 min | If Safari doesn't render Leaflet tiles, fall back to a static map image |
+| Item                                                               | Effort | Skip if                                                                 |
+| ------------------------------------------------------------------ | ------ | ----------------------------------------------------------------------- |
+| Custom 404 page tied to village photography                        | 30 min | Default AstroWind 404 acceptable for launch                             |
+| Open Graph image set per page (currently global only)              | 1 hour | Global `default.png` is acceptable                                      |
+| `manifest.webmanifest` + Apple touch icons                         | 30 min | Browser-default favicon is acceptable                                   |
+| Plausible / GA4 wired via `analytics.vendors` in `src/config.yaml` | 15 min | Should ship — single config change                                      |
+| robots.txt sanity check (no `Disallow: /` left from staging)       | 5 min  | Never skip                                                              |
+| `dist/sitemap-index.xml` smoke-tested in the smoke script          | 5 min  | Never skip — already in this PR                                         |
+| Dyslexia-mode toggle final-pass on every layout                    | 30 min | Already shipped (`ToggleDyslexic.astro`) — verify, don't rebuild        |
+| VillageMap loads without console errors on Safari iOS              | 20 min | If Safari doesn't render Leaflet tiles, fall back to a static map image |
 
 ### 1.D Definition of "Done" for Day -5 (Tue May 12 EOD)
 
@@ -231,6 +232,7 @@ Green checkboxes on each of these means we enter the test phase clean:
 ## §2 · Day 0 (Sun May 17) Launch-Day Runbook
 
 **Prerequisite checks the day before (Day -1 / Sat May 16 EOD):**
+
 - DNS pre-staged at Cloudflare (apex A record TTL=300s a day in advance)
 - Hetzner production VPS freshly provisioned ≥ 24h before launch via
   mambakkam.net's `scripts/launch/provision.sh` (full system bootstrap —
@@ -253,16 +255,18 @@ line tomorrow morning.
 
 **One-paragraph summary:**
 17:00 Cloudflare account + Origin Cert generation (SAN list = mambakkam.net
-+ *.mambakkam.net + demo.studybuddy.app); 17:15 Hetzner sign-up + SSH
-key (no CX22 yet); 17:25 Zoho Mail with mambakkam.net mailbox + MX/SPF/
-DKIM/DMARC; 17:55 Gmail send-as; 18:15 Grafana Cloud account + Access
-Policy token (3 scopes); 18:40 pre-stage mambakkam DNS A record at
-TTL=300s; 19:00 register studybuddy.app + add mailboxes; 19:25 Auth0
-dev tenant + 3 applications; 19:50 Stripe test mode + webhook + Sentry.
-20:30 final go/no-go before bed. Total 3.5 hours; budget 4 if Zoho DKIM
-verification stalls.
+
+- \*.mambakkam.net + demo.studybuddy.app); 17:15 Hetzner sign-up + SSH
+  key (no CX22 yet); 17:25 Zoho Mail with mambakkam.net mailbox + MX/SPF/
+  DKIM/DMARC; 17:55 Gmail send-as; 18:15 Grafana Cloud account + Access
+  Policy token (3 scopes); 18:40 pre-stage mambakkam DNS A record at
+  TTL=300s; 19:00 register studybuddy.app + add mailboxes; 19:25 Auth0
+  dev tenant + 3 applications; 19:50 Stripe test mode + webhook + Sentry.
+  20:30 final go/no-go before bed. Total 3.5 hours; budget 4 if Zoho DKIM
+  verification stalls.
 
 **Hard "no" tonight:**
+
 - Don't actually provision the Hetzner CX22 (that's Day 0 at 08:00 EDT)
 - Don't enable Cloudflare proxy on either pre-staged A record (would 502)
 - Don't push past 21:00 EDT — sleep beats finishing
@@ -275,24 +279,24 @@ Operator starts on the VPS at **08:00 EDT** the morning of launch. This
 gives 1 hour of provisioning + smoke-testing before the public T-0 cutover
 at 09:00 EDT.
 
-| Time (EDT) | Δ | Action | Owner | Pass criterion |
-|---|---|---|---|---|
-| 08:00 | T-1h | **Open laptop**, Hetzner console — provision a fresh CX22 (Ubuntu 22.04, SSH key from Day -1, Falkenstein) | Operator | VPS public IP visible; SSH-able as root within ~3 min |
-| 08:03 | T-57m | `ssh root@<vps-ip>` + run `provision.sh` one-liner from §2.5 Sequence A step 1 | Operator | All 14 steps complete (~20 min); restic password printed once and saved |
-| 08:25 | T-35m | Paste Cloudflare Origin Cert + key into `/etc/ssl/cloudflare/origin-{cert,key}.pem` (mode 600) | Operator | `nginx -t` is clean |
-| 08:28 | T-32m | Paste GitHub Actions deploy SSH pubkey to `/home/deploy/.ssh/authorized_keys` | Operator | matching private key already in repo secret `MAMBAKKAM_VPS_SSH_KEY` |
-| 08:30 | T-30m | Edit `/opt/mambakkam/.env.demo` with the analytics ID; sudo systemctl reload nginx | Operator | nginx reload OK |
-| 08:32 | T-28m | Build + start mambakkam container: `sudo -u deploy bash /opt/mambakkam/scripts/launch/deploy.sh` | Operator | `docker compose ps` shows `Up (healthy)` |
-| 08:40 | T-20m | Local smoke: `bash scripts/launch/smoke.sh http://127.0.0.1:8081` | Operator | Exit 0 |
-| 08:45 | T-15m | DNS cutover: at Cloudflare, change the apex A record value from the Day -1 placeholder IP to the real VPS public IP, **enable proxy** (orange cloud) | Operator | `dig +short mambakkam.net` returns a Cloudflare-edge IP within 60s |
-| 08:50 | T-10m | Public smoke: `bash scripts/launch/smoke.sh https://mambakkam.net` from your laptop | Operator | Exit 0 |
-| 08:55 | T-5m | Manual click-through: home → about → people/siva-m → landmarks → work → studybuddy link reaches `demo.studybuddy.app` (will 404 until 13:00, that's expected) | Operator | Every mambakkam page renders correctly |
-| **09:00** | **T-0** | **GO LIVE** — share `https://mambakkam.net` to the announcement channel | Operator | Announcement sent |
-| 09:30 | T+30m | First user-traffic check — Cloudflare Analytics + nginx access log | Operator | No 5xx in the access log |
-| 11:00 | T+2h | Stability check — green light for StudyBuddy second-tenant join | Operator | Cloudflare Analytics shows steady 200s |
-| 13:00 | T+4h | **StudyBuddy joins the box** — second-tenant provisioning + DNS cutover (driven by StudyBuddy's launch plan §2) | Operator | StudyBuddy `smoke.sh` exits 0; mambakkam unaffected |
-| 15:00 | T+6h | First post-launch incident review (even if uneventful) | Operator | Notes captured for retrospective |
-| Next day 02:30 UTC | — | First nightly content backup runs (`30 2 * * *`) | Auto | Backup file in `/opt/mambakkam/backups/`; StudyBuddy's 02:00 UTC ran 30 min earlier |
+| Time (EDT)         | Δ       | Action                                                                                                                                                        | Owner    | Pass criterion                                                                      |
+| ------------------ | ------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------- | ----------------------------------------------------------------------------------- |
+| 08:00              | T-1h    | **Open laptop**, Hetzner console — provision a fresh CX22 (Ubuntu 22.04, SSH key from Day -1, Falkenstein)                                                    | Operator | VPS public IP visible; SSH-able as root within ~3 min                               |
+| 08:03              | T-57m   | `ssh root@<vps-ip>` + run `provision.sh` one-liner from §2.5 Sequence A step 1                                                                                | Operator | All 14 steps complete (~20 min); restic password printed once and saved             |
+| 08:25              | T-35m   | Paste Cloudflare Origin Cert + key into `/etc/ssl/cloudflare/origin-{cert,key}.pem` (mode 600)                                                                | Operator | `nginx -t` is clean                                                                 |
+| 08:28              | T-32m   | Paste GitHub Actions deploy SSH pubkey to `/home/deploy/.ssh/authorized_keys`                                                                                 | Operator | matching private key already in repo secret `MAMBAKKAM_VPS_SSH_KEY`                 |
+| 08:30              | T-30m   | Edit `/opt/mambakkam/.env.demo` with the analytics ID; sudo systemctl reload nginx                                                                            | Operator | nginx reload OK                                                                     |
+| 08:32              | T-28m   | Build + start mambakkam container: `sudo -u deploy bash /opt/mambakkam/scripts/launch/deploy.sh`                                                              | Operator | `docker compose ps` shows `Up (healthy)`                                            |
+| 08:40              | T-20m   | Local smoke: `bash scripts/launch/smoke.sh http://127.0.0.1:8081`                                                                                             | Operator | Exit 0                                                                              |
+| 08:45              | T-15m   | DNS cutover: at Cloudflare, change the apex A record value from the Day -1 placeholder IP to the real VPS public IP, **enable proxy** (orange cloud)          | Operator | `dig +short mambakkam.net` returns a Cloudflare-edge IP within 60s                  |
+| 08:50              | T-10m   | Public smoke: `bash scripts/launch/smoke.sh https://mambakkam.net` from your laptop                                                                           | Operator | Exit 0                                                                              |
+| 08:55              | T-5m    | Manual click-through: home → about → people/siva-m → landmarks → work → studybuddy link reaches `demo.studybuddy.app` (will 404 until 13:00, that's expected) | Operator | Every mambakkam page renders correctly                                              |
+| **09:00**          | **T-0** | **GO LIVE** — share `https://mambakkam.net` to the announcement channel                                                                                       | Operator | Announcement sent                                                                   |
+| 09:30              | T+30m   | First user-traffic check — Cloudflare Analytics + nginx access log                                                                                            | Operator | No 5xx in the access log                                                            |
+| 11:00              | T+2h    | Stability check — green light for StudyBuddy second-tenant join                                                                                               | Operator | Cloudflare Analytics shows steady 200s                                              |
+| 13:00              | T+4h    | **StudyBuddy joins the box** — second-tenant provisioning + DNS cutover (driven by StudyBuddy's launch plan §2)                                               | Operator | StudyBuddy `smoke.sh` exits 0; mambakkam unaffected                                 |
+| 15:00              | T+6h    | First post-launch incident review (even if uneventful)                                                                                                        | Operator | Notes captured for retrospective                                                    |
+| Next day 02:30 UTC | —       | First nightly content backup runs (`30 2 * * *`)                                                                                                              | Auto     | Backup file in `/opt/mambakkam/backups/`; StudyBuddy's 02:00 UTC ran 30 min earlier |
 
 **Rollback plan (if smoke fails after cutover):**
 
@@ -301,6 +305,7 @@ at 09:00 EDT.
 3. **DNS revert** (only if the Hetzner box itself is unhealthy): point apex A back to whatever was serving the site pre-launch (Netlify/Vercel deploy URL — keep these alive until T+24h as a fallback).
 
 **On-call duties (T+0 → T+24h):**
+
 - Watch Cloudflare Analytics every 30 min for the first 4 hours
 - Tail `/var/log/nginx/mambakkam.net.access.log` for 5xx
 - Respond to first user feedback within 1 hour during business hours
@@ -462,8 +467,8 @@ Two cases where auto-deploy should be skipped or the operator should take over:
 2. **Host nginx vhost change.** `infra/nginx/mambakkam.net.conf` lives in the
    repo but the deploy script does NOT auto-copy it into `/etc/nginx/`. After
    editing the vhost: `sudo cp infra/nginx/mambakkam.net.conf
-   /etc/nginx/sites-available/ && sudo nginx -t && sudo systemctl reload
-   nginx`. Manual on purpose — a bad vhost would take down BOTH co-tenant
+/etc/nginx/sites-available/ && sudo nginx -t && sudo systemctl reload
+nginx`. Manual on purpose — a bad vhost would take down BOTH co-tenant
    sites including StudyBuddy.
 
 ---
@@ -487,13 +492,14 @@ curl -fsSL https://raw.githubusercontent.com/wegofwd2020-hub/mambakkam-net/main/
 ```
 
 What it does (full first-tenant bootstrap):
+
 - `apt-get update && upgrade`
 - Installs Docker CE + Compose plugin, `nginx` (host-level), `ufw`,
   `fail2ban`, `cron`, `rsync`
 - Configures UFW (allow ssh / 80 / 443; deny everything else) + fail2ban
   (default ssh jail)
 - Creates the `deploy` system user with passwordless sudo for `docker
-  compose` only — StudyBuddy will reuse this same user when it joins
+compose` only — StudyBuddy will reuse this same user when it joins
 - Creates `/opt/mambakkam/` + git clones the repo
 - Generates `.env.demo` skeleton from `.env.demo.example`
 - Drops `infra/nginx/mambakkam.net.conf` into `/etc/nginx/sites-available/`
@@ -524,6 +530,7 @@ sudo -u deploy bash /opt/mambakkam/scripts/launch/deploy.sh
 ```
 
 What it does:
+
 1. `cd /opt/mambakkam`
 2. `git fetch origin main && git reset --hard origin/main`
 3. `docker compose -f docker-compose.demo.yml --env-file .env.demo up -d --build --remove-orphans`
@@ -544,15 +551,15 @@ the local container or public URL).
 
 What it checks:
 
-| Check | Expected | Fails on |
-|---|---|---|
-| `GET /` | 200 + `<title>` contains `Mambakkam` | Any non-200 |
-| `GET /sitemap-index.xml` | 200 + `<sitemapindex` | Empty or missing |
-| `GET /people/siva-m` | 200 + body contains `Siva` | Any non-200 |
-| `GET /landmarks/ayyanar-shrine` | 200 | Any non-200 |
-| `GET /work/studybuddy-ondemand` | 200 + body contains `demo.studybuddy.app` | Outbound link missing |
-| `GET /404-this-does-not-exist` | 404 (correct error path, not 200) | A 200 means the 404 page was misconfigured |
-| `GET /robots.txt` | 200 + does NOT contain `Disallow: /` | Stale "noindex everything" rule |
+| Check                           | Expected                                  | Fails on                                   |
+| ------------------------------- | ----------------------------------------- | ------------------------------------------ |
+| `GET /`                         | 200 + `<title>` contains `Mambakkam`      | Any non-200                                |
+| `GET /sitemap-index.xml`        | 200 + `<sitemapindex`                     | Empty or missing                           |
+| `GET /people/siva-m`            | 200 + body contains `Siva`                | Any non-200                                |
+| `GET /landmarks/ayyanar-shrine` | 200                                       | Any non-200                                |
+| `GET /work/studybuddy-ondemand` | 200 + body contains `demo.studybuddy.app` | Outbound link missing                      |
+| `GET /404-this-does-not-exist`  | 404 (correct error path, not 200)         | A 200 means the 404 page was misconfigured |
+| `GET /robots.txt`               | 200 + does NOT contain `Disallow: /`      | Stale "noindex everything" rule            |
 
 Exits 0 if all green; exits 1 with a structured failure summary on any miss.
 
@@ -565,6 +572,7 @@ Exits 0 if all green; exits 1 with a structured failure summary on any miss.
 ```
 
 What it does:
+
 1. `rsync -a /opt/mambakkam/src/assets/images/ /opt/mambakkam/backups/images-$(date +%Y%m%d)/`
 2. `cp /var/log/nginx/mambakkam.net.access.log /opt/mambakkam/backups/access-$(date +%Y%m%d).log` then `gzip` it
 3. Prune backups older than 7 days
@@ -578,6 +586,7 @@ nginx access logs for retrospectives).
 **Triggers:** push to `main`, manual `workflow_dispatch`.
 
 Steps:
+
 1. Checkout (no build needed in CI — the VPS rebuilds in-place)
 2. SSH to VPS using `MAMBAKKAM_VPS_SSH_KEY` repo secret
 3. Run `bash /opt/mambakkam/scripts/launch/deploy.sh`
@@ -586,11 +595,11 @@ Steps:
 
 **Required GitHub secrets:**
 
-| Secret | Purpose |
-|---|---|
-| `MAMBAKKAM_VPS_SSH_KEY` | Private SSH key for the `deploy` user on the VPS |
-| `MAMBAKKAM_VPS_HOST` | The VPS hostname or IP (same value as StudyBuddy's `DEMO_VPS_HOST` if co-located) |
-| `MAMBAKKAM_VPS_USER` | `deploy` |
+| Secret                  | Purpose                                                                           |
+| ----------------------- | --------------------------------------------------------------------------------- |
+| `MAMBAKKAM_VPS_SSH_KEY` | Private SSH key for the `deploy` user on the VPS                                  |
+| `MAMBAKKAM_VPS_HOST`    | The VPS hostname or IP (same value as StudyBuddy's `DEMO_VPS_HOST` if co-located) |
+| `MAMBAKKAM_VPS_USER`    | `deploy`                                                                          |
 
 ---
 
@@ -603,16 +612,16 @@ fails, the next day's tests don't start until the issue is fixed.
 
 **Goal:** prove the automation works end-to-end against a real Hetzner box.
 
-| Time | Activity | Pass criterion |
-|---|---|---|
-| Morning | Provision a fresh Hetzner CX22 (the **staging** box, separate from the production box that gets cut on Day -1 (Sat May 16)) by running `scripts/launch/provision.sh` from scratch — full first-tenant bootstrap | Docker installed, UFW/fail2ban active, host nginx serves a "hello" page from a temp container |
-| | Configure Cloudflare DNS for `staging.mambakkam.net` (proxied) | `dig` resolves the new A-record to a Cloudflare-edge IP |
-| | Run `scripts/launch/deploy.sh` | Container `Up`; `smoke.sh http://127.0.0.1:8081` exits 0 |
-| | Run `scripts/launch/smoke.sh https://staging.mambakkam.net` | Exit 0 |
-| Afternoon | Trigger a fake `main` push → verify auto-deploy works end-to-end | `deploy-mambakkam.yml` finishes green; smoke check passes |
-| | Trigger a deliberate smoke failure (rename a key page in `src/data/`) — verify issue creation | Issue auto-opened with `incident:mambakkam` label |
-| Late afternoon | **Co-tenant smoke** — onto the same staging box, run StudyBuddy's `scripts/demo/provision.sh` and confirm it does NOT clobber Docker/UFW/fail2ban/deploy user/host nginx put in place by mambakkam | Both `staging.mambakkam.net` and a StudyBuddy staging hostname respond cleanly; `nginx -t` green; `ufw status` unchanged |
-| End of day | Backup script runs (manually trigger once at 17:00 to verify cron works) | Backup file present in `/opt/mambakkam/backups/` |
+| Time           | Activity                                                                                                                                                                                                        | Pass criterion                                                                                                           |
+| -------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------ |
+| Morning        | Provision a fresh Hetzner CX22 (the **staging** box, separate from the production box that gets cut on Day -1 (Sat May 16)) by running `scripts/launch/provision.sh` from scratch — full first-tenant bootstrap | Docker installed, UFW/fail2ban active, host nginx serves a "hello" page from a temp container                            |
+|                | Configure Cloudflare DNS for `staging.mambakkam.net` (proxied)                                                                                                                                                  | `dig` resolves the new A-record to a Cloudflare-edge IP                                                                  |
+|                | Run `scripts/launch/deploy.sh`                                                                                                                                                                                  | Container `Up`; `smoke.sh http://127.0.0.1:8081` exits 0                                                                 |
+|                | Run `scripts/launch/smoke.sh https://staging.mambakkam.net`                                                                                                                                                     | Exit 0                                                                                                                   |
+| Afternoon      | Trigger a fake `main` push → verify auto-deploy works end-to-end                                                                                                                                                | `deploy-mambakkam.yml` finishes green; smoke check passes                                                                |
+|                | Trigger a deliberate smoke failure (rename a key page in `src/data/`) — verify issue creation                                                                                                                   | Issue auto-opened with `incident:mambakkam` label                                                                        |
+| Late afternoon | **Co-tenant smoke** — onto the same staging box, run StudyBuddy's `scripts/demo/provision.sh` and confirm it does NOT clobber Docker/UFW/fail2ban/deploy user/host nginx put in place by mambakkam              | Both `staging.mambakkam.net` and a StudyBuddy staging hostname respond cleanly; `nginx -t` green; `ufw status` unchanged |
+| End of day     | Backup script runs (manually trigger once at 17:00 to verify cron works)                                                                                                                                        | Backup file present in `/opt/mambakkam/backups/`                                                                         |
 
 **Gate to Day 2:** all infra works on staging; rollback path proven.
 
@@ -624,16 +633,16 @@ Walk through every URL in the navigation (top + footer) against
 `https://staging.mambakkam.net`. Expand subtrees: every landmark, every person,
 every work item.
 
-| Section | Pages to check | Critical check |
-|---|---|---|
-| Home | `/` | Hero loads, village map renders, no 5xx in network tab |
-| News (blog) | `/news`, individual posts | Pagination works; tag/category pages 200 |
-| People | `/people`, `/people/siva-m` | Headshot loads at 1x and 2x; bio renders Markdown |
-| Landmarks | `/landmarks/{ayyanar-shrine,ellaiyamman-temple,new-temple,pillaiyar-temple}` | Each renders body + photo |
-| Work | `/work`, all four work detail pages | `/work/studybuddy-ondemand` outbound link to `demo.studybuddy.app` is `target="_blank" rel="noopener"` |
-| 404 | `/this-doesnt-exist` | Returns HTTP 404 (not 200) and renders the custom 404 |
-| Sitemap | `/sitemap-index.xml` | Returns 200 + lists every public page |
-| robots.txt | `/robots.txt` | No `Disallow: /` |
+| Section     | Pages to check                                                               | Critical check                                                                                         |
+| ----------- | ---------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------ |
+| Home        | `/`                                                                          | Hero loads, village map renders, no 5xx in network tab                                                 |
+| News (blog) | `/news`, individual posts                                                    | Pagination works; tag/category pages 200                                                               |
+| People      | `/people`, `/people/siva-m`                                                  | Headshot loads at 1x and 2x; bio renders Markdown                                                      |
+| Landmarks   | `/landmarks/{ayyanar-shrine,ellaiyamman-temple,new-temple,pillaiyar-temple}` | Each renders body + photo                                                                              |
+| Work        | `/work`, all four work detail pages                                          | `/work/studybuddy-ondemand` outbound link to `demo.studybuddy.app` is `target="_blank" rel="noopener"` |
+| 404         | `/this-doesnt-exist`                                                         | Returns HTTP 404 (not 200) and renders the custom 404                                                  |
+| Sitemap     | `/sitemap-index.xml`                                                         | Returns 200 + lists every public page                                                                  |
+| robots.txt  | `/robots.txt`                                                                | No `Disallow: /`                                                                                       |
 
 **Gate to Day 3:** every page passes; any 5xx documented + fixed; any broken
 image flagged.
@@ -679,14 +688,14 @@ post-launch drill cadence has a baseline.
 
 **Goal:** non-happy-path holds up; demo can run end-to-end with no surprises.
 
-| Test area | Specific tests |
-|---|---|
-| **Accessibility** | Alt+D toggles OpenDyslexic (cookie persists). Tab through home — no traps. axe-core scan on home + people + landmarks: no critical violations. Screen-reader test on `/people/siva-m` — heading hierarchy intact, alt text present on every image. |
-| **Mobile** | Open `https://staging.mambakkam.net/` on a real phone (iOS Safari + Android Chrome). Hero stacks, nav opens, village map is usable on a small viewport. |
-| **Outbound to StudyBuddy** | Click the "Visit StudyBuddy" CTA from `/work/studybuddy-ondemand`. Lands on `demo.studybuddy.app` with no certificate warning. |
-| **Inbound from StudyBuddy** | If StudyBuddy has a back-link, click it from there → arrives on mambakkam.net cleanly. |
-| **Cloudflare cache check** | Visit `/_astro/<hash>.css` twice; second response shows `cf-cache-status: HIT`. |
-| **Lighthouse** | Run on home + a content page. Target: Performance ≥ 90, Accessibility ≥ 95, SEO ≥ 95. |
+| Test area                   | Specific tests                                                                                                                                                                                                                                     |
+| --------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Accessibility**           | Alt+D toggles OpenDyslexic (cookie persists). Tab through home — no traps. axe-core scan on home + people + landmarks: no critical violations. Screen-reader test on `/people/siva-m` — heading hierarchy intact, alt text present on every image. |
+| **Mobile**                  | Open `https://staging.mambakkam.net/` on a real phone (iOS Safari + Android Chrome). Hero stacks, nav opens, village map is usable on a small viewport.                                                                                            |
+| **Outbound to StudyBuddy**  | Click the "Visit StudyBuddy" CTA from `/work/studybuddy-ondemand`. Lands on `demo.studybuddy.app` with no certificate warning.                                                                                                                     |
+| **Inbound from StudyBuddy** | If StudyBuddy has a back-link, click it from there → arrives on mambakkam.net cleanly.                                                                                                                                                             |
+| **Cloudflare cache check**  | Visit `/_astro/<hash>.css` twice; second response shows `cf-cache-status: HIT`.                                                                                                                                                                    |
+| **Lighthouse**              | Run on home + a content page. Target: Performance ≥ 90, Accessibility ≥ 95, SEO ≥ 95.                                                                                                                                                              |
 
 **Gate to Day 4:** every flow above passes; Lighthouse scores meet bar.
 
@@ -694,14 +703,14 @@ post-launch drill cadence has a baseline.
 
 **Goal:** confirm nothing has regressed and produce an explicit go-decision.
 
-| Time | Activity | Pass criterion |
-|---|---|---|
-| Morning | Re-run all of Day 2's content walkthrough against staging | Same passes as Day 2 |
-| Morning | `npm run check && npm run build` on a clean clone | Exit code 0 |
-| Midday | Lower DNS TTL on `mambakkam.net` apex A record to 300s | Cloudflare confirms TTL=300 |
-| Midday | Provision the **production** Hetzner CX22 (separate from staging — same `provision.sh` from scratch). Paste Origin Cert with the SAN list covering both mambakkam.net and demo.studybuddy.app. | Production box healthy; `staging.mambakkam.net` stays running for last-mile testing |
-| Midday | Confirm StudyBuddy is ready to join the production box on Day 0 (Sun May 17) (read its launch plan §4 day 4) | StudyBuddy second-tenant gate is green; its `provision.sh` validated against the staging box on Day 1 |
-| Afternoon | Final go/no-go meeting with self — separate decisions for mambakkam.net (T-0 = 09:00) and StudyBuddy (T+4h = 13:00) | Both boxes ticked → GO for both cutovers |
+| Time      | Activity                                                                                                                                                                                       | Pass criterion                                                                                        |
+| --------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------- |
+| Morning   | Re-run all of Day 2's content walkthrough against staging                                                                                                                                      | Same passes as Day 2                                                                                  |
+| Morning   | `npm run check && npm run build` on a clean clone                                                                                                                                              | Exit code 0                                                                                           |
+| Midday    | Lower DNS TTL on `mambakkam.net` apex A record to 300s                                                                                                                                         | Cloudflare confirms TTL=300                                                                           |
+| Midday    | Provision the **production** Hetzner CX22 (separate from staging — same `provision.sh` from scratch). Paste Origin Cert with the SAN list covering both mambakkam.net and demo.studybuddy.app. | Production box healthy; `staging.mambakkam.net` stays running for last-mile testing                   |
+| Midday    | Confirm StudyBuddy is ready to join the production box on Day 0 (Sun May 17) (read its launch plan §4 day 4)                                                                                   | StudyBuddy second-tenant gate is green; its `provision.sh` validated against the staging box on Day 1 |
+| Afternoon | Final go/no-go meeting with self — separate decisions for mambakkam.net (T-0 = 09:00) and StudyBuddy (T+4h = 13:00)                                                                            | Both boxes ticked → GO for both cutovers                                                              |
 
 **Gate to Day 0 (Sun May 17) launch:** 4 successive days of green plus a documented go-decision.
 
@@ -711,16 +720,16 @@ post-launch drill cadence has a baseline.
 
 The known risks worth pre-mitigating, ordered by likelihood × impact:
 
-| Risk | Likelihood | Impact | Mitigation |
-|---|---|---|---|
-| Host nginx vhost edit breaks BOTH mambakkam + StudyBuddy on same box | Medium | High | `nginx -t` before every reload; vhost edit is manual (intentionally not auto-deployed); keep the StudyBuddy vhost in a separate file so a syntax error in one doesn't break the other |
-| Cloudflare Origin Cert expires (1 year default) | Low | High | Set a calendar reminder for 11 months out; cert covers both domains so a renewal blocks both — schedule for a quiet weekend |
-| `docker compose up --build` on push to main pulls in a breaking npm dep | Medium | Medium | Lockfile is committed; CI matrix tests Node 18/20/22 before merge; if a build breaks, the previous container keeps serving |
-| Image assets bloat git repo size over time | Low | Low | `backup.sh` only rsyncs assets; if repo grows past 1 GB, move large originals to git LFS or S3 |
-| Cloudflare DNS cutover takes longer than 5 min | Low | Medium | Pre-stage TTL=300s on Day -1 (Sat May 16); have the staging URL bookmark as fallback during the announcement |
-| Apex/www redirect loop on Cloudflare proxy | Low | Medium | Test `curl -sI https://www.mambakkam.net/` resolves to a single 301 (not a chain). Page Rule must not conflict with `Always Use HTTPS` |
-| Hetzner CX22 OOM under combined load (mambakkam is tiny but StudyBuddy is hungry) | Low | Medium | mambakkam container resource limit set in compose (cpus: 0.25, mem: 128M); `docker stats` monitored on Day 1 |
-| Static site goes stale (no fresh content for 6 months) | Medium | Low | Schedule monthly content review; `news/` collection acts as the heartbeat |
+| Risk                                                                              | Likelihood | Impact | Mitigation                                                                                                                                                                            |
+| --------------------------------------------------------------------------------- | ---------- | ------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Host nginx vhost edit breaks BOTH mambakkam + StudyBuddy on same box              | Medium     | High   | `nginx -t` before every reload; vhost edit is manual (intentionally not auto-deployed); keep the StudyBuddy vhost in a separate file so a syntax error in one doesn't break the other |
+| Cloudflare Origin Cert expires (1 year default)                                   | Low        | High   | Set a calendar reminder for 11 months out; cert covers both domains so a renewal blocks both — schedule for a quiet weekend                                                           |
+| `docker compose up --build` on push to main pulls in a breaking npm dep           | Medium     | Medium | Lockfile is committed; CI matrix tests Node 18/20/22 before merge; if a build breaks, the previous container keeps serving                                                            |
+| Image assets bloat git repo size over time                                        | Low        | Low    | `backup.sh` only rsyncs assets; if repo grows past 1 GB, move large originals to git LFS or S3                                                                                        |
+| Cloudflare DNS cutover takes longer than 5 min                                    | Low        | Medium | Pre-stage TTL=300s on Day -1 (Sat May 16); have the staging URL bookmark as fallback during the announcement                                                                          |
+| Apex/www redirect loop on Cloudflare proxy                                        | Low        | Medium | Test `curl -sI https://www.mambakkam.net/` resolves to a single 301 (not a chain). Page Rule must not conflict with `Always Use HTTPS`                                                |
+| Hetzner CX22 OOM under combined load (mambakkam is tiny but StudyBuddy is hungry) | Low        | Medium | mambakkam container resource limit set in compose (cpus: 0.25, mem: 128M); `docker stats` monitored on Day 1                                                                          |
+| Static site goes stale (no fresh content for 6 months)                            | Medium     | Low    | Schedule monthly content review; `news/` collection acts as the heartbeat                                                                                                             |
 
 ---
 
@@ -803,6 +812,7 @@ Cloudflare-IP allowlist + (for StudyBuddy) the application bearer token.
 
   before the StudyBuddy second-tenant cutover at T+4h = 13:00 — that way
   StudyBuddy is observable from the moment it joins.
+
 - If launch-day pressure pushes monitoring out, that's fine — the stack
   scaffolding is in place; bringing it up is ~5 min any time after.
 
@@ -909,8 +919,8 @@ nothing wakes you at 3am.
 
 **Severity assignments at-a-glance:**
 
-| Pages (immediate, customer/DR impact) | Warns (next time at keyboard) |
-|---|---|
+| Pages (immediate, customer/DR impact)                                                                                  | Warns (next time at keyboard)                                                                                               |
+| ---------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------- |
 | MambakkamDown, StudyBuddyDown, StudyBuddyHighErrorRate, Demo5xxRateHigh, CX22DiskFull, BackupSilent, ResticCheckFailed | CX22LowMemory, StudyBuddyErrorBurst, MambakkamErrorLogs, ResticPruneFailed, BackupSizeRunaway, SSHBruteForce, Fail2banBurst |
 
 **Where it fits in the launch timeline.** Apply rules at the same time
@@ -929,13 +939,13 @@ Outstanding before alerts are "ready":
 
 ## Change Log
 
-| Date | Change |
-|---|---|
-| 2026-05-09 | Initial — comprehensive plan for May 16 launch (4 days code freeze + 4 days test phase); co-located on StudyBuddy Hetzner CX22; Zoho free-tier email |
+| Date       | Change                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              |
+| ---------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 2026-05-09 | Initial — comprehensive plan for May 16 launch (4 days code freeze + 4 days test phase); co-located on StudyBuddy Hetzner CX22; Zoho free-tier email                                                                                                                                                                                                                                                                                                                                                                |
 | 2026-05-09 | **Tenancy-order flip** — mambakkam.net is now the first tenant on a fresh CX22; StudyBuddy joins as second tenant later the same day on May 16 (T+4h after mambakkam.net cutover). Re-framed §0 cost narrative, §1.A.bis Phase 3 Zoho note, §2 launch-day timing, §2.5 cold-start sequence, §3.1 provision.sh inventory, Day 1 + Day 4 of test plan. Added §6 "Decided 2026-05-09" block. Flagged outstanding work on `scripts/launch/provision.sh` (must add Docker/UFW/fail2ban/deploy-user steps before May 12). |
-| 2026-05-09 | **Observability scaffolded** — added §7 plus full design in `MONITORING.md`. Prometheus + nginx-exporter + blackbox + node-exporter as a third compose stack on the CX22; remote_write to Grafana Cloud free tier (no local Grafana). `provision.sh` writes the `.env.monitoring` template; operator brings the stack up post-cutover. Public `/metrics` on both vhosts is Cloudflare-Access-gated. |
-| 2026-05-09 | **Logging scaffolded** — added §8 plus full design in `LOGGING.md`. Promtail joins the monitoring compose stack as a fifth service; ships docker / nginx / journald / backup logs to Grafana Cloud Loki free tier (50 GB / 14 d). Loki creds added to `.env.monitoring` template (separate URL + numeric user from Prometheus; same access-policy token works if scoped). |
-| 2026-05-09 | **Backups rewritten** — added §9 plus full design + restore runbook in `BACKUPS.md`. Replaced rsync+pg_dump+gzip with restic (encrypted + deduped + incremental). New weekly integrity-check script; password auto-generated by `provision.sh` and printed once. Day 3 restore-drill row added to §4 test plan. Local-only posture; off-box deferred until first paying customer. |
-| 2026-05-09 | **Alerts as code** — added §10 + new `Plans/RUNBOOK.md` consolidating the 14 alerts that were previously scattered across MONITORING / LOGGING / BACKUPS docs. Rules ship as YAML in `infra/monitoring/alerts/` with an idempotent `apply.sh` upload helper. Two-severity Gmail routing (`[PAGE]` / `[WARN]` subject prefix). Per-alert response runbook entries. Day 3 alert-test-fire row added to §4. |
-| 2026-05-09 | **Day-N labels + date shift** — launch slipped from May 16 → May 17 (Day 0 = Sun May 17). Day -5 to Day -1 labels added to the 4-day test phase (May 13-16); Day 0 = launch, Day 1 = first day live (May 18). Code-freeze cutoff stays at May 12 EOD (now Day -5). Day-of-week labels in the original timeline were corrected (off by one). All section headers + body text updated; sibling docs (DEPLOYMENT/MONITORING/LOGGING/BACKUPS/RUNBOOK + provision.sh) shifted in the same pass. |
-| 2026-05-09 | **Concrete Day -1 / Day 0 timing** — operator anchored times: Day -1 (Sat May 16) 17:00-19:00 EDT for account + email setup (Cloudflare, Hetzner, Zoho, Grafana Cloud); Day 0 (Sun May 17) 08:00 EDT operator arrives at the VPS, T-0 (public cutover) at 09:00 EDT. Replaced the prior abstract T-2h/T-1h/T-30m table with a wall-clock minute-by-minute version anchored on 08:00 EDT start. |
+| 2026-05-09 | **Observability scaffolded** — added §7 plus full design in `MONITORING.md`. Prometheus + nginx-exporter + blackbox + node-exporter as a third compose stack on the CX22; remote_write to Grafana Cloud free tier (no local Grafana). `provision.sh` writes the `.env.monitoring` template; operator brings the stack up post-cutover. Public `/metrics` on both vhosts is Cloudflare-Access-gated.                                                                                                                 |
+| 2026-05-09 | **Logging scaffolded** — added §8 plus full design in `LOGGING.md`. Promtail joins the monitoring compose stack as a fifth service; ships docker / nginx / journald / backup logs to Grafana Cloud Loki free tier (50 GB / 14 d). Loki creds added to `.env.monitoring` template (separate URL + numeric user from Prometheus; same access-policy token works if scoped).                                                                                                                                           |
+| 2026-05-09 | **Backups rewritten** — added §9 plus full design + restore runbook in `BACKUPS.md`. Replaced rsync+pg_dump+gzip with restic (encrypted + deduped + incremental). New weekly integrity-check script; password auto-generated by `provision.sh` and printed once. Day 3 restore-drill row added to §4 test plan. Local-only posture; off-box deferred until first paying customer.                                                                                                                                   |
+| 2026-05-09 | **Alerts as code** — added §10 + new `Plans/RUNBOOK.md` consolidating the 14 alerts that were previously scattered across MONITORING / LOGGING / BACKUPS docs. Rules ship as YAML in `infra/monitoring/alerts/` with an idempotent `apply.sh` upload helper. Two-severity Gmail routing (`[PAGE]` / `[WARN]` subject prefix). Per-alert response runbook entries. Day 3 alert-test-fire row added to §4.                                                                                                            |
+| 2026-05-09 | **Day-N labels + date shift** — launch slipped from May 16 → May 17 (Day 0 = Sun May 17). Day -5 to Day -1 labels added to the 4-day test phase (May 13-16); Day 0 = launch, Day 1 = first day live (May 18). Code-freeze cutoff stays at May 12 EOD (now Day -5). Day-of-week labels in the original timeline were corrected (off by one). All section headers + body text updated; sibling docs (DEPLOYMENT/MONITORING/LOGGING/BACKUPS/RUNBOOK + provision.sh) shifted in the same pass.                          |
+| 2026-05-09 | **Concrete Day -1 / Day 0 timing** — operator anchored times: Day -1 (Sat May 16) 17:00-19:00 EDT for account + email setup (Cloudflare, Hetzner, Zoho, Grafana Cloud); Day 0 (Sun May 17) 08:00 EDT operator arrives at the VPS, T-0 (public cutover) at 09:00 EDT. Replaced the prior abstract T-2h/T-1h/T-30m table with a wall-clock minute-by-minute version anchored on 08:00 EDT start.                                                                                                                      |

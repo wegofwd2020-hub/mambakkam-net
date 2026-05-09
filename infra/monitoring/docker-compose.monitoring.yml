@@ -54,20 +54,19 @@
 # =============================================================================
 
 services:
-
   # ── Prometheus: scrape + remote_write ───────────────────────────────────────
   prometheus:
     image: prom/prometheus:v2.55.1
     container_name: monitoring-prometheus
     restart: always
-    user: "65534:65534"   # nobody:nobody — Prometheus runs unprivileged
+    user: '65534:65534' # nobody:nobody — Prometheus runs unprivileged
     command:
       - --config.file=/etc/prometheus/prometheus.yml
       # Local TSDB is small — we ship to Grafana Cloud for long-term storage.
       # 7d retention is plenty for ad-hoc local PromQL via the UI.
       - --storage.tsdb.retention.time=7d
       - --storage.tsdb.retention.size=2GB
-      - --web.enable-lifecycle           # POST /-/reload for config hot-reload
+      - --web.enable-lifecycle # POST /-/reload for config hot-reload
       - --web.listen-address=0.0.0.0:9090
     volumes:
       - ./prometheus.yml:/etc/prometheus/prometheus.yml:ro
@@ -83,23 +82,23 @@ services:
       # Loopback only — never publish 0.0.0.0:9090. The host nginx vhost
       # gates external access via Cloudflare Access if you choose to expose
       # the Prometheus UI publicly. Default is no public exposure.
-      - "127.0.0.1:9090:9090"
+      - '127.0.0.1:9090:9090'
     # Required on Linux Docker so `host.docker.internal` resolves to the host
     # gateway from inside the container (matches macOS/Windows default).
     # The scrape jobs for cx22-host node-exporter and the StudyBuddy compose-
     # internal nginx (127.0.0.1:8443 from the host's perspective) both need this.
     extra_hosts:
-      - "host.docker.internal:host-gateway"
+      - 'host.docker.internal:host-gateway'
     deploy:
       resources:
         limits:
-          cpus: "0.30"
+          cpus: '0.30'
           memory: 256M
     logging:
       driver: json-file
       options:
-        max-size: "10m"
-        max-file: "5"
+        max-size: '10m'
+        max-file: '5'
 
   # ── Promtail: ships logs to Grafana Cloud Loki ─────────────────────────────
   # Counterpart to Prometheus's remote_write — agent-mode log shipper.
@@ -119,12 +118,12 @@ services:
       - --config.expand-env=true
     volumes:
       - ./promtail.yml:/etc/promtail/promtail.yml:ro
-      - promtail_positions:/tmp                    # state: where we are in each file
+      - promtail_positions:/tmp # state: where we are in each file
       - /var/run/docker.sock:/var/run/docker.sock:ro
       - /var/lib/docker/containers:/var/lib/docker/containers:ro
-      - /var/log:/var/log:ro                       # nginx + backup script logs
-      - /var/log/journal:/var/log/journal:ro       # systemd journal binary files
-      - /etc/machine-id:/etc/machine-id:ro         # journal namespacing key
+      - /var/log:/var/log:ro # nginx + backup script logs
+      - /var/log/journal:/var/log/journal:ro # systemd journal binary files
+      - /etc/machine-id:/etc/machine-id:ro # journal namespacing key
     environment:
       GRAFANA_CLOUD_LOKI_URL: ${GRAFANA_CLOUD_LOKI_URL}
       GRAFANA_CLOUD_LOKI_USERNAME: ${GRAFANA_CLOUD_LOKI_USERNAME}
@@ -132,17 +131,17 @@ services:
     ports:
       # Loopback only — Promtail's HTTP server is for /metrics + /ready, not
       # the log push surface (that's Grafana Cloud).
-      - "127.0.0.1:9080:9080"
+      - '127.0.0.1:9080:9080'
     deploy:
       resources:
         limits:
-          cpus: "0.20"
+          cpus: '0.20'
           memory: 128M
     logging:
       driver: json-file
       options:
-        max-size: "10m"
-        max-file: "5"
+        max-size: '10m'
+        max-file: '5'
 
   # ── nginx-prometheus-exporter: scrapes mambakkam astrowind stub_status ─────
   nginx-exporter:
@@ -154,14 +153,14 @@ services:
       # connect to it by container name. See "networks:" at the bottom.
       - --nginx.scrape-uri=http://mambakkam-astrowind:8080/stub_status
     networks:
-      - default              # for prometheus to reach it
-      - mambakkam_default    # for it to reach the astrowind container
+      - default # for prometheus to reach it
+      - mambakkam_default # for it to reach the astrowind container
     ports:
-      - "127.0.0.1:9113:9113"
+      - '127.0.0.1:9113:9113'
     deploy:
       resources:
         limits:
-          cpus: "0.05"
+          cpus: '0.05'
           memory: 32M
 
   # ── blackbox-exporter: synthetic uptime probes ─────────────────────────────
@@ -172,11 +171,11 @@ services:
     volumes:
       - ./blackbox.yml:/etc/blackbox_exporter/config.yml:ro
     ports:
-      - "127.0.0.1:9115:9115"
+      - '127.0.0.1:9115:9115'
     deploy:
       resources:
         limits:
-          cpus: "0.05"
+          cpus: '0.05'
           memory: 32M
 
   # ── node-exporter: CX22 host CPU/RAM/disk/network ──────────────────────────
@@ -184,8 +183,9 @@ services:
     image: prom/node-exporter:v1.8.2
     container_name: monitoring-node-exporter
     restart: always
-    network_mode: host       # node-exporter MUST run on the host net to see
-                             # accurate netdev / fs metrics
+    network_mode:
+      host # node-exporter MUST run on the host net to see
+      # accurate netdev / fs metrics
     pid: host
     command:
       - --path.rootfs=/host
@@ -195,7 +195,7 @@ services:
     deploy:
       resources:
         limits:
-          cpus: "0.05"
+          cpus: '0.05'
           memory: 32M
 
 volumes:

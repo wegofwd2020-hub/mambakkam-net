@@ -5,6 +5,7 @@
 **Purpose:** Describe the hosting architecture for the Day 0 (Sun May 17) launch — what's
 in the environment, what's deliberately not, and how it's configured.
 **Companion docs:**
+
 - [`DEMO_LAUNCH_PLAN.md`](DEMO_LAUNCH_PLAN.md) — the day-by-day cutover runbook
 - [`DEMO_HOSTING_GUIDE.md`](https://github.com/wegofwd2020-hub/studybuddy-docs/blob/main/docs/dev/DEMO_HOSTING_GUIDE.md) — StudyBuddy's equivalent (this doc is its mambakkam.net analogue)
 
@@ -91,16 +92,16 @@ see Change Log.)
 
 ### Monthly cost breakdown
 
-| Item | Provider | Cost to mambakkam.net |
-|---|---|---|
-| VPS (Hetzner CX22) | Hetzner Cloud | $5 (full bill — first tenant) |
-| Domain `mambakkam.net` | Cloudflare Registrar | ~$1 (annual ÷ 12) |
-| SSL certificate | Cloudflare (Universal at edge) + Origin Cert (free, 15-yr) | $0 |
-| DNS + DDoS protection + CDN | Cloudflare free tier | $0 |
-| Email — 1 mailbox | Zoho free tier | $0 |
-| Backups (image rsync + log archive) | Local to VPS | $0 |
-| GitHub Actions CI/CD | Free (public repo) | $0 |
-| **Total** | | **~$6/month** |
+| Item                                | Provider                                                   | Cost to mambakkam.net         |
+| ----------------------------------- | ---------------------------------------------------------- | ----------------------------- |
+| VPS (Hetzner CX22)                  | Hetzner Cloud                                              | $5 (full bill — first tenant) |
+| Domain `mambakkam.net`              | Cloudflare Registrar                                       | ~$1 (annual ÷ 12)             |
+| SSL certificate                     | Cloudflare (Universal at edge) + Origin Cert (free, 15-yr) | $0                            |
+| DNS + DDoS protection + CDN         | Cloudflare free tier                                       | $0                            |
+| Email — 1 mailbox                   | Zoho free tier                                             | $0                            |
+| Backups (image rsync + log archive) | Local to VPS                                               | $0                            |
+| GitHub Actions CI/CD                | Free (public repo)                                         | $0                            |
+| **Total**                           |                                                            | **~$6/month**                 |
 
 StudyBuddy joins as a second tenant for $0 marginal infra cost; its own
 costs (Auth0, Stripe-test, GHCR) are tracked in StudyBuddy's launch plan
@@ -108,12 +109,12 @@ and unrelated to this box.
 
 ### Alternatives considered
 
-| Platform | Monthly cost | Decided not to pick because… |
-|---|---|---|
-| **Co-located Hetzner CX22 (mambakkam first)** ⭐ | ~$6 all-in | Chosen — see "Why co-locate" above |
-| Dedicated Hetzner CX22 (mambakkam-only) | $6 | Same cost since mambakkam pays the bill anyway; co-locating just buys back the value of the second slot for StudyBuddy |
-| Cloudflare Pages | $0 | Best long-term fit, but committing during launch week is risky; decided to revisit post-launch |
-| Netlify / Vercel | $0 hobby | Same as Pages — defer the move |
+| Platform                                         | Monthly cost | Decided not to pick because…                                                                                           |
+| ------------------------------------------------ | ------------ | ---------------------------------------------------------------------------------------------------------------------- |
+| **Co-located Hetzner CX22 (mambakkam first)** ⭐ | ~$6 all-in   | Chosen — see "Why co-locate" above                                                                                     |
+| Dedicated Hetzner CX22 (mambakkam-only)          | $6           | Same cost since mambakkam pays the bill anyway; co-locating just buys back the value of the second slot for StudyBuddy |
+| Cloudflare Pages                                 | $0           | Best long-term fit, but committing during launch week is risky; decided to revisit post-launch                         |
+| Netlify / Vercel                                 | $0 hobby     | Same as Pages — defer the move                                                                                         |
 
 ---
 
@@ -260,6 +261,7 @@ The full checklist with verification commands is in
 Quick-check before showing anyone the site:
 
 ### Infrastructure
+
 - [ ] Cloudflare DNS apex A record points at VPS public IP, **Proxied**
 - [ ] `dig mambakkam.net +short` returns a Cloudflare-edge IP, not the VPS IP
 - [ ] SSL/TLS mode = Full (strict); Always Use HTTPS = on
@@ -268,11 +270,13 @@ Quick-check before showing anyone the site:
 - [ ] `bash scripts/launch/smoke.sh https://mambakkam.net` exits 0
 
 ### Email
+
 - [ ] Zoho domain verification TXT record green
 - [ ] MX, SPF, DKIM, DMARC all green in Zoho's verification UI
 - [ ] Gmail send-as for `siva@mambakkam.net` round-trips a test email
 
 ### Content
+
 - [ ] Every navigation entry resolves (home, news, people, landmarks, work)
 - [ ] `/work/studybuddy-ondemand` outbound link reaches `demo.studybuddy.app` cleanly
 - [ ] Coming-soon work items (Thittam) render unlinked with a "Coming soon" pill
@@ -302,14 +306,14 @@ GitHub Actions  (deploy-mambakkam.yml)
                 └── (red) — file incident:mambakkam issue, no auto-rollback
 ```
 
-| Concern | How it's handled |
-|---|---|
-| Deploy a code change | Auto on merge to main |
-| Restart the container | `ssh vps; docker compose -f docker-compose.demo.yml restart` |
-| Backups | nightly cron at 02:30 UTC: image rsync + nginx access log archive; 7-day retention |
-| Monitor errors | Cloudflare Analytics (traffic shape) + grep nginx logs (5xx rate) |
-| Update SSL cert | Cloudflare auto-renews edge; Origin Cert is 15-year validity |
-| Scale up | Cloudflare CDN auto-handles cache; for origin pressure, move to Cloudflare Pages (zero code change) |
+| Concern               | How it's handled                                                                                    |
+| --------------------- | --------------------------------------------------------------------------------------------------- |
+| Deploy a code change  | Auto on merge to main                                                                               |
+| Restart the container | `ssh vps; docker compose -f docker-compose.demo.yml restart`                                        |
+| Backups               | nightly cron at 02:30 UTC: image rsync + nginx access log archive; 7-day retention                  |
+| Monitor errors        | Cloudflare Analytics (traffic shape) + grep nginx logs (5xx rate)                                   |
+| Update SSL cert       | Cloudflare auto-renews edge; Origin Cert is 15-year validity                                        |
+| Scale up              | Cloudflare CDN auto-handles cache; for origin pressure, move to Cloudflare Pages (zero code change) |
 
 ---
 
@@ -318,36 +322,36 @@ GitHub Actions  (deploy-mambakkam.yml)
 The static-site architecture is the load-bearing decision: every graduation
 below is a hosting swap, not a code rewrite. Don't pre-optimize.
 
-| Trigger | Action | New cost |
-|---|---|---|
-| StudyBuddy traffic eats CX22 RAM/CPU | Move mambakkam to Cloudflare Pages | $0 |
-| Operator wants out of VPS admin | Cloudflare Pages | $0 |
-| Content team grows | Add Decap CMS or TinaCMS (still static output, editors via UI) | $0 |
-| Tamil i18n launches | Astro i18n routing; same hosting | $0 |
-| Cloudflare Pages free-tier cap hit | Pages Pro | $20/mo |
-| Newsletter/contact form ships | Wire `.env.demo` SMTP placeholders to Zoho; add a single observability metric | $0 |
+| Trigger                              | Action                                                                        | New cost |
+| ------------------------------------ | ----------------------------------------------------------------------------- | -------- |
+| StudyBuddy traffic eats CX22 RAM/CPU | Move mambakkam to Cloudflare Pages                                            | $0       |
+| Operator wants out of VPS admin      | Cloudflare Pages                                                              | $0       |
+| Content team grows                   | Add Decap CMS or TinaCMS (still static output, editors via UI)                | $0       |
+| Tamil i18n launches                  | Astro i18n routing; same hosting                                              | $0       |
+| Cloudflare Pages free-tier cap hit   | Pages Pro                                                                     | $20/mo   |
+| Newsletter/contact form ships        | Wire `.env.demo` SMTP placeholders to Zoho; add a single observability metric | $0       |
 
 ---
 
 ## Troubleshooting
 
-| Symptom | Likely cause | Fix |
-|---|---|---|
-| `502 Bad Gateway` from Cloudflare | Container down or host nginx can't reach `127.0.0.1:8081` | `docker compose -f docker-compose.demo.yml ps` — check `Up (healthy)`; if not, `docker compose logs astrowind` |
-| `Error 521` (Cloudflare can't reach origin) | UFW blocking inbound 443, OR host nginx not running | `ufw status; systemctl status nginx; nginx -t` |
-| `SSL_ERROR_NO_CYPHER_OVERLAP` | Cloudflare set to Full (strict) but Origin Cert missing/expired | Check `/etc/ssl/cloudflare/origin-cert.pem`; regenerate at Cloudflare → SSL/TLS → Origin Server |
-| HTTPS works but redirect loops on `www` | Cloudflare Page Rule conflicts with `Always Use HTTPS` | Disable the Page Rule and let the host vhost handle the www→apex 301 |
-| Pages render but `/_astro/*.css` 404 | `npm run build` failed silently or `dist/` is stale | SSH to VPS; `cd /opt/mambakkam && docker compose -f docker-compose.demo.yml build --no-cache && docker compose -f docker-compose.demo.yml up -d` |
-| `Coming soon` pill missing on Thittam card | `comingSoon: true` not set in `src/data/work/thittam.md` frontmatter, OR build cached | Verify frontmatter; clear cache with `--no-cache` build |
-| Deploy workflow fails at "Run deploy.sh on VPS" | `MAMBAKKAM_VPS_SSH_KEY` repo secret stale, OR deploy user's `authorized_keys` rotated | Regenerate SSH key pair; update both repo secret and `/home/deploy/.ssh/authorized_keys` |
-| Smoke check fails on `/people/siva-m` after content edit | Slug changed (filename rename) | Astro slug = filename; verify `src/data/people/siva-m.md` exists; if intentionally renamed, update smoke.sh slug |
-| Daily backup cron didn't run | cron service died or `/etc/cron.d/mambakkam-backup` got removed | `service cron status; ls /etc/cron.d/mambakkam-backup`; re-run `provision.sh` (idempotent) |
+| Symptom                                                  | Likely cause                                                                          | Fix                                                                                                                                              |
+| -------------------------------------------------------- | ------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `502 Bad Gateway` from Cloudflare                        | Container down or host nginx can't reach `127.0.0.1:8081`                             | `docker compose -f docker-compose.demo.yml ps` — check `Up (healthy)`; if not, `docker compose logs astrowind`                                   |
+| `Error 521` (Cloudflare can't reach origin)              | UFW blocking inbound 443, OR host nginx not running                                   | `ufw status; systemctl status nginx; nginx -t`                                                                                                   |
+| `SSL_ERROR_NO_CYPHER_OVERLAP`                            | Cloudflare set to Full (strict) but Origin Cert missing/expired                       | Check `/etc/ssl/cloudflare/origin-cert.pem`; regenerate at Cloudflare → SSL/TLS → Origin Server                                                  |
+| HTTPS works but redirect loops on `www`                  | Cloudflare Page Rule conflicts with `Always Use HTTPS`                                | Disable the Page Rule and let the host vhost handle the www→apex 301                                                                             |
+| Pages render but `/_astro/*.css` 404                     | `npm run build` failed silently or `dist/` is stale                                   | SSH to VPS; `cd /opt/mambakkam && docker compose -f docker-compose.demo.yml build --no-cache && docker compose -f docker-compose.demo.yml up -d` |
+| `Coming soon` pill missing on Thittam card               | `comingSoon: true` not set in `src/data/work/thittam.md` frontmatter, OR build cached | Verify frontmatter; clear cache with `--no-cache` build                                                                                          |
+| Deploy workflow fails at "Run deploy.sh on VPS"          | `MAMBAKKAM_VPS_SSH_KEY` repo secret stale, OR deploy user's `authorized_keys` rotated | Regenerate SSH key pair; update both repo secret and `/home/deploy/.ssh/authorized_keys`                                                         |
+| Smoke check fails on `/people/siva-m` after content edit | Slug changed (filename rename)                                                        | Astro slug = filename; verify `src/data/people/siva-m.md` exists; if intentionally renamed, update smoke.sh slug                                 |
+| Daily backup cron didn't run                             | cron service died or `/etc/cron.d/mambakkam-backup` got removed                       | `service cron status; ls /etc/cron.d/mambakkam-backup`; re-run `provision.sh` (idempotent)                                                       |
 
 ---
 
 ## Change Log
 
-| Date | Version | Change |
-|---|---|---|
-| 2026-05-09 | 1.0 | Initial — Day 0 (Sun May 17) launch hosting plan, modeled on StudyBuddy's `DEMO_HOSTING_GUIDE.md` |
-| 2026-05-09 | 1.1 | **Tenancy-order flip** — mambakkam.net is now the first tenant on a fresh CX22; pays the full $5/mo VPS bill (~$6/mo all-in with the domain). StudyBuddy joins as second tenant on Day 0 (Sun May 17) at zero marginal infra cost. Origin Cert with SAN list (covering both domains) is generated up-front during the mambakkam.net cold start on Day -1 (Sat May 16). Cron offsets: mambakkam at 02:30 UTC, StudyBuddy at 02:00 UTC. |
+| Date       | Version | Change                                                                                                                                                                                                                                                                                                                                                                                                                                |
+| ---------- | ------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 2026-05-09 | 1.0     | Initial — Day 0 (Sun May 17) launch hosting plan, modeled on StudyBuddy's `DEMO_HOSTING_GUIDE.md`                                                                                                                                                                                                                                                                                                                                     |
+| 2026-05-09 | 1.1     | **Tenancy-order flip** — mambakkam.net is now the first tenant on a fresh CX22; pays the full $5/mo VPS bill (~$6/mo all-in with the domain). StudyBuddy joins as second tenant on Day 0 (Sun May 17) at zero marginal infra cost. Origin Cert with SAN list (covering both domains) is generated up-front during the mambakkam.net cold start on Day -1 (Sat May 16). Cron offsets: mambakkam at 02:30 UTC, StudyBuddy at 02:00 UTC. |

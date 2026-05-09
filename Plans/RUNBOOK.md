@@ -5,6 +5,7 @@
 **Status:** Source-of-truth for alert response. Rule definitions live in
 `infra/monitoring/alerts/`; this doc says what to do when one fires.
 **Companion docs:**
+
 - [`MONITORING.md`](MONITORING.md) — metrics architecture
 - [`LOGGING.md`](LOGGING.md) — log shipping
 - [`BACKUPS.md`](BACKUPS.md) — backup architecture
@@ -14,10 +15,10 @@
 
 ## TL;DR
 
-| Severity | Where it lands | Response time | When you'll see it |
-|---|---|---|---|
-| `[PAGE]` | Gmail inbox, label `alerts/page` | Immediate (during waking hours) | Customer-visible breakage or DR risk |
-| `[WARN]` | Gmail inbox, label `alerts/warn` | Next time at the keyboard | Symptoms worth investigating but not urgent |
+| Severity | Where it lands                   | Response time                   | When you'll see it                          |
+| -------- | -------------------------------- | ------------------------------- | ------------------------------------------- |
+| `[PAGE]` | Gmail inbox, label `alerts/page` | Immediate (during waking hours) | Customer-visible breakage or DR risk        |
+| `[WARN]` | Gmail inbox, label `alerts/warn` | Next time at the keyboard       | Symptoms worth investigating but not urgent |
 
 Single operator, best-effort coverage. No formal on-call; nothing wakes you at 3am — emails are filtered out of the lock-screen-notifying mail clients between 23:00 and 07:00. Revisit when the first paying customer arrives.
 
@@ -31,15 +32,15 @@ Click-ops in the Grafana Cloud Alerting UI — easier than the API for a 2-chann
 
 `Alerting → Contact points → Add contact point`
 
-| Field | Value |
-|---|---|
-| Name | `gmail-siva` |
-| Type | Email |
-| Addresses | `siva@mambakkam.net` |
-| Single email | ON (one email per alert; don't bundle dissimilar alerts) |
-| Subject (page) | `[PAGE] {{.GroupLabels.alertname}} — {{.CommonLabels.site}}` |
-| Subject (warn) | `[WARN] {{.GroupLabels.alertname}} — {{.CommonLabels.site}}` |
-| Message body | Default Grafana template — includes the `description` and `runbook_url` from each rule |
+| Field          | Value                                                                                  |
+| -------------- | -------------------------------------------------------------------------------------- |
+| Name           | `gmail-siva`                                                                           |
+| Type           | Email                                                                                  |
+| Addresses      | `siva@mambakkam.net`                                                                   |
+| Single email   | ON (one email per alert; don't bundle dissimilar alerts)                               |
+| Subject (page) | `[PAGE] {{.GroupLabels.alertname}} — {{.CommonLabels.site}}`                           |
+| Subject (warn) | `[WARN] {{.GroupLabels.alertname}} — {{.CommonLabels.site}}`                           |
+| Message body   | Default Grafana template — includes the `description` and `runbook_url` from each rule |
 
 ### 2. Notification policy
 
@@ -49,8 +50,8 @@ Default route: `gmail-siva` (catches anything not matching specific routes).
 
 Specific routes (top-down, first-match):
 
-| Match | Route to | Subject template |
-|---|---|---|
+| Match             | Route to     | Subject template                                             |
+| ----------------- | ------------ | ------------------------------------------------------------ |
 | `severity = page` | `gmail-siva` | `[PAGE] {{.GroupLabels.alertname}} — {{.CommonLabels.site}}` |
 | `severity = warn` | `gmail-siva` | `[WARN] {{.GroupLabels.alertname}} — {{.CommonLabels.site}}` |
 
@@ -74,13 +75,13 @@ Subject: ([WARN])
 
 Per the click-ops policy:
 
-| Setting | Value | Why |
-|---|---|---|
-| Group wait | `30s` | Wait briefly for related alerts to bunch (e.g. 5xx surge often pulls in StudyBuddyHighErrorRate too) |
-| Group interval | `5m` | Don't re-page on the same group within 5 min |
-| Repeat interval | `4h` | Re-page every 4 h while the alert remains firing — prevents "I forgot about that" syndrome |
-| Mute timing (page) | none | Pages are always delivered |
-| Mute timing (warn) | weekday 07:00–22:00 (operator local time) | Warns piled up over night/weekend land in one batch when you're back |
+| Setting            | Value                                     | Why                                                                                                  |
+| ------------------ | ----------------------------------------- | ---------------------------------------------------------------------------------------------------- |
+| Group wait         | `30s`                                     | Wait briefly for related alerts to bunch (e.g. 5xx surge often pulls in StudyBuddyHighErrorRate too) |
+| Group interval     | `5m`                                      | Don't re-page on the same group within 5 min                                                         |
+| Repeat interval    | `4h`                                      | Re-page every 4 h while the alert remains firing — prevents "I forgot about that" syndrome           |
+| Mute timing (page) | none                                      | Pages are always delivered                                                                           |
+| Mute timing (warn) | weekday 07:00–22:00 (operator local time) | Warns piled up over night/weekend land in one batch when you're back                                 |
 
 ### 4. Test the path before launch
 
@@ -156,7 +157,7 @@ sudo docker compose -f docker-compose.demo.yml up -d
 **Escalation**
 
 - If host nginx config-test fails: revert `infra/nginx/mambakkam.net.conf` from git (`git -C /opt/mambakkam log -p infra/nginx/`); reload nginx.
-- If Origin Cert expired: regenerate at Cloudflare → SSL/TLS → Origin Server (15 min). SAN list: mambakkam.net + *.mambakkam.net + demo.studybuddy.app.
+- If Origin Cert expired: regenerate at Cloudflare → SSL/TLS → Origin Server (15 min). SAN list: mambakkam.net + \*.mambakkam.net + demo.studybuddy.app.
 - If the VPS is itself unreachable: file Hetzner ticket + post a Cloudflare maintenance worker as cover (5 min via CF dashboard).
 
 ---
@@ -350,7 +351,7 @@ If the manual run succeeds, cron itself is the issue — `systemctl restart cron
 
 **Escalation**
 
-- If the cron service is broken at the systemd level: rebuild the cron entry from `provision.sh` (re-running provision.sh is idempotent; it'll restore /etc/cron.d/* without touching anything else).
+- If the cron service is broken at the systemd level: rebuild the cron entry from `provision.sh` (re-running provision.sh is idempotent; it'll restore /etc/cron.d/\* without touching anything else).
 - If backups are silently failing (script reports success but no snapshot lands): run `restic snapshots` on each repo manually; if the snapshot list matches expectations, the alert query has a bug — open a follow-up to fix the LogQL.
 
 ---
@@ -445,6 +446,7 @@ Backend code is logging structlog errors at >1/sec. Could be auth errors (rare-b
 ```
 
 Common patterns:
+
 - `logger=auth event="invalid_token"` — usually noise from automated scanners; ignore unless rate climbs.
 - `logger=pipeline` — content-generation hiccup; check `/admin/pipeline`.
 - `logger=stripe` — webhook signature mismatch; usually a misconfigured webhook URL.
@@ -607,6 +609,6 @@ Don't ship an alert without a runbook entry. An unguided 3am page is hostile to 
 
 ## Change Log
 
-| Date | Version | Change |
-|---|---|---|
-| 2026-05-09 | 1.0 | Initial — 14 alerts (5 metric + 9 log) consolidated from MONITORING/LOGGING/BACKUPS docs into a single source of truth. Per-alert response runbook. Notification routing as 2-severity Gmail click-ops. apply.sh helper for uploads. |
+| Date       | Version | Change                                                                                                                                                                                                                               |
+| ---------- | ------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| 2026-05-09 | 1.0     | Initial — 14 alerts (5 metric + 9 log) consolidated from MONITORING/LOGGING/BACKUPS docs into a single source of truth. Per-alert response runbook. Notification routing as 2-severity Gmail click-ops. apply.sh helper for uploads. |

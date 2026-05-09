@@ -5,6 +5,7 @@
 **Audience:** Operator (Sivakumar)
 **Window:** Day -1 (Sat May 16 2026), 17:00–20:30 EDT (3.5 hr block)
 **Companion docs:**
+
 - [`DEMO_LAUNCH_PLAN.md`](DEMO_LAUNCH_PLAN.md) — referenced from §2 Day -1 evening
 - [`MONITORING.md`](MONITORING.md) · [`LOGGING.md`](LOGGING.md) — Grafana Cloud setup
 - [`StudyBuddy_OnDemand/docs/DEMO_LAUNCH_PLAN.md`](https://github.com/wegofwd2020-hub/StudyBuddy_OnDemand/blob/main/docs/DEMO_LAUNCH_PLAN.md) — Auth0 / Stripe / Sentry context
@@ -18,17 +19,17 @@ sections below in order. Every section ends with what you need to copy
 into the password manager. By 20:30 EDT you have everything tomorrow's
 `provision.sh` runs need.
 
-| Section | Time block | Account | Why |
-|---|---|---|---|
-| 1 | 17:00–17:15 | Cloudflare | DNS for both domains, Origin Cert with shared SAN |
-| 2 | 17:15–17:25 | Hetzner Cloud | VPS provider; SSH key only — no CX22 yet |
-| 3 | 17:25–17:55 | Zoho Mail | mambakkam.net mailbox + DNS records |
-| 4 | 17:55–18:15 | Gmail send-as | Compose-from custom domain |
-| 5 | 18:15–18:40 | Grafana Cloud | Metrics + logs + alert rules |
-| 6 | 18:40–18:50 | Pre-stage DNS for mambakkam | Day-0 cutover is just a value change |
-| 7 | 19:00–19:25 | studybuddy.app domain + DNS + Zoho mailboxes | StudyBuddy-side setup begins |
-| 8 | 19:25–19:50 | Auth0 dev tenant | Student + teacher login |
-| 9 | 19:50–20:30 | Stripe (test mode) + Sentry | Payments + error tracking |
+| Section | Time block  | Account                                      | Why                                               |
+| ------- | ----------- | -------------------------------------------- | ------------------------------------------------- |
+| 1       | 17:00–17:15 | Cloudflare                                   | DNS for both domains, Origin Cert with shared SAN |
+| 2       | 17:15–17:25 | Hetzner Cloud                                | VPS provider; SSH key only — no CX22 yet          |
+| 3       | 17:25–17:55 | Zoho Mail                                    | mambakkam.net mailbox + DNS records               |
+| 4       | 17:55–18:15 | Gmail send-as                                | Compose-from custom domain                        |
+| 5       | 18:15–18:40 | Grafana Cloud                                | Metrics + logs + alert rules                      |
+| 6       | 18:40–18:50 | Pre-stage DNS for mambakkam                  | Day-0 cutover is just a value change              |
+| 7       | 19:00–19:25 | studybuddy.app domain + DNS + Zoho mailboxes | StudyBuddy-side setup begins                      |
+| 8       | 19:25–19:50 | Auth0 dev tenant                             | Student + teacher login                           |
+| 9       | 19:50–20:30 | Stripe (test mode) + Sentry                  | Payments + error tracking                         |
 
 **Total:** 3.5 hours. Budget 4 if Zoho DKIM verification stalls.
 
@@ -47,6 +48,7 @@ into the password manager. By 20:30 EDT you have everything tomorrow's
 - [ ] This document open in another tab
 
 **Naming convention for password-manager entries** — use this consistently:
+
 ```
 [Launch May 2026] Cloudflare account
 [Launch May 2026] Cloudflare Origin Cert (mambakkam + studybuddy SAN)
@@ -82,6 +84,7 @@ You're moving DNS to Cloudflare nameservers and pre-configuring SSL.
 - [ ] Wait — propagation can take up to 24h, but usually <30 min. **Move on to §1.3 while you wait.**
 
 **Verify (later, can run from terminal anytime):**
+
 ```bash
 dig NS mambakkam.net +short
 # Expect: kim.ns.cloudflare.com / walt.ns.cloudflare.com (or whatever Cloudflare assigned)
@@ -97,7 +100,7 @@ dig NS mambakkam.net +short
   *.mambakkam.net
   demo.studybuddy.app
   ```
-  *Important:* `demo.studybuddy.app` must be in the SAN list now even though that domain isn't on Cloudflare yet — Cloudflare allows it because Origin Certs are issued by Cloudflare's PKI and don't require domain ownership at generation time. StudyBuddy uses this same cert when it joins on Day 0 afternoon.
+  _Important:_ `demo.studybuddy.app` must be in the SAN list now even though that domain isn't on Cloudflare yet — Cloudflare allows it because Origin Certs are issued by Cloudflare's PKI and don't require domain ownership at generation time. StudyBuddy uses this same cert when it joins on Day 0 afternoon.
 - [ ] Validity: **15 years** (default)
 - [ ] Click "Create" — Cloudflare displays the certificate + private key ONCE
 - [ ] **Copy both** to the password manager:
@@ -141,6 +144,7 @@ ssh-keygen -t ed25519 -f ~/.ssh/mambakkam_cx22 -C "mambakkam-launch-2026"
 ```
 
 This creates two files:
+
 - `~/.ssh/mambakkam_cx22` (private key — never share)
 - `~/.ssh/mambakkam_cx22.pub` (public key — paste into Hetzner)
 
@@ -190,6 +194,7 @@ once that domain is registered.
 - [ ] Wait ~2 min for propagation, then back in Zoho click **"Verify"**
 
 **Verify (terminal):**
+
 ```bash
 dig TXT mambakkam.net +short
 # Expect to see "zoho-verification=zb..." among the results
@@ -215,11 +220,11 @@ dig TXT mambakkam.net +short
 
 - [ ] In Zoho → Domains → mambakkam.net → **Email Configuration → DKIM** — Zoho generates a public key
 - [ ] Cloudflare DNS → + Add record:
-  - Type: **TXT**, Name: **zmail._domainkey**, Content: paste Zoho's public key string
+  - Type: **TXT**, Name: **zmail.\_domainkey**, Content: paste Zoho's public key string
 
 #### DMARC (single TXT)
 
-- [ ] Type: **TXT**, Name: **_dmarc**, Content: `v=DMARC1; p=quarantine; rua=mailto:siva@mambakkam.net`
+- [ ] Type: **TXT**, Name: **\_dmarc**, Content: `v=DMARC1; p=quarantine; rua=mailto:siva@mambakkam.net`
 
 #### Verify all four green in Zoho
 
@@ -227,6 +232,7 @@ dig TXT mambakkam.net +short
 - [ ] Once all green, **save** to password manager: `[Launch May 2026] Zoho mailbox siva@mambakkam.net` (email + password)
 
 **Verify (terminal):**
+
 ```bash
 dig MX mambakkam.net +short                # mx.zoho.com / mx2.zoho.com / mx3.zoho.com
 dig TXT mambakkam.net +short | grep spf1   # v=spf1 include:zoho.com ~all
@@ -330,6 +336,7 @@ creating a new record under launch-day pressure.
 > Tomorrow morning at ~08:45 EDT (mambakkam T-15m), you'll edit the apex A record value from `192.0.2.1` to the real Hetzner CX22 IP and **enable proxy** (orange cloud).
 
 **Verify:**
+
 ```bash
 dig mambakkam.net +short    # 192.0.2.1
 dig www.mambakkam.net +short # mambakkam.net (then 192.0.2.1)
@@ -378,7 +385,7 @@ dig www.mambakkam.net +short # mambakkam.net (then 192.0.2.1)
 - [ ] Add MX (mx.zoho.com / mx2 / mx3 — same priorities as §3.3) at Cloudflare for **studybuddy.app**
 - [ ] Add SPF: TXT @ `v=spf1 include:zoho.com ~all`
 - [ ] Add DKIM: from Zoho config
-- [ ] Add DMARC: TXT _dmarc `v=DMARC1; p=quarantine; rua=mailto:support@studybuddy.app`
+- [ ] Add DMARC: TXT \_dmarc `v=DMARC1; p=quarantine; rua=mailto:support@studybuddy.app`
 - [ ] **Save** to password manager:
   - `[Launch May 2026] Zoho mailbox support@studybuddy.app`
   - `[Launch May 2026] Zoho mailbox sales@studybuddy.app`
@@ -440,6 +447,7 @@ Free tier — 7,500 MAU, more than enough for the demo.
 ### 8.5 — JWKS URL
 
 This is derived from your tenant domain — no separate config needed:
+
 - `[Launch May 2026] Auth0 JWKS URL` = `https://studybuddy-demo.<region>.auth0.com/.well-known/jwks.json`
 
 ### 8.6 — Verify
@@ -522,81 +530,81 @@ morning. Pull each from the password manager.
 
 ### `/opt/mambakkam/.env.demo`
 
-| Variable | Source |
-|---|---|
-| `PLAUSIBLE_DOMAIN` (if using Plausible) | Plausible site setup — defer; not on tonight's list |
-| `SMTP_HOST=smtp.zoho.com` | static |
-| `SMTP_PORT=465` | static |
-| `SMTP_USER=siva@mambakkam.net` | static |
-| `SMTP_PASSWORD` | `[Launch May 2026] Zoho App Password (mambakkam Gmail)` |
+| Variable                                | Source                                                  |
+| --------------------------------------- | ------------------------------------------------------- |
+| `PLAUSIBLE_DOMAIN` (if using Plausible) | Plausible site setup — defer; not on tonight's list     |
+| `SMTP_HOST=smtp.zoho.com`               | static                                                  |
+| `SMTP_PORT=465`                         | static                                                  |
+| `SMTP_USER=siva@mambakkam.net`          | static                                                  |
+| `SMTP_PASSWORD`                         | `[Launch May 2026] Zoho App Password (mambakkam Gmail)` |
 
 ### `/opt/studybuddy/.env.demo` (~12 lines need pasting; rest auto-generated by `openssl rand`)
 
-| Variable | Source |
-|---|---|
-| `JWT_SECRET` | run `openssl rand -hex 32` |
-| `ADMIN_JWT_SECRET` | run `openssl rand -hex 32` |
-| `METRICS_TOKEN` | run `openssl rand -hex 32` |
-| `POSTGRES_PASSWORD` | run `openssl rand -hex 32` |
-| `REDIS_PASSWORD` | run `openssl rand -hex 32` |
-| `AUTH0_DOMAIN` | `[Launch May 2026] Auth0 tenant domain` |
-| `AUTH0_JWKS_URL` | `[Launch May 2026] Auth0 JWKS URL` |
-| `AUTH0_STUDENT_CLIENT_ID` | `[Launch May 2026] Auth0 student client_id` |
-| `AUTH0_TEACHER_CLIENT_ID` | `[Launch May 2026] Auth0 teacher client_id` |
-| `AUTH0_MGMT_CLIENT_ID` | `[Launch May 2026] Auth0 M2M client_id` |
-| `AUTH0_MGMT_CLIENT_SECRET` | `[Launch May 2026] Auth0 M2M client_secret` |
-| `AUTH0_MGMT_API_URL` | `[Launch May 2026] Auth0 M2M API URL` |
-| `SMTP_USER=support@studybuddy.app` | static |
-| `SMTP_PASSWORD` | `[Launch May 2026] Zoho App Password (studybuddy.app Gmail)` |
-| `STRIPE_SECRET_KEY` | `[Launch May 2026] Stripe sk_test_*` |
-| `STRIPE_WEBHOOK_SECRET` | `[Launch May 2026] Stripe webhook signing secret` |
-| `SENTRY_DSN` | `[Launch May 2026] Sentry DSN` |
-| `HCLOUD_TOKEN` (optional) | `[Launch May 2026] Hetzner API token` |
+| Variable                           | Source                                                       |
+| ---------------------------------- | ------------------------------------------------------------ |
+| `JWT_SECRET`                       | run `openssl rand -hex 32`                                   |
+| `ADMIN_JWT_SECRET`                 | run `openssl rand -hex 32`                                   |
+| `METRICS_TOKEN`                    | run `openssl rand -hex 32`                                   |
+| `POSTGRES_PASSWORD`                | run `openssl rand -hex 32`                                   |
+| `REDIS_PASSWORD`                   | run `openssl rand -hex 32`                                   |
+| `AUTH0_DOMAIN`                     | `[Launch May 2026] Auth0 tenant domain`                      |
+| `AUTH0_JWKS_URL`                   | `[Launch May 2026] Auth0 JWKS URL`                           |
+| `AUTH0_STUDENT_CLIENT_ID`          | `[Launch May 2026] Auth0 student client_id`                  |
+| `AUTH0_TEACHER_CLIENT_ID`          | `[Launch May 2026] Auth0 teacher client_id`                  |
+| `AUTH0_MGMT_CLIENT_ID`             | `[Launch May 2026] Auth0 M2M client_id`                      |
+| `AUTH0_MGMT_CLIENT_SECRET`         | `[Launch May 2026] Auth0 M2M client_secret`                  |
+| `AUTH0_MGMT_API_URL`               | `[Launch May 2026] Auth0 M2M API URL`                        |
+| `SMTP_USER=support@studybuddy.app` | static                                                       |
+| `SMTP_PASSWORD`                    | `[Launch May 2026] Zoho App Password (studybuddy.app Gmail)` |
+| `STRIPE_SECRET_KEY`                | `[Launch May 2026] Stripe sk_test_*`                         |
+| `STRIPE_WEBHOOK_SECRET`            | `[Launch May 2026] Stripe webhook signing secret`            |
+| `SENTRY_DSN`                       | `[Launch May 2026] Sentry DSN`                               |
+| `HCLOUD_TOKEN` (optional)          | `[Launch May 2026] Hetzner API token`                        |
 
 ### `/opt/mambakkam/infra/monitoring/.env.monitoring`
 
-| Variable | Source |
-|---|---|
-| `GRAFANA_CLOUD_REMOTE_WRITE_URL` | `[Launch May 2026] Grafana Cloud Prometheus URL + user` |
-| `GRAFANA_CLOUD_USERNAME` | (same entry, Prometheus numeric user) |
-| `GRAFANA_CLOUD_LOKI_URL` | `[Launch May 2026] Grafana Cloud Loki URL + user` |
-| `GRAFANA_CLOUD_LOKI_USERNAME` | (same entry, Loki numeric user — different number from Prometheus) |
-| `GRAFANA_CLOUD_API_KEY` | `[Launch May 2026] Grafana Cloud token` |
-| `STUDYBUDDY_METRICS_TOKEN` | matches the `METRICS_TOKEN` you `openssl rand`-ed in /opt/studybuddy/.env.demo |
+| Variable                         | Source                                                                         |
+| -------------------------------- | ------------------------------------------------------------------------------ |
+| `GRAFANA_CLOUD_REMOTE_WRITE_URL` | `[Launch May 2026] Grafana Cloud Prometheus URL + user`                        |
+| `GRAFANA_CLOUD_USERNAME`         | (same entry, Prometheus numeric user)                                          |
+| `GRAFANA_CLOUD_LOKI_URL`         | `[Launch May 2026] Grafana Cloud Loki URL + user`                              |
+| `GRAFANA_CLOUD_LOKI_USERNAME`    | (same entry, Loki numeric user — different number from Prometheus)             |
+| `GRAFANA_CLOUD_API_KEY`          | `[Launch May 2026] Grafana Cloud token`                                        |
+| `STUDYBUDDY_METRICS_TOKEN`       | matches the `METRICS_TOKEN` you `openssl rand`-ed in /opt/studybuddy/.env.demo |
 
 ### `/etc/ssl/cloudflare/origin-{cert,key}.pem`
 
-| File | Source |
-|---|---|
-| `origin-cert.pem` (mode 644) | `[Launch May 2026] Cloudflare Origin Cert (cert PEM)` |
+| File                             | Source                                                      |
+| -------------------------------- | ----------------------------------------------------------- |
+| `origin-cert.pem` (mode 644)     | `[Launch May 2026] Cloudflare Origin Cert (cert PEM)`       |
 | `origin-key.pem` (mode 600 root) | `[Launch May 2026] Cloudflare Origin Key (private key PEM)` |
 
 ### GitHub Actions repo secrets
 
 These you set in **GitHub → repo → Settings → Secrets and variables → Actions** at some point on Day -2 or Day -1; not strictly required tonight but easy to do while you're at the laptop:
 
-| Secret name | Value | Used by |
-|---|---|---|
-| `MAMBAKKAM_VPS_HOST` | (filled in tomorrow once you know the CX22 public IP) | mambakkam-net deploy workflow |
-| `MAMBAKKAM_VPS_USER` | `deploy` | same |
-| `MAMBAKKAM_VPS_SSH_KEY` | content of `~/.ssh/mambakkam_cx22` (the private key) | same |
-| `DEMO_VPS_HOST` | same as MAMBAKKAM_VPS_HOST (shared CX22) | StudyBuddy deploy workflow |
-| `DEMO_VPS_USER` | `deploy` | same |
-| `DEMO_VPS_SSH_KEY` | a separate SSH keypair (generate one for studybuddy in §2.2 if not done) — or reuse the mambakkam key if you prefer one shared deploy key | same |
-| `GHCR_TOKEN` | personal access token with `write:packages` scope | StudyBuddy deploy (Docker image push) |
+| Secret name             | Value                                                                                                                                     | Used by                               |
+| ----------------------- | ----------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------- |
+| `MAMBAKKAM_VPS_HOST`    | (filled in tomorrow once you know the CX22 public IP)                                                                                     | mambakkam-net deploy workflow         |
+| `MAMBAKKAM_VPS_USER`    | `deploy`                                                                                                                                  | same                                  |
+| `MAMBAKKAM_VPS_SSH_KEY` | content of `~/.ssh/mambakkam_cx22` (the private key)                                                                                      | same                                  |
+| `DEMO_VPS_HOST`         | same as MAMBAKKAM_VPS_HOST (shared CX22)                                                                                                  | StudyBuddy deploy workflow            |
+| `DEMO_VPS_USER`         | `deploy`                                                                                                                                  | same                                  |
+| `DEMO_VPS_SSH_KEY`      | a separate SSH keypair (generate one for studybuddy in §2.2 if not done) — or reuse the mambakkam key if you prefer one shared deploy key | same                                  |
+| `GHCR_TOKEN`            | personal access token with `write:packages` scope                                                                                         | StudyBuddy deploy (Docker image push) |
 
 ---
 
 ## What to do if something goes sideways tonight
 
-| Symptom | Diagnosis | Recover |
-|---|---|---|
-| Cloudflare nameserver migration not propagating after 30 min | Some registrars cache aggressively | Wait until 22:00 EDT and recheck; in worst case, do §1.2 first thing tomorrow morning before §6 |
-| Zoho DKIM verification stays grey | DNS propagation lag | Wait 30 min, retry. If still grey at 18:30, skip and revisit Day 0 morning — the demo doesn't strictly need DKIM working at launch |
-| Hetzner asks for additional verification (passport scan, etc.) | First-time account on a new email | Have a backup plan: use an existing Hetzner account, or use a different VPS provider (DigitalOcean, Vultr) at the same price point — adjust `provision.sh` if you switch |
-| `studybuddy.app` is taken | Common-word risk | Have backup: `studybuddy.io`, `studybuddy.dev`, `studybuddy.cloud`, `usestudybuddy.com`. Update `.env.demo` and host-nginx vhost tomorrow |
-| Auth0 free tier requires phone verification you can't complete tonight | Phone-network issues | Skip Auth0 for tonight; wire it on Day 0 morning before StudyBuddy second-tenant cutover at 13:00 EDT |
-| Stripe asks for business info even in test mode | Sometimes does | You can use test-mode without activation — just make sure the `Test mode` toggle is ON. If forced to activate, defer to Day 0 morning |
+| Symptom                                                                | Diagnosis                          | Recover                                                                                                                                                                  |
+| ---------------------------------------------------------------------- | ---------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Cloudflare nameserver migration not propagating after 30 min           | Some registrars cache aggressively | Wait until 22:00 EDT and recheck; in worst case, do §1.2 first thing tomorrow morning before §6                                                                          |
+| Zoho DKIM verification stays grey                                      | DNS propagation lag                | Wait 30 min, retry. If still grey at 18:30, skip and revisit Day 0 morning — the demo doesn't strictly need DKIM working at launch                                       |
+| Hetzner asks for additional verification (passport scan, etc.)         | First-time account on a new email  | Have a backup plan: use an existing Hetzner account, or use a different VPS provider (DigitalOcean, Vultr) at the same price point — adjust `provision.sh` if you switch |
+| `studybuddy.app` is taken                                              | Common-word risk                   | Have backup: `studybuddy.io`, `studybuddy.dev`, `studybuddy.cloud`, `usestudybuddy.com`. Update `.env.demo` and host-nginx vhost tomorrow                                |
+| Auth0 free tier requires phone verification you can't complete tonight | Phone-network issues               | Skip Auth0 for tonight; wire it on Day 0 morning before StudyBuddy second-tenant cutover at 13:00 EDT                                                                    |
+| Stripe asks for business info even in test mode                        | Sometimes does                     | You can use test-mode without activation — just make sure the `Test mode` toggle is ON. If forced to activate, defer to Day 0 morning                                    |
 
 If you fall behind by more than 30 min, **don't push past 21:00 EDT**.
 Sleep is your most important Day 0 asset. Deferred items can move to Day 0
@@ -606,6 +614,6 @@ morning before the 08:00 EDT VPS work begins (start at 06:30 instead).
 
 ## Change Log
 
-| Date | Version | Change |
-|---|---|---|
-| 2026-05-09 | 1.0 | Initial — chronological 9-section operator checklist for Day -1 (Sat May 16) 17:00–20:30 EDT account + email setup. Cloudflare → Hetzner → Zoho → Gmail → Grafana Cloud → DNS pre-stage → studybuddy.app + Zoho mailboxes → Auth0 → Stripe + Sentry. Plus a §10 "values to paste tomorrow" cheat-sheet and a contingency table. |
+| Date       | Version | Change                                                                                                                                                                                                                                                                                                                          |
+| ---------- | ------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 2026-05-09 | 1.0     | Initial — chronological 9-section operator checklist for Day -1 (Sat May 16) 17:00–20:30 EDT account + email setup. Cloudflare → Hetzner → Zoho → Gmail → Grafana Cloud → DNS pre-stage → studybuddy.app + Zoho mailboxes → Auth0 → Stripe + Sentry. Plus a §10 "values to paste tomorrow" cheat-sheet and a contingency table. |

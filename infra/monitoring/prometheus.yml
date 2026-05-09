@@ -15,14 +15,14 @@
 # =============================================================================
 
 global:
-  scrape_interval:     15s
+  scrape_interval: 15s
   evaluation_interval: 15s
-  scrape_timeout:      10s
+  scrape_timeout: 10s
 
   # Tagged onto every series shipped to Grafana Cloud. Helpful when you eventually
   # add a second VPS or staging environment — series stay distinguishable.
   external_labels:
-    env:      production
+    env: production
     location: hetzner-cx22-co-tenant
     operator: mambakkam
 
@@ -74,16 +74,15 @@ remote_write:
 # ─────────────────────────────────────────────────────────────────────────────
 
 scrape_configs:
-
   # ── Self-monitoring ──────────────────────────────────────────────────────────
   - job_name: prometheus
     static_configs:
-      - targets: ["localhost:9090"]
+      - targets: ['localhost:9090']
 
   # ── mambakkam nginx (via nginx-prometheus-exporter sidecar) ─────────────────
   - job_name: mambakkam-nginx
     static_configs:
-      - targets: ["nginx-exporter:9113"]
+      - targets: ['nginx-exporter:9113']
     relabel_configs:
       - target_label: service
         replacement: mambakkam-nginx
@@ -93,7 +92,7 @@ scrape_configs:
   # ── CX22 host metrics (node-exporter on host network) ──────────────────────
   - job_name: cx22-host
     static_configs:
-      - targets: ["host.docker.internal:9100"]
+      - targets: ['host.docker.internal:9100']
     relabel_configs:
       - target_label: service
         replacement: cx22-host
@@ -130,7 +129,7 @@ scrape_configs:
   # StudyBuddy live in separate compose projects.
   - job_name: studybuddy-api
     static_configs:
-      - targets: ["host.docker.internal:8443"]
+      - targets: ['host.docker.internal:8443']
     metrics_path: /metrics
     scheme: http
     authorization:
@@ -141,7 +140,6 @@ scrape_configs:
         replacement: studybuddy-api
       - target_label: project
         replacement: studybuddy
-
 # Note: `host.docker.internal` resolves on Linux only when the container is
 # started with `extra_hosts: ["host.docker.internal:host-gateway"]`. The
 # monitoring compose sets that on the prometheus service (see

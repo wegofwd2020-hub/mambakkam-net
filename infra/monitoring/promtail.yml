@@ -21,7 +21,7 @@
 server:
   http_listen_port: 9080
   grpc_listen_port: 0
-  log_level: warn   # don't ship Promtail's own DEBUG lines to Loki
+  log_level: warn # don't ship Promtail's own DEBUG lines to Loki
 
 # Where Promtail tracks how far it's read from each file. Persisted to a
 # Docker volume so a Promtail restart doesn't re-ship logs (would burn
@@ -46,7 +46,6 @@ clients:
 # (Promtail attaches these via the global stage.)
 
 scrape_configs:
-
   # ── 1. docker — auto-discover every container ──────────────────────────────
   # docker_sd_configs reads from the Docker socket and emits a target per
   # running container. The relabel rules below project compose-project-name

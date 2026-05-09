@@ -15,8 +15,8 @@ modules:
     http:
       method: GET
       preferred_ip_protocol: ip4
-      valid_status_codes: []         # default: any 2xx
-      fail_if_not_ssl: true          # cert chain must verify
+      valid_status_codes: [] # default: any 2xx
+      fail_if_not_ssl: true # cert chain must verify
       tls_config:
         insecure_skip_verify: false
       # The Cloudflare-fronted demo URLs WILL show a valid cert because Cloudflare
