@@ -156,7 +156,7 @@ This creates two files:
 
 ### 2.3 — (Optional) Hetzner API token for snapshots
 
-If you want `scripts/demo/backup.sh` to also trigger Hetzner volume snapshots:
+If you want **StudyBuddy_OnDemand's** [`scripts/demo/backup.sh`](https://github.com/wegofwd2020-hub/StudyBuddy_OnDemand/blob/main/scripts/demo/backup.sh) (lives in a different repo) to also trigger a Hetzner **server image snapshot** as belt-and-braces alongside its restic backup. Note: this is StudyBuddy-only; mambakkam's `scripts/launch/backup.sh` does not call the Hetzner API and doesn't need this token.
 
 - [ ] Hetzner Cloud Console → **Security → API Tokens → Generate API Token**
 - [ ] Name: `studybuddy-snapshot-trigger`, permissions: **Read & Write**
@@ -187,6 +187,8 @@ once that domain is registered.
 - [ ] **Save** to password manager: `[Launch May 2026] Zoho org admin`
 
 ### 3.2 — Verification TXT at Cloudflare
+
+> **Prerequisite:** §1.2 nameserver change at your previous registrar must have propagated to Cloudflare being authoritative for `mambakkam.net`. Verify with `dig NS mambakkam.net +short` returning Cloudflare's two nameservers. If not yet propagated (usually <30 min, can be up to 24h), come back to §3.2 later — DO NOT add the TXT record at the previous registrar instead, you'll have to redo it.
 
 - [ ] Cloudflare → mambakkam.net → **DNS → Records → + Add record**
 - [ ] Type: **TXT**, Name: **@** (apex), Content: paste the `zoho-verification=...` value, TTL: Auto, Proxy: **DNS only** (grey cloud, not orange)
@@ -255,6 +257,8 @@ Lets you compose mail FROM `siva@mambakkam.net` while reading via Gmail.
 
 ### 4.1 — Add as send-as identity
 
+> **Prerequisite:** §3.3 MX records must be propagated and accepting mail. Gmail's verification email below goes TO `siva@mambakkam.net`, which means MX needs to be live. Quick check: `dig MX mambakkam.net +short` returns `mx.zoho.com / mx2.zoho.com / mx3.zoho.com`. If empty or wrong, wait — §3.3 may still be propagating. If the verification email doesn't arrive within 10 min, this is the most likely cause (not Gmail being slow).
+
 - [ ] In Gmail → **Settings (gear) → See all settings → Accounts and Import → Send mail as → Add another email address**
 - [ ] Name: `Siva Mambakkam`, Email: `siva@mambakkam.net`, **Treat as alias: NO** (uncheck), → Next
 - [ ] SMTP Server: `smtp.zoho.com`, Port: `465`, Username: `siva@mambakkam.net`, Password: paste the Zoho App Password from §3.4, **Secured connection using SSL** (default), → Add Account
@@ -287,10 +291,10 @@ Free tier covers all of demo's metrics + logs + alerts. No card.
 ### 5.2 — Capture Prometheus remote_write credentials
 
 - [ ] In your stack's overview → **Connections** (top nav) → **Hosted Prometheus metrics** → click **"Send Metrics"**
-- [ ] Copy **all three** values to password manager:
+- [ ] Copy the two values shown on this page to the password manager:
   - **URL** (looks like `https://prometheus-prod-XX-prod-YY.grafana.net/api/prom/push`) → `GRAFANA_CLOUD_REMOTE_WRITE_URL`
   - **Username** (numeric, e.g. `1234567`) → `GRAFANA_CLOUD_USERNAME`
-  - The token from §5.4 below goes into `GRAFANA_CLOUD_API_KEY`
+- [ ] The third Prometheus credential (`GRAFANA_CLOUD_API_KEY`) is the access-policy token generated below in §5.4 — same token serves Prometheus, Loki, and the alert ruler.
 - [ ] **Save** to password manager: `[Launch May 2026] Grafana Cloud Prometheus URL + user`
 
 ### 5.3 — Capture Loki credentials
