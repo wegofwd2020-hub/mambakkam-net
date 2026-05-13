@@ -162,6 +162,8 @@ Dashboard signal: alert if `probe_success == 0` for 2 consecutive scrapes (60 s)
 
 ### Phase 2 — Bring up the local stack (~5 min, after StudyBuddy is provisioned)
 
+> The `.env.monitoring` file needs **both** the Prometheus creds (set up in Phase 1 above) and the **Loki creds** (set up in [`LOGGING.md`](LOGGING.md) Phase 2). Do LOGGING.md Phase 2 before running this — otherwise Promtail will start without `GRAFANA_CLOUD_LOKI_URL` + `GRAFANA_CLOUD_LOKI_USERNAME` and log shipping silently fails.
+
 ```bash
 ssh deploy@<cx22-ip>
 cd /opt/mambakkam/infra/monitoring

@@ -348,8 +348,9 @@ The set as of 2026-05-09: `StudyBuddyErrorBurst` (warn),
   risk; revisit before paying customers arrive.
 - **Log retention.** 14 days on Loki + 7 days on the local container
   json-file rotation. Match this to your data-retention policy. After
-  Day 0 (Sun May 17) launch + 30 d, consider turning Loki retention down to 7 d if
-  ingest costs threaten the free tier.
+  launch, once 30 days have elapsed (approx. 2026-06-16), consider
+  turning Loki retention down to 7 d if ingest costs threaten the
+  free tier.
 
 ---
 

@@ -107,7 +107,7 @@ bash apply.sh log                # just log rules
 
 Rules take effect within ~60s of upload (ruler poll interval). Notification routing changes are immediate.
 
-If your Cloud Access Policy token doesn't have the `rules:write` scope, the upload returns 401/403 — generate a new policy in Grafana Cloud → Access policies with both `MetricsWriter`+`LogsWriter`+`RulesWriter` scopes, save the token, replace `GRAFANA_CLOUD_API_KEY` in `.env.monitoring`, re-run `apply.sh`.
+The Cloud Access Policy token must have all three scopes from the start: `metrics:write` (Prometheus push), `logs:write` (Loki push), `alerts:write` (Mimir + Loki ruler API — what `apply.sh` calls). This is set up up-front in [`ACCOUNT_SETUP.md`](ACCOUNT_SETUP.md) §5.4. If the upload returns 401/403, your existing policy is missing `alerts:write` — generate a new policy in Grafana Cloud → Access policies with all three scopes, save the token, replace `GRAFANA_CLOUD_API_KEY` in `.env.monitoring`, re-run `apply.sh`.
 
 ---
 

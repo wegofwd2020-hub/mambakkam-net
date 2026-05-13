@@ -119,7 +119,7 @@ sudo tail -f /var/log/studybuddy-backup.log   # live tail during a manual run
 
 ## Setup runbook (operator)
 
-This runs automatically as part of `provision.sh` (steps 12 in mambakkam, 8 in StudyBuddy). Quick reference for what the script does and what the operator must save out-of-band:
+This runs automatically as part of `provision.sh` — the "restic password + repo init" step in each script (mambakkam's `scripts/launch/provision.sh` and StudyBuddy's `scripts/demo/provision.sh`). Don't hard-code step numbers here; they shift as the script grows. Quick reference for what the script does and what the operator must save out-of-band:
 
 ### First-tenant (mambakkam) — Day -1 (Sat May 16) cold start
 
