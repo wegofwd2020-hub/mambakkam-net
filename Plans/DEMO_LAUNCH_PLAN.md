@@ -117,7 +117,8 @@ These ship with this PR. Use them as-is; no further code work needed.
 | First-time provisioning      | [`scripts/launch/provision.sh`](../scripts/launch/provision.sh)                       | Idempotent Hetzner CX22 add-on — host nginx install, `/opt/mambakkam` clone, deploy user, vhost dropped, daily-backup cron |
 | Manual / CI deploy           | [`scripts/launch/deploy.sh`](../scripts/launch/deploy.sh)                             | `git pull && docker compose build && up -d` + post-deploy smoke                                                            |
 | Post-deploy smoke check      | [`scripts/launch/smoke.sh`](../scripts/launch/smoke.sh)                               | Curl-based: `/`, `/sitemap-index.xml`, key landing-page words present, 404 returns 404                                     |
-| Daily content backup         | [`scripts/launch/backup.sh`](../scripts/launch/backup.sh)                             | `rsync` of `src/assets/images` + nginx access logs; retains last 7 days; cron-friendly                                     |
+| Daily content backup         | [`scripts/launch/backup.sh`](../scripts/launch/backup.sh)                             | restic-based, encrypted at-rest. Sources: `src/assets/images/` + `/var/log/nginx/mambakkam.net.*` + `/etc/ssl/cloudflare/` + `.env.demo` → `restic forget` with 7d/4w/3m/1y policy. Cron 02:30 UTC. |
+| Weekly restic check + prune  | [`scripts/launch/backup-check.sh`](../scripts/launch/backup-check.sh)                 | `restic check --read-data-subset 5%` (silent bit-rot detection) → `restic prune --max-unused 5%` (reclaim disk that daily `forget`s marked unreferenced). Cron Sun 03:30 UTC, 1h after the daily so they don't compete for the repo lock. |
 | Host nginx vhost             | [`infra/nginx/mambakkam.net.conf`](../infra/nginx/mambakkam.net.conf)                 | SSL termination via Cloudflare Origin Cert; proxy_pass to `127.0.0.1:8081`; HSTS; gzip; long-cache for `/_astro/*`         |
 | Auto-deploy on merge to main | [`.github/workflows/deploy-mambakkam.yml`](../.github/workflows/deploy-mambakkam.yml) | SSH to Hetzner → `scripts/launch/deploy.sh` → smoke against public domain → open issue on failure                          |
 | Env skeleton                 | [`.env.demo.example`](../.env.demo.example)                                           | Placeholders for analytics ID + Zoho SMTP (future contact form)                                                            |
@@ -334,14 +335,6 @@ This sequence runs against a **fresh Hetzner CX22**. mambakkam.net is the
 first tenant on the box, so its `provision.sh` must perform the full
 system bootstrap — Docker, UFW, fail2ban, the `deploy` user, host nginx,
 the `/etc/ssl/cloudflare/` directory, and the daily-backup cron.
-
-> **Script status (2026-05-09):** `scripts/launch/provision.sh` was
-> originally written assuming StudyBuddy provisioned the box first. It
-> needs to be expanded before Day -5 (Tue May 12) to cover the system-bootstrap items
-> above — until then, the operator must run those steps manually (Docker
-> install, UFW config, fail2ban, deploy user) before re-running
-> `provision.sh` for the mambakkam-specific work. Tracked as a code-freeze
-> task in §1.A.
 
 ```
 ┌──────────────────────────────────────────────────────────────────────┐
@@ -569,25 +562,50 @@ What it checks:
 
 Exits 0 if all green; exits 1 with a structured failure summary on any miss.
 
-### 3.4 Daily content backup — `scripts/launch/backup.sh`
+### 3.4 Daily content backup — `scripts/launch/backup.sh` (restic)
 
-**Run on:** the Hetzner VPS, scheduled via cron at 02:30 UTC.
+**Run on:** the Hetzner VPS via cron. Two scripts on two schedules, both
+wired up by `provision.sh`: the cron file at `/etc/cron.d/mambakkam-backup`,
+and the restic repo + password initialised inline.
 
 ```cron
-30 2 * * * /opt/mambakkam/scripts/launch/backup.sh >> /var/log/mambakkam-backup.log 2>&1
+# Daily backup — restic snapshot of non-git assets
+30 2 * * *  root cd /opt/mambakkam && bash scripts/launch/backup.sh       >> /var/log/mambakkam-backup.log 2>&1
+
+# Weekly integrity check + prune (Sundays, 1h after the daily — see §3.5)
+30 3 * * 0  root cd /opt/mambakkam && bash scripts/launch/backup-check.sh >> /var/log/mambakkam-backup.log 2>&1
 ```
 
-What it does:
+**Daily — `backup.sh`** (2 steps):
 
-1. `rsync -a /opt/mambakkam/src/assets/images/ /opt/mambakkam/backups/images-$(date +%Y%m%d)/`
-2. `cp /var/log/nginx/mambakkam.net.access.log /opt/mambakkam/backups/access-$(date +%Y%m%d).log` then `gzip` it
-3. Prune backups older than 7 days
+1. `restic backup` → `/opt/mambakkam/backups/restic/` covering four sources, all the things that would be costly to recreate (code + Markdown are in git, so they're excluded):
+   - `$INSTALL_DIR/src/assets/images/` — large media uploaded directly to the VPS
+   - `/var/log/nginx/mambakkam.net.*` — host nginx vhost logs (logrotate keeps 14d; restic captures the live window in case of investigation)
+   - `/etc/ssl/cloudflare/` — Origin Cert + key (15-yr validity but a clean rebuild needs them on hand)
+   - `$INSTALL_DIR/.env.demo` — analytics ID + future contact-form SMTP creds
 
-Note: code + content are in git, so backup focuses on the **non-git assets**
-that would be costly to recreate (large images uploaded directly to the VPS,
-nginx access logs for retrospectives).
+   Tag: `daily`. Encrypted at-rest with AES-256; password at `/etc/restic/mambakkam.password` (generated and printed once by `provision.sh`).
 
-### 3.5 Auto-deploy CI — `.github/workflows/deploy-mambakkam.yml`
+2. `restic forget --tag daily --keep-daily 7 --keep-weekly 4 --keep-monthly 3 --keep-yearly 1` — about 15 snapshots retained. `forget` only marks snapshots unreferenced; actual disk reclamation runs weekly via `backup-check.sh` (see §3.5).
+
+Exit codes: **0** success / **1** restic backup failed / **2** restic forget/prune failed / **3** repo not initialised (run `provision.sh`) / **4** password file missing or unreadable.
+
+### 3.5 Weekly restic check + prune — `scripts/launch/backup-check.sh`
+
+**Run on:** the Hetzner VPS via cron at Sun 03:30 UTC (one hour after the Sunday daily backup so they don't compete for the repo lock). Wired up alongside the daily in `provision.sh`'s cron file.
+
+What it does (2 steps):
+
+1. `restic check --read-data-subset 5%` — verifies repo metadata + reads 5% of pack files to catch silent bit-rot. Full 100% audit is too slow to run weekly; 5% cycles every pack within ~5 months on average.
+2. `restic prune --max-unused 5%` — reclaims disk that the daily `forget`s marked unreferenced but didn't physically delete.
+
+Exit codes: 0 success / 1 check failed (**possible bit-rot — investigate immediately**) / 2 prune failed / 3 repo not initialised / 4 password file unreadable.
+
+**Log routing.** Both scripts write to `/var/log/mambakkam-backup.log` via cron redirect. Promtail (running in the StudyBuddy monitoring stack — see [`Plans/MONITORING.md`](MONITORING.md)) ships that log to Grafana Cloud Loki. Query: `{job="backups", which="mambakkam"} |~ "(?i)check|prune|error"`.
+
+**Companion runbook.** [`Plans/BACKUPS.md`](BACKUPS.md) documents 5 restore scenarios — Scenarios 4 (recover Cloudflare Origin Cert + key) and 5 (historical access-log search) are mambakkam-relevant. Scenario rehearsals happen in §4 Day -3 alongside the alert test-fire.
+
+### 3.6 Auto-deploy CI — `.github/workflows/deploy-mambakkam.yml`
 
 **Triggers:** push to `main`, manual `workflow_dispatch`.
 
