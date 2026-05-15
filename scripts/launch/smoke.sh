@@ -79,8 +79,12 @@ http_get_noredirect() {
     "$url" 2>&1
 }
 
-extract_status() { echo "$1" | sed -E 's/.*::status::([0-9]+)$/\1/' ; }
-extract_body()   { echo "$1" | sed -E 's/::status::[0-9]+$//' ; }
+# Use bash parameter expansion, not sed: sed is line-oriented, so any response
+# body containing a newline (multi-line meta description, robots.txt, etc.)
+# made extract_status return body+code instead of just the code. ${var##*X}
+# returns everything after the last X; ${var%X*} returns everything before it.
+extract_status() { local s="$1"; printf '%s' "${s##*::status::}"; }
+extract_body()   { local s="$1"; printf '%s' "${s%::status::*}"; }
 
 echo ""
 echo -e "${bold}=== mambakkam.net smoke check ===${reset}"
