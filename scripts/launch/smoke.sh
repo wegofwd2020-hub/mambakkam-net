@@ -55,12 +55,18 @@ done
 BASE_URL="${POSITIONAL[0]:-http://127.0.0.1:8081}"
 BASE_URL="${BASE_URL%/}"   # strip trailing slash
 
+# ── JSON step logger (writes /opt/mambakkam/logs/smoke-*.json) ────────────
+source "$(dirname "${BASH_SOURCE[0]}")/_log.sh"
+log_init smoke
+
 # ── Output helpers ─────────────────────────────────────────────────────────
 bold="\033[1m"; green="\033[0;32m"; yellow="\033[0;33m"; red="\033[0;31m"; reset="\033[0m"
 declare -a FAILURES=()
 
-pass() { echo -e "  ${green}✓${reset} $1"; }
-fail() { echo -e "  ${red}✗${reset} $1 — $2"; FAILURES+=("$1: $2"); }
+# pass / fail close the currently-open log step. Callers open one with
+# log_step "<short step name>" before invoking the check.
+pass() { echo -e "  ${green}✓${reset} $1"; log_step_ok; }
+fail() { echo -e "  ${red}✗${reset} $1 — $2"; FAILURES+=("$1: $2"); log_step_fail "$2"; }
 
 # Curl wrapper: emits HTTP status code + body to stdout, separated by ::status::.
 # Times out after 10 seconds. Follows redirects (we want to test the final page).
@@ -96,6 +102,7 @@ echo ""
 
 # ── Home ───────────────────────────────────────────────────────────────────
 echo "Home:"
+log_step "GET /"
 RESP=$(http_get "$BASE_URL/")
 STATUS=$(extract_status "$RESP")
 BODY=$(extract_body "$RESP")
@@ -108,6 +115,7 @@ fi
 # ── Sitemap ────────────────────────────────────────────────────────────────
 echo ""
 echo "Sitemap:"
+log_step "GET /sitemap-index.xml"
 RESP=$(http_get "$BASE_URL/sitemap-index.xml")
 STATUS=$(extract_status "$RESP")
 BODY=$(extract_body "$RESP")
@@ -120,6 +128,7 @@ fi
 # ── People ─────────────────────────────────────────────────────────────────
 echo ""
 echo "People:"
+log_step "GET /people"
 RESP=$(http_get "$BASE_URL/people")
 STATUS=$(extract_status "$RESP")
 BODY=$(extract_body "$RESP")
@@ -129,6 +138,7 @@ else
   fail "GET /people" "status=$STATUS"
 fi
 
+log_step "GET /people/siva-m"
 RESP=$(http_get "$BASE_URL/people/siva-m")
 STATUS=$(extract_status "$RESP")
 BODY=$(extract_body "$RESP")
@@ -141,6 +151,7 @@ fi
 # ── Landmarks ──────────────────────────────────────────────────────────────
 echo ""
 echo "Landmarks:"
+log_step "GET /landmarks"
 RESP=$(http_get "$BASE_URL/landmarks")
 STATUS=$(extract_status "$RESP")
 if [[ "$STATUS" == "200" ]]; then
@@ -149,6 +160,7 @@ else
   fail "GET /landmarks" "status=$STATUS"
 fi
 
+log_step "GET /landmarks/ayyanar-shrine"
 RESP=$(http_get "$BASE_URL/landmarks/ayyanar-shrine")
 STATUS=$(extract_status "$RESP")
 if [[ "$STATUS" == "200" ]]; then
@@ -160,6 +172,7 @@ fi
 # ── Work ───────────────────────────────────────────────────────────────────
 echo ""
 echo "Work:"
+log_step "GET /work"
 RESP=$(http_get "$BASE_URL/work")
 STATUS=$(extract_status "$RESP")
 BODY=$(extract_body "$RESP")
@@ -169,6 +182,7 @@ else
   fail "GET /work" "status=$STATUS"
 fi
 
+log_step "GET /work/studybuddy-ondemand"
 RESP=$(http_get "$BASE_URL/work/studybuddy-ondemand")
 STATUS=$(extract_status "$RESP")
 if [[ "$STATUS" == "200" ]]; then
@@ -180,6 +194,7 @@ fi
 # ── 404 handling ───────────────────────────────────────────────────────────
 echo ""
 echo "404 handling:"
+log_step "GET /missing-route (expect 404)"
 RESP=$(http_get_noredirect "$BASE_URL/this-route-does-not-exist-$(date +%s)")
 STATUS=$(extract_status "$RESP")
 if [[ "$STATUS" == "404" ]]; then
@@ -191,6 +206,7 @@ fi
 # ── robots.txt ─────────────────────────────────────────────────────────────
 echo ""
 echo "robots.txt:"
+log_step "GET /robots.txt"
 RESP=$(http_get "$BASE_URL/robots.txt")
 STATUS=$(extract_status "$RESP")
 BODY=$(extract_body "$RESP")
