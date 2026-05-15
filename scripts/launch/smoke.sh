@@ -9,6 +9,15 @@
 #   bash scripts/launch/smoke.sh                                # default: 127.0.0.1:8081
 #   bash scripts/launch/smoke.sh https://mambakkam.net
 #   bash scripts/launch/smoke.sh https://staging.mambakkam.net
+#   bash scripts/launch/smoke.sh -k https://mambakkam.net       # tolerate self-signed
+#   SMOKE_INSECURE=1 bash scripts/launch/smoke.sh https://...   # env-var equivalent
+#
+# Flags:
+#   -k, --insecure   Pass curl's -k so self-signed / untrusted certs don't
+#                    fail the check. Use for local-VM rehearsal where the
+#                    Cloudflare Origin Cert is replaced by a self-signed one
+#                    (see scripts/launch/provision-local.sh). Equivalent to
+#                    setting SMOKE_INSECURE=1.
 #
 # Exit codes:
 #   0 — every check passed
@@ -29,11 +38,25 @@
 
 set -uo pipefail   # not -e: we want to collect failures, not abort on first
 
-BASE_URL="${1:-http://127.0.0.1:8081}"
+# ── Parse flags ────────────────────────────────────────────────────────────
+# Accept -k / --insecure in any position; remaining positional arg is BASE_URL.
+# SMOKE_INSECURE=1 in the env achieves the same thing — useful for CI.
+INSECURE_FLAG=()
+POSITIONAL=()
+for arg in "$@"; do
+  case "$arg" in
+    -k|--insecure) INSECURE_FLAG=(-k) ;;
+    -h|--help)     sed -n '2,30p' "$0"; exit 0 ;;
+    *)             POSITIONAL+=("$arg") ;;
+  esac
+done
+[[ "${SMOKE_INSECURE:-0}" == "1" ]] && INSECURE_FLAG=(-k)
+
+BASE_URL="${POSITIONAL[0]:-http://127.0.0.1:8081}"
 BASE_URL="${BASE_URL%/}"   # strip trailing slash
 
 # ── Output helpers ─────────────────────────────────────────────────────────
-bold="\033[1m"; green="\033[0;32m"; red="\033[0;31m"; reset="\033[0m"
+bold="\033[1m"; green="\033[0;32m"; yellow="\033[0;33m"; red="\033[0;31m"; reset="\033[0m"
 declare -a FAILURES=()
 
 pass() { echo -e "  ${green}✓${reset} $1"; }
@@ -43,7 +66,7 @@ fail() { echo -e "  ${red}✗${reset} $1 — $2"; FAILURES+=("$1: $2"); }
 # Times out after 10 seconds. Follows redirects (we want to test the final page).
 http_get() {
   local url="$1"
-  curl -sL -m 10 -w '::status::%{http_code}' \
+  curl -sL "${INSECURE_FLAG[@]}" -m 10 -w '::status::%{http_code}' \
     -A 'mambakkam-smoke/1.0' \
     "$url" 2>&1
 }
@@ -51,7 +74,7 @@ http_get() {
 # As above, but does NOT follow redirects (used for 404 + robots).
 http_get_noredirect() {
   local url="$1"
-  curl -s -m 10 -w '::status::%{http_code}' \
+  curl -s "${INSECURE_FLAG[@]}" -m 10 -w '::status::%{http_code}' \
     -A 'mambakkam-smoke/1.0' \
     "$url" 2>&1
 }
@@ -62,6 +85,9 @@ extract_body()   { echo "$1" | sed -E 's/::status::[0-9]+$//' ; }
 echo ""
 echo -e "${bold}=== mambakkam.net smoke check ===${reset}"
 echo "    target: $BASE_URL"
+if [[ ${#INSECURE_FLAG[@]} -gt 0 ]]; then
+  echo -e "    ${yellow}insecure: curl -k (self-signed certs tolerated)${reset}"
+fi
 echo ""
 
 # ── Home ───────────────────────────────────────────────────────────────────
