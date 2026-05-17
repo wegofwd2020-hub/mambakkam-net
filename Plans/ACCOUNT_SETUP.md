@@ -1,7 +1,7 @@
 # Account & Email Setup — Day -1 (Sat May 16) 17:00–20:30 EDT
 
-**Document version:** 1.0
-**Date:** 2026-05-09
+**Document version:** 1.4
+**Date:** 2026-05-16
 **Audience:** Operator (Sivakumar)
 **Window:** Day -1 (Sat May 16 2026), 17:00–20:30 EDT (3.5 hr block)
 **Companion docs:**
@@ -21,20 +21,20 @@ into the password manager. By 20:30 EDT you have everything tomorrow's
 
 | Section | Time block  | Account                                      | Why                                               |
 | ------- | ----------- | -------------------------------------------- | ------------------------------------------------- |
-| 1       | 17:00–17:15 | Cloudflare                                   | DNS for both domains, Origin Cert with shared SAN |
+| 1       | 17:00–17:20 | Cloudflare                                   | Register mambakkam.net, DNS, Origin Cert with shared SAN |
 | 2       | 17:15–17:25 | Hetzner Cloud                                | VPS provider; SSH key only — no CX22 yet          |
-| 3       | 17:25–17:55 | Zoho Mail                                    | mambakkam.net mailbox + DNS records               |
-| 4       | 17:55–18:15 | Gmail send-as                                | Compose-from custom domain                        |
+| 3       | 17:25–17:35 | Cloudflare Email Routing (mambakkam)         | Forward siva@mambakkam.net → personal Gmail       |
+| 4       | 17:35–17:45 | Gmail send-as                                | Compose-from custom domain (alias mode)           |
 | 5       | 18:15–18:40 | Grafana Cloud                                | Metrics + logs + alert rules                      |
 | 6       | 18:40–18:50 | Pre-stage DNS for mambakkam                  | Day-0 cutover is just a value change              |
-| 7       | 19:00–19:25 | studybuddy.app domain + DNS + Zoho mailboxes | StudyBuddy-side setup begins                      |
+| 7       | 19:00–19:25 | usestudybuddy.com domain + DNS + Email Routing  | StudyBuddy-side setup begins                      |
 | 8       | 19:25–19:50 | Auth0 dev tenant                             | Student + teacher login                           |
-| 9       | 19:50–20:30 | Stripe (test mode) + Sentry                  | Payments + error tracking                         |
+| 9       | 19:50–19:55 | Final go/no-go                               | Stripe + Sentry deferred to Phase 5; just the wrap-up |
 
-**Total:** 3.5 hours. Budget 4 if Zoho DKIM verification stalls.
+**Total:** ~3 hours. Email is no longer a bottleneck (Cloudflare Email Routing is ~5 min/zone with no DKIM wait). §9 Stripe + Sentry deferred — neither blocks the demo (Stripe is Phase 5; Sentry replaced by Grafana Cloud Loki for error visibility).
 
-**No credit card needed for:** Cloudflare, Zoho free tier, Grafana Cloud, Auth0 free tier, Stripe (test mode), Sentry free tier, Plausible has paid only.
-**Credit card needed for:** Hetzner Cloud (€7.50 deposit credit; CX22 billing starts Day 0 morning when you spin one up).
+**No credit card needed for:** Cloudflare Email Routing, Grafana Cloud, Auth0 free tier, Stripe (test mode), Sentry free tier, Plausible has paid only.
+**Credit card needed for:** Cloudflare (one-time ~$10–11 for the `mambakkam.net` registration in §1.2), Hetzner Cloud (€7.50 deposit credit; CX22 billing starts Day 0 morning when you spin one up).
 
 ---
 
@@ -43,30 +43,33 @@ into the password manager. By 20:30 EDT you have everything tomorrow's
 - [ ] Personal email account (for all sign-ups) — recommend a dedicated account or +alias e.g. `you+studybuddy-launch@gmail.com`
 - [ ] Phone for 2FA (most providers require it)
 - [ ] Password manager unlocked (1Password, Bitwarden, etc.) with a fresh "StudyBuddy Launch May 2026" vault/folder
-- [ ] Credit card (Hetzner only)
-- [ ] Confirmation that you currently own `mambakkam.net` (check current registrar; you'll move DNS to Cloudflare in §1)
+- [ ] Credit card (Cloudflare domain registration + Hetzner)
+- [ ] `mambakkam.net` is **not** yet registered — you'll register it fresh at Cloudflare Registrar in §1.2 (~$10–11/yr for `.net`). If someone has since taken it, fall back to Porkbun or pick an alternative TLD before continuing.
 - [ ] This document open in another tab
 
 **Naming convention for password-manager entries** — use this consistently:
 
 ```
 [Launch May 2026] Cloudflare account
+[Launch May 2026] Cloudflare Registrar — mambakkam.net (registration date + expiry + auth code)
 [Launch May 2026] Cloudflare Origin Cert (mambakkam + studybuddy SAN)
 [Launch May 2026] Hetzner Cloud account
 [Launch May 2026] Hetzner SSH keypair
-[Launch May 2026] Zoho org admin
-[Launch May 2026] Zoho App Password (Gmail integration)
 ... (one entry per credential)
+
+Cloudflare Email Routing (§3, §7) needs no separate credentials — it's
+managed inside your Cloudflare account from §1.1.
 ```
 
 The bracket prefix lets you find them all with one search later.
 
 ---
 
-## §1 — Cloudflare (17:00–17:15, 15 min)
+## §1 — Cloudflare (17:00–17:20, 20 min)
 
-mambakkam.net is presumed already registered at a previous registrar.
-You're moving DNS to Cloudflare nameservers and pre-configuring SSL.
+mambakkam.net is not yet registered. You'll register it at Cloudflare
+Registrar (which auto-attaches the zone with Cloudflare nameservers, so
+no nameserver-change step is needed), then pre-configure SSL.
 
 ### 1.1 — Account
 
@@ -75,19 +78,26 @@ You're moving DNS to Cloudflare nameservers and pre-configuring SSL.
 - [ ] Enable 2FA (Account → Profile → Authentication)
 - [ ] **Save** to password manager: `[Launch May 2026] Cloudflare account` (email + password)
 
-### 1.2 — Add `mambakkam.net` zone
+### 1.2 — Register `mambakkam.net` at Cloudflare Registrar
 
-- [ ] Cloudflare dashboard → "+ Add a Site" → enter `mambakkam.net` → Free plan
-- [ ] Cloudflare scans existing DNS records — review for stale Netlify/Vercel A/AAAA records (delete any not part of the launch plan)
-- [ ] Note Cloudflare's two assigned nameservers (e.g. `kim.ns.cloudflare.com`, `walt.ns.cloudflare.com`)
-- [ ] **Go to your previous registrar** (where mambakkam.net was registered) and change the nameservers to those two values
-- [ ] Wait — propagation can take up to 24h, but usually <30 min. **Move on to §1.3 while you wait.**
+- [ ] Add a payment method first: top-right profile → **Billing → Payment Methods → Add** (credit card required; Cloudflare Registrar does not accept other methods for domain purchases)
+- [ ] Cloudflare dashboard → left sidebar → **Domain Registration → Register Domains**
+- [ ] Search `mambakkam` → confirm `.net` is available at ~$10–11/yr (Cloudflare passes through wholesale; no markup)
+- [ ] Click **Purchase** → 1-year term (extend later if you want)
+- [ ] Contact info — leave Cloudflare's WHOIS privacy **ON** (free; real contact details go only to the registry, not public WHOIS)
+- [ ] Confirm + pay; registration completes in ~1–2 min
+- [ ] The zone auto-attaches to your Cloudflare account with Cloudflare nameservers already assigned — no separate "Add a Site" or nameserver-change step needed
+- [ ] **Save** to password manager: `[Launch May 2026] Cloudflare Registrar — mambakkam.net` (registration date, expiry date, and the transfer auth code if Cloudflare shows one)
 
-**Verify (later, can run from terminal anytime):**
+**If `.net` is not registrable at Cloudflare** (rare, but the supported-TLD list does change): register at **Porkbun** instead (~$11/yr), then come back here, do the old §1.2 flow — "+ Add a Site" → Free plan → change nameservers at Porkbun to the two `*.ns.cloudflare.com` values Cloudflare assigns. Transfer to Cloudflare Registrar after the 60-day ICANN new-registration lock expires (~mid-July 2026).
+
+**Verify (can run from terminal anytime once registration completes):**
 
 ```bash
 dig NS mambakkam.net +short
-# Expect: kim.ns.cloudflare.com / walt.ns.cloudflare.com (or whatever Cloudflare assigned)
+# Expect: two *.ns.cloudflare.com nameservers
+whois mambakkam.net | grep -iE "registrar:|expir"
+# Expect: Registrar: Cloudflare, Inc.
 ```
 
 ### 1.3 — Generate Cloudflare Origin Certificate (SAN list for both domains)
@@ -98,15 +108,15 @@ dig NS mambakkam.net +short
   ```
   mambakkam.net
   *.mambakkam.net
-  demo.studybuddy.app
+  demo.usestudybuddy.com
   ```
-  _Important:_ `demo.studybuddy.app` must be in the SAN list now even though that domain isn't on Cloudflare yet — Cloudflare allows it because Origin Certs are issued by Cloudflare's PKI and don't require domain ownership at generation time. StudyBuddy uses this same cert when it joins on Day 0 afternoon.
+  _Important:_ `demo.usestudybuddy.com` must be in the SAN list now even though that domain isn't on Cloudflare yet — Cloudflare allows it because Origin Certs are issued by Cloudflare's PKI and don't require domain ownership at generation time. StudyBuddy uses this same cert when it joins on Day 0 afternoon.
 - [ ] Validity: **15 years** (default)
 - [ ] Click "Create" — Cloudflare displays the certificate + private key ONCE
 - [ ] **Copy both** to the password manager:
   - `[Launch May 2026] Cloudflare Origin Cert (cert PEM)`
   - `[Launch May 2026] Cloudflare Origin Key (private key PEM)`
-  - SAN list = `mambakkam.net + *.mambakkam.net + demo.studybuddy.app`
+  - SAN list = `mambakkam.net + *.mambakkam.net + demo.usestudybuddy.com`
 - [ ] Tomorrow morning you'll paste these into `/etc/ssl/cloudflare/origin-{cert,key}.pem` on the VPS
 
 ### 1.4 — SSL/TLS settings for `mambakkam.net`
@@ -116,7 +126,7 @@ dig NS mambakkam.net +short
 - [ ] **SSL/TLS → Edge Certificates** → **Always Use HTTPS** = **ON**
 - [ ] **Speed → Optimization** → leave defaults (Auto Minify is fine; Rocket Loader off)
 
-> studybuddy.app DNS work happens in §7 below, after the domain is registered.
+> usestudybuddy.com DNS work happens in §7 below, after the domain is registered.
 
 ---
 
@@ -172,105 +182,99 @@ Skip if you don't want Hetzner-side snapshots — restic local backups are suffi
 
 ---
 
-## §3 — Zoho Mail (17:25–17:55, 30 min)
+## §3 — Cloudflare Email Routing for mambakkam.net (17:25–17:35, 10 min)
 
-mambakkam.net mailbox first. studybuddy.app mailboxes get added in §7
-once that domain is registered.
+Demo-grade inbound mail: forward `siva@mambakkam.net` → your personal
+Gmail. No mailbox, no IMAP, no SMTP, no monthly bill. When real inbound
+traffic justifies a separate inbox, upgrade to a paid provider (Zoho
+Mail Lite ~$12/yr, Migadu ~$19/yr, Fastmail ~$36/yr) and revisit §3 + §4
++ the DEPLOYMENT_PLAN cost table.
 
-### 3.1 — Org + first domain
+Studybuddy.app uses the same pattern in §7.
 
-- [ ] Sign up at https://www.zoho.com/mail/zohomail-pricing.html → **Forever Free Plan**
-- [ ] Verify email
-- [ ] Enable 2FA
-- [ ] At "Add domain" prompt — enter `mambakkam.net`
-- [ ] Zoho displays a verification TXT record (e.g. `zoho-verification=zb12345abc...`)
-- [ ] **Save** to password manager: `[Launch May 2026] Zoho org admin`
+### 3.1 — Enable Email Routing
 
-### 3.2 — Verification TXT at Cloudflare
+- [ ] Cloudflare dashboard → mambakkam.net zone → left sidebar → **Email → Email Routing**
+- [ ] Click **Get started** (or **Enable Email Routing**)
+- [ ] Cloudflare prompts to auto-add the required DNS records (3× MX + 1× SPF TXT). Click **Add records and enable** — Cloudflare writes them directly into the zone, no manual entry needed.
 
-> **Prerequisite:** §1.2 nameserver change at your previous registrar must have propagated to Cloudflare being authoritative for `mambakkam.net`. Verify with `dig NS mambakkam.net +short` returning Cloudflare's two nameservers. If not yet propagated (usually <30 min, can be up to 24h), come back to §3.2 later — DO NOT add the TXT record at the previous registrar instead, you'll have to redo it.
+Records Cloudflare adds for you (FYI; do not edit):
 
-- [ ] Cloudflare → mambakkam.net → **DNS → Records → + Add record**
-- [ ] Type: **TXT**, Name: **@** (apex), Content: paste the `zoho-verification=...` value, TTL: Auto, Proxy: **DNS only** (grey cloud, not orange)
+- 3× MX at apex pointing to `route1.mx.cloudflare.net`, `route2.mx.cloudflare.net`, `route3.mx.cloudflare.net` (priorities CF-assigned)
+- 1× TXT at apex: `v=spf1 include:_spf.mx.cloudflare.net ~all`
+
+### 3.2 — Add destination address (your personal Gmail)
+
+- [ ] Email Routing → **Destination addresses** tab → **+ Add destination address**
+- [ ] Enter your personal Gmail (e.g. `wegofwd2020@gmail.com`)
+- [ ] Cloudflare sends a verification email to that address — open Gmail, click the **Verify** link
+- [ ] Back in Cloudflare, destination shows green ✓ **Verified**
+
+### 3.3 — Create routing rule for `siva@mambakkam.net`
+
+- [ ] Email Routing → **Routes** tab → **+ Create address**
+- [ ] Custom address: `siva` (Cloudflare auto-appends `@mambakkam.net`)
+- [ ] Action: **Send to an email** → select your verified Gmail
 - [ ] Save
-- [ ] Wait ~2 min for propagation, then back in Zoho click **"Verify"**
+- [ ] (Optional but recommended) Also add a **Catch-all** rule: top of the Routes tab → enable Catch-all → action: Send to your Gmail. Catches typos and any `info@`, `hello@`, etc. that future visitors might guess.
+
+### 3.4 — DMARC for the domain (single TXT)
+
+DMARC is not added by Cloudflare automatically. Add it manually so you can monitor send-side behaviour and so receivers know the domain's posture.
+
+- [ ] Cloudflare → DNS → Records → **+ Add record**
+- [ ] Type: **TXT**, Name: **\_dmarc**, Content: `v=DMARC1; p=none; rua=mailto:wegofwd2020@gmail.com`
+- [ ] _Why `p=none`:_ when you send-as from Gmail in §4, DKIM signs as `gmail.com` and SPF passes for `gmail.com`, so neither aligns with `mambakkam.net`. `p=none` puts DMARC in monitor-only mode — messages still deliver. Tighten to `p=quarantine` later if/when you move to a real mail provider that can sign DKIM for the domain.
+
+### 3.5 — End-to-end inbound test
+
+- [ ] From a different email account (not your personal Gmail — outbound from Gmail to yourself can short-circuit the test), send a message to `siva@mambakkam.net`
+- [ ] Within ~30 sec, the message lands in your personal Gmail inbox
+- [ ] Open it and check headers: `Received:` chain should show `*.mx.cloudflare.net` as the first hop
 
 **Verify (terminal):**
 
 ```bash
-dig TXT mambakkam.net +short
-# Expect to see "zoho-verification=zb..." among the results
+dig MX mambakkam.net +short                # route1.mx.cloudflare.net / route2.../ route3...
+dig TXT mambakkam.net +short | grep spf1   # v=spf1 include:_spf.mx.cloudflare.net ~all
+dig TXT _dmarc.mambakkam.net +short        # v=DMARC1; p=none; rua=mailto:...
 ```
 
-### 3.3 — Mailbox + DNS records (MX, SPF, DKIM, DMARC)
-
-- [ ] In Zoho post-verification — create mailbox `siva@mambakkam.net` (or your chosen handle); set a strong password
-- [ ] Zoho displays four sets of records to add at Cloudflare. Copy each carefully:
-
-#### MX records (3 entries)
-
-- [ ] Cloudflare → DNS → + Add record:
-  - Type: **MX**, Name: **@**, Server: **mx.zoho.com**, Priority: **10**
-- [ ] Repeat: Server: **mx2.zoho.com**, Priority: **20**
-- [ ] Repeat: Server: **mx3.zoho.com**, Priority: **50**
-
-#### SPF (single TXT at apex)
-
-- [ ] Type: **TXT**, Name: **@**, Content: `v=spf1 include:zoho.com ~all`, Proxy: DNS only
-
-#### DKIM
-
-- [ ] In Zoho → Domains → mambakkam.net → **Email Configuration → DKIM** — Zoho generates a public key
-- [ ] Cloudflare DNS → + Add record:
-  - Type: **TXT**, Name: **zmail.\_domainkey**, Content: paste Zoho's public key string
-
-#### DMARC (single TXT)
-
-- [ ] Type: **TXT**, Name: **\_dmarc**, Content: `v=DMARC1; p=quarantine; rua=mailto:siva@mambakkam.net`
-
-#### Verify all four green in Zoho
-
-- [ ] Back in Zoho's UI, click **Verify** on each (MX, SPF, DKIM). DKIM may take 5-10 min.
-- [ ] Once all green, **save** to password manager: `[Launch May 2026] Zoho mailbox siva@mambakkam.net` (email + password)
-
-**Verify (terminal):**
-
-```bash
-dig MX mambakkam.net +short                # mx.zoho.com / mx2.zoho.com / mx3.zoho.com
-dig TXT mambakkam.net +short | grep spf1   # v=spf1 include:zoho.com ~all
-dig TXT zmail._domainkey.mambakkam.net +short  # long key string starting v=DKIM1
-dig TXT _dmarc.mambakkam.net +short        # v=DMARC1...
-```
-
-### 3.4 — App Password for Gmail integration
-
-- [ ] In Zoho → Profile → **Security → Application-Specific Passwords → Generate**
-- [ ] Description: `Gmail send-as integration (mambakkam)`
-- [ ] Zoho displays the App Password ONCE (16-char string)
-- [ ] **Save** to password manager: `[Launch May 2026] Zoho App Password (mambakkam Gmail)`
+> No password-manager entry needed for §3 — Cloudflare Email Routing has no separate credentials. Account-level Cloudflare creds from §1.1 are all you need.
 
 ---
 
-## §4 — Gmail send-as for `siva@mambakkam.net` (17:55–18:15, 20 min)
+## §4 — Gmail send-as for `siva@mambakkam.net` (17:35–17:45, 10 min)
 
 Lets you compose mail FROM `siva@mambakkam.net` while reading via Gmail.
+Because Cloudflare Email Routing is inbound-only (no outbound SMTP),
+you use Gmail's own outbound — i.e. "Treat as alias" mode.
+
+**Caveats of alias mode** (acceptable for a demo, document for later):
+
+- Recipients in some clients see `via gmail.com` next to your From address
+- DKIM signs as `gmail.com`, not `mambakkam.net` (no DMARC alignment — that's why §3.4 sets `p=none`)
+- Outbound from your personal Gmail account is rate-limited and tied to your Gmail reputation
+- When you move to a paid mail provider, re-do this with provider SMTP + App Password and tighten DMARC to `p=quarantine`
 
 ### 4.1 — Add as send-as identity
 
-> **Prerequisite:** §3.3 MX records must be propagated and accepting mail. Gmail's verification email below goes TO `siva@mambakkam.net`, which means MX needs to be live. Quick check: `dig MX mambakkam.net +short` returns `mx.zoho.com / mx2.zoho.com / mx3.zoho.com`. If empty or wrong, wait — §3.3 may still be propagating. If the verification email doesn't arrive within 10 min, this is the most likely cause (not Gmail being slow).
+> **Prerequisite:** §3.3 routing rule is live, §3.5 inbound test passed. Gmail's verification email below goes TO `siva@mambakkam.net`, which means Cloudflare Email Routing has to be forwarding correctly. If §3.5 worked, this will too.
 
 - [ ] In Gmail → **Settings (gear) → See all settings → Accounts and Import → Send mail as → Add another email address**
-- [ ] Name: `Siva Mambakkam`, Email: `siva@mambakkam.net`, **Treat as alias: NO** (uncheck), → Next
-- [ ] SMTP Server: `smtp.zoho.com`, Port: `465`, Username: `siva@mambakkam.net`, Password: paste the Zoho App Password from §3.4, **Secured connection using SSL** (default), → Add Account
-- [ ] Gmail sends a verification email to `siva@mambakkam.net` — open Zoho mail, find it, click the confirm link
-- [ ] Back in Gmail, **set as default From if you want** (probably keep your personal Gmail as default)
+- [ ] Name: `Siva Mambakkam`, Email: `siva@mambakkam.net`, **Treat as alias: YES** (leave checked — the default), → Next Step
+- [ ] Gmail offers an SMTP form. You can **skip it** if Gmail shows a "Send through Gmail" option (it usually does for aliases you've forwarded to yourself). If Gmail insists on SMTP details, see Fallback below.
+- [ ] Gmail sends a verification email to `siva@mambakkam.net` — it forwards via Cloudflare to your personal Gmail inbox — open it, click the **Confirm** link (or copy the verification code into the popup)
+- [ ] Back in Gmail Settings → **set as default From** if you want all outbound to default to this identity (your call; many keep personal Gmail as default and pick the alias per-compose)
+
+**Fallback if Gmail won't let you use "Send through Gmail":** This usually only happens when "Treat as alias" is unchecked. Make sure it's checked. If Gmail still requires SMTP, you'll need to either (a) sign up for a paid mail provider in §3 and redo §4 with their SMTP, or (b) use a free SMTP relay like Brevo (300/day free) — out of scope for the demo path.
 
 ### 4.2 — Test round-trip
 
 - [ ] Compose new mail in Gmail — From dropdown shows `Siva Mambakkam <siva@mambakkam.net>`
-- [ ] Send to your personal Gmail (or any address you can read)
-- [ ] Reply from there — confirm reply lands in Zoho inbox
-- [ ] **Verify** the test message in Zoho webmail (https://mail.zoho.com)
+- [ ] Send to a non-Gmail address you control (Gmail-to-Gmail can hide alias issues)
+- [ ] Confirm it arrived from `siva@mambakkam.net`
+- [ ] Reply from that address — confirm reply lands in your personal Gmail inbox (forwarded by Cloudflare Email Routing)
 
 If round-trip works, mambakkam mail is fully wired.
 
@@ -354,57 +358,53 @@ dig www.mambakkam.net +short # mambakkam.net (then 192.0.2.1)
 
 ---
 
-## §7 — `studybuddy.app` domain + DNS + Zoho mailboxes (19:00–19:25, 25 min)
+## §7 — `usestudybuddy.com` domain + DNS + Email Routing (19:00–19:25, 25 min)
 
 ### 7.1 — Register the domain
 
-- [ ] Cloudflare dashboard → **Domain Registration → Register Domain** → search `studybuddy.app`
+- [ ] Cloudflare dashboard → **Domain Registration → Register Domain** → search `usestudybuddy.com`
 - [ ] If available, add to cart and complete purchase (~$12-15/yr for `.app`; auto-renew default ON; ICANN privacy on)
-- [ ] **Save** to password manager: `[Launch May 2026] studybuddy.app domain` — note the registration date + auto-renew status
+- [ ] **Save** to password manager: `[Launch May 2026] usestudybuddy.com domain` — note the registration date + auto-renew status
 - [ ] Cloudflare automatically configures the zone — no nameserver migration needed since registration was at Cloudflare itself
 
-> If `studybuddy.app` is unavailable, decide on alternative: `studybuddy.io`, `studybuddy.dev`, `studybuddy.cloud`. Update `.env.demo`'s `FRONTEND_URL` and the host-nginx vhost `server_name` accordingly tomorrow morning.
+> If `usestudybuddy.com` is unavailable, decide on alternative: `studybuddy.io`, `studybuddy.dev`, `studybuddy.cloud`. Update `.env.demo`'s `FRONTEND_URL` and the host-nginx vhost `server_name` accordingly tomorrow morning.
 
-### 7.2 — Cloudflare DNS for `demo.studybuddy.app`
+### 7.2 — Cloudflare DNS for `demo.usestudybuddy.com`
 
-- [ ] Cloudflare → studybuddy.app → DNS → **+ Add record**
+- [ ] Cloudflare → usestudybuddy.com → DNS → **+ Add record**
 - [ ] Type: **A**, Name: **demo**, IPv4: **192.0.2.1** (placeholder, same idea as §6), TTL: **5 min**, Proxy: **DNS only** (off — turning proxy on without a working origin would 502; flip to orange tomorrow morning at 12:45 EDT during StudyBuddy cutover)
 
-### 7.3 — SSL/TLS for studybuddy.app
+### 7.3 — SSL/TLS for usestudybuddy.com
 
-- [ ] Cloudflare → studybuddy.app → **SSL/TLS → Overview** → Mode: **Full (strict)**
+- [ ] Cloudflare → usestudybuddy.com → **SSL/TLS → Overview** → Mode: **Full (strict)**
 - [ ] **SSL/TLS → Edge Certificates** → **Always Use HTTPS** = **ON**
-- [ ] (Origin Cert was already generated in §1.3 with `demo.studybuddy.app` in the SAN list — no work here)
+- [ ] (Origin Cert was already generated in §1.3 with `demo.usestudybuddy.com` in the SAN list — no work here)
 
-### 7.4 — Add studybuddy.app to existing Zoho org
+### 7.4 — Enable Cloudflare Email Routing for usestudybuddy.com
 
-- [ ] Zoho admin console → Domains → **+ Add Domain** → enter `studybuddy.app`
-- [ ] Add the Zoho verification TXT at Cloudflare DNS (same pattern as §3.2)
-- [ ] Verify in Zoho
+Same pattern as §3 for mambakkam.net — inbound forwarding only, demo-grade.
 
-### 7.5 — Mailboxes + DNS for studybuddy.app
+- [ ] Cloudflare dashboard → usestudybuddy.com zone → **Email → Email Routing → Get started**
+- [ ] Click **Add records and enable** — Cloudflare writes 3× MX + 1× SPF TXT into the zone automatically
+- [ ] Destination addresses tab — your personal Gmail is already verified from §3.2, so it shows in the dropdown; no need to re-verify
 
-- [ ] Create mailbox `support@studybuddy.app` (strong password)
-- [ ] Create mailbox `sales@studybuddy.app` (strong password)
-- [ ] Add MX (mx.zoho.com / mx2 / mx3 — same priorities as §3.3) at Cloudflare for **studybuddy.app**
-- [ ] Add SPF: TXT @ `v=spf1 include:zoho.com ~all`
-- [ ] Add DKIM: from Zoho config
-- [ ] Add DMARC: TXT \_dmarc `v=DMARC1; p=quarantine; rua=mailto:support@studybuddy.app`
-- [ ] **Save** to password manager:
-  - `[Launch May 2026] Zoho mailbox support@studybuddy.app`
-  - `[Launch May 2026] Zoho mailbox sales@studybuddy.app`
+### 7.5 — Routing rules + DMARC for usestudybuddy.com
 
-### 7.6 — Generate App Password for Gmail integration (StudyBuddy)
+- [ ] Email Routing → Routes → **+ Create address** → `support` → action: send to your verified Gmail
+- [ ] Repeat: **+ Create address** → `sales` → send to your Gmail
+- [ ] (Recommended) Enable **Catch-all** → send to your Gmail (catches typos, plus any guessed addresses like `hello@`, `info@`)
+- [ ] DNS → Records → **+ Add record**: Type **TXT**, Name **\_dmarc**, Content `v=DMARC1; p=none; rua=mailto:wegofwd2020@gmail.com`
+- [ ] Same `p=none` rationale as §3.4 — Gmail send-as alias mode in §7.6 won't DMARC-align for the domain
 
-- [ ] In Zoho → Profile → Security → App Passwords → **Generate**
-- [ ] Description: `Gmail send-as integration (studybuddy.app)`
-- [ ] Note: this is a SECOND App Password for the same Zoho account; `support@studybuddy.app` and `siva@mambakkam.net` are independent send-as identities in Gmail
-- [ ] **Save** to password manager: `[Launch May 2026] Zoho App Password (studybuddy.app Gmail)`
+### 7.6 — Add support@usestudybuddy.com as Gmail send-as
 
-### 7.7 — Add support@studybuddy.app as Gmail send-as (optional but recommended)
+- [ ] Gmail → Settings → Accounts → Send mail as → **Add another email address**
+- [ ] Name: `StudyBuddy Support`, Email: `support@usestudybuddy.com`, **Treat as alias: YES**
+- [ ] Send through Gmail (same pattern as §4.1 — no SMTP server needed in alias mode)
+- [ ] Gmail sends a verification email to `support@usestudybuddy.com` — it forwards via Cloudflare to your personal Gmail; click the Confirm link
+- [ ] (Optional) Repeat for `sales@usestudybuddy.com` if you want it as a separate identity in the Gmail From dropdown
 
-- [ ] Gmail → Settings → Accounts → Send mail as → **Add another email address** → use the App Password from §7.6
-- [ ] Verify via the Zoho mailbox confirmation link
+> No password-manager entry needed for §7.4–7.6 — Cloudflare Email Routing has no separate credentials. When you upgrade to a paid mail provider (and re-enable mailbox-based receive + provider SMTP), come back here and add mailbox + App Password entries to the password manager.
 
 ---
 
@@ -426,9 +426,9 @@ Free tier — 7,500 MAU, more than enough for the demo.
 - [ ] Auth0 dashboard → **Applications → Create Application**
 - [ ] Name: `StudyBuddy Student`, Type: **Single Page Application** → Create
 - [ ] Settings tab:
-  - **Allowed Callback URLs:** `https://demo.studybuddy.app/auth/callback, http://localhost:3000/auth/callback`
-  - **Allowed Logout URLs:** `https://demo.studybuddy.app, http://localhost:3000`
-  - **Allowed Web Origins:** `https://demo.studybuddy.app, http://localhost:3000`
+  - **Allowed Callback URLs:** `https://demo.usestudybuddy.com/auth/callback, http://localhost:3000/auth/callback`
+  - **Allowed Logout URLs:** `https://demo.usestudybuddy.com, http://localhost:3000`
+  - **Allowed Web Origins:** `https://demo.usestudybuddy.com, http://localhost:3000`
 - [ ] Save changes
 - [ ] **Note + save** to password manager:
   - `[Launch May 2026] Auth0 student client_id` (the **Client ID** from this app's Settings tab)
@@ -460,64 +460,27 @@ This is derived from your tenant domain — no separate config needed:
 
 ---
 
-## §9 — Stripe (test mode) + Sentry (19:50–20:30, 40 min)
+## §9 — Final go/no-go (19:50–19:55, 5 min)
 
-### 9.1 — Stripe sign-up
+Stripe + Sentry were originally planned for tonight. Both are deferred:
 
-- [ ] Sign up at https://dashboard.stripe.com/register
-- [ ] Email + password; do NOT activate live mode (no business info needed for test mode)
-- [ ] Enable 2FA
-- [ ] **Save** to password manager: `[Launch May 2026] Stripe account`
+- **Stripe** — code is wired in (`config.py` has `STRIPE_SECRET_KEY: str | None = None`; all usage sites do `getattr(..., None)` and only raise if a billing endpoint is hit). The demo flow (admin-provisioned Teacher + Student accounts browsing pre-built content) never touches a billing endpoint. Sign-up + test keys + webhook = deferred to Phase 5 (when a paid tier ships). Tonight: do nothing.
+- **Sentry** — error tracking. Skipped in favour of Grafana Cloud Loki (§5) for log-based error visibility. Less ergonomic (raw log lines vs grouped issues + stack traces) but saves a third-party dependency.
 
-### 9.2 — Test mode keys
+### §9.1–§9.5 — Deferred (Phase 5)
 
-- [ ] Top-right toggle: confirm **"Test mode"** is ON (orange tag)
-- [ ] **Developers → API keys**
-- [ ] **Note + save** to password manager:
-  - `[Launch May 2026] Stripe sk_test_*` (Secret key, click "Reveal")
-  - `[Launch May 2026] Stripe pk_test_*` (Publishable key)
+When you add a paid tier post-launch, come back here. Original steps (sign up at https://dashboard.stripe.com/register, capture `sk_test_*` + `pk_test_*` + webhook `whsec_*`, point webhook at `https://demo.usestudybuddy.com/api/v1/subscriptions/webhook` with the 6 subscription events) lived in v1.3 of this doc — pull from git history if you need them verbatim.
 
-### 9.3 — Test webhook endpoint
+For Sentry, original steps (sign up at https://sentry.io/signup/, create Python/FastAPI project, capture DSN) also lived in v1.3.
 
-- [ ] **Developers → Webhooks → + Add endpoint**
-- [ ] Endpoint URL: `https://demo.studybuddy.app/api/v1/subscriptions/webhook`
-- [ ] **Listen to**: select these events at minimum:
-  - `checkout.session.completed`
-  - `customer.subscription.created`
-  - `customer.subscription.updated`
-  - `customer.subscription.deleted`
-  - `invoice.payment_succeeded`
-  - `invoice.payment_failed`
-- [ ] After creation, Stripe shows the **Signing secret** (`whsec_...`)
-- [ ] **Note + save**: `[Launch May 2026] Stripe webhook signing secret (STRIPE_WEBHOOK_SECRET)`
-
-> The webhook will return 4xx tonight because demo.studybuddy.app isn't live yet — that's expected. Stripe retries on failure; once StudyBuddy is up tomorrow, the next test event will succeed.
-
-### 9.4 — Sentry sign-up
-
-- [ ] Sign up at https://sentry.io/signup/
-- [ ] Free Developer plan (no card)
-- [ ] Org name: `studybuddy` (or your handle)
-- [ ] **Save** to password manager: `[Launch May 2026] Sentry account`
-
-### 9.5 — Create project + DSN
-
-- [ ] **Projects → Create project**
-- [ ] Platform: **Python (FastAPI)**, Alert frequency: defaults are fine
-- [ ] Project name: `studybuddy-api`
-- [ ] After creation, Sentry shows the DSN (looks like `https://xxx@oNNN.ingest.sentry.io/PPP`)
-- [ ] **Note + save**: `[Launch May 2026] Sentry DSN`
-
-> Optional: create a second Sentry project for the Next.js frontend if you want separate error streams. The backend project alone is enough for the demo.
-
-### 9.6 — Final go/no-go (20:25–20:30, 5 min)
+### §9.6 — Final go/no-go (now §9, since 9.1–9.5 are skipped)
 
 Run through this checklist before closing the laptop:
 
-- [ ] All §1-§9 items have entries in the password manager (~25 entries total)
+- [ ] All §1-§8 items have entries in the password manager (~20 entries total)
 - [ ] You have one consolidated note somewhere with the values you'll paste into `.env.demo` tomorrow morning (see §10 below)
-- [ ] DNS for both `mambakkam.net` and `demo.studybuddy.app` is pre-staged at Cloudflare with TTL=5min, proxy off
-- [ ] Cloudflare Origin Cert + key are in the password manager
+- [ ] DNS for both `mambakkam.net` and `demo.usestudybuddy.com` is pre-staged at Cloudflare with TTL=5min, proxy off
+- [ ] Cloudflare Origin Cert + key are in the password manager (SAN: `mambakkam.net`, `*.mambakkam.net`, `demo.usestudybuddy.com`)
 - [ ] Hetzner SSH private key is in the password manager
 - [ ] You have NOT yet provisioned a CX22 (Day 0 morning at 08:00 EDT)
 - [ ] Tomorrow morning's checklist starts with: open this file, open the password manager, open `mambakkam-net/Plans/DEMO_LAUNCH_PLAN.md` §2 Day 0 runbook
@@ -537,10 +500,7 @@ morning. Pull each from the password manager.
 | Variable                                | Source                                                  |
 | --------------------------------------- | ------------------------------------------------------- |
 | `PLAUSIBLE_DOMAIN` (if using Plausible) | Plausible site setup — defer; not on tonight's list     |
-| `SMTP_HOST=smtp.zoho.com`               | static                                                  |
-| `SMTP_PORT=465`                         | static                                                  |
-| `SMTP_USER=siva@mambakkam.net`          | static                                                  |
-| `SMTP_PASSWORD`                         | `[Launch May 2026] Zoho App Password (mambakkam Gmail)` |
+| _SMTP_HOST / SMTP_USER / SMTP_PASSWORD_ | **Omit for demo.** No app-originated email ships in the demo; outbound from `siva@mambakkam.net` goes via Gmail send-as (alias mode), not from the server. When you later add a contact form + paid mail provider, paste back the four SMTP_* lines with provider host/credentials. |
 
 ### `/opt/studybuddy/.env.demo` (~12 lines need pasting; rest auto-generated by `openssl rand`)
 
@@ -558,11 +518,9 @@ morning. Pull each from the password manager.
 | `AUTH0_MGMT_CLIENT_ID`             | `[Launch May 2026] Auth0 M2M client_id`                      |
 | `AUTH0_MGMT_CLIENT_SECRET`         | `[Launch May 2026] Auth0 M2M client_secret`                  |
 | `AUTH0_MGMT_API_URL`               | `[Launch May 2026] Auth0 M2M API URL`                        |
-| `SMTP_USER=support@studybuddy.app` | static                                                       |
-| `SMTP_PASSWORD`                    | `[Launch May 2026] Zoho App Password (studybuddy.app Gmail)` |
-| `STRIPE_SECRET_KEY`                | `[Launch May 2026] Stripe sk_test_*`                         |
-| `STRIPE_WEBHOOK_SECRET`            | `[Launch May 2026] Stripe webhook signing secret`            |
-| `SENTRY_DSN`                       | `[Launch May 2026] Sentry DSN`                               |
+| _SMTP_USER / SMTP_PASSWORD_        | **Omit for demo.** Same rationale as `/opt/mambakkam/.env.demo` above — no app-originated email in demo; add when you wire a contact form + paid mail provider. |
+| _STRIPE_SECRET_KEY / STRIPE_WEBHOOK_SECRET_ | **Omit for demo.** Stripe is Phase-5 only; `config.py` defaults `STRIPE_SECRET_KEY: str \| None = None` and all usage sites do `getattr(..., None)` — app boots fine without these. Add when a paid tier ships. |
+| _SENTRY_DSN_                       | **Omit for demo.** Error visibility comes from Grafana Cloud Loki (§5) instead. Add Sentry later if grouped issues + stack traces become worth the extra dependency. |
 | `HCLOUD_TOKEN` (optional)          | `[Launch May 2026] Hetzner API token`                        |
 
 ### `/opt/mambakkam/infra/monitoring/.env.monitoring`
@@ -603,10 +561,10 @@ These you set in **GitHub → repo → Settings → Secrets and variables → Ac
 
 | Symptom                                                                | Diagnosis                          | Recover                                                                                                                                                                  |
 | ---------------------------------------------------------------------- | ---------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| Cloudflare nameserver migration not propagating after 30 min           | Some registrars cache aggressively | Wait until 22:00 EDT and recheck; in worst case, do §1.2 first thing tomorrow morning before §6                                                                          |
-| Zoho DKIM verification stays grey                                      | DNS propagation lag                | Wait 30 min, retry. If still grey at 18:30, skip and revisit Day 0 morning — the demo doesn't strictly need DKIM working at launch                                       |
+| Cloudflare Email Routing "Get started" button greyed out               | Zone not fully active yet          | Wait 1–2 min after registration completes; refresh the page. If still grey, check the zone's overview tab — status should be "Active"                                    |
+| Gmail send-as won't let you skip the SMTP form                         | "Treat as alias" wasn't checked    | Back out, re-add the address with **Treat as alias = YES** checked. If still required, use the Fallback note in §4.1                                                     |
 | Hetzner asks for additional verification (passport scan, etc.)         | First-time account on a new email  | Have a backup plan: use an existing Hetzner account, or use a different VPS provider (DigitalOcean, Vultr) at the same price point — adjust `provision.sh` if you switch |
-| `studybuddy.app` is taken                                              | Common-word risk                   | Have backup: `studybuddy.io`, `studybuddy.dev`, `studybuddy.cloud`, `usestudybuddy.com`. Update `.env.demo` and host-nginx vhost tomorrow                                |
+| `usestudybuddy.com` is taken                                              | Common-word risk                   | Have backup: `studybuddy.io`, `studybuddy.dev`, `studybuddy.cloud`, `usestudybuddy.com`. Update `.env.demo` and host-nginx vhost tomorrow                                |
 | Auth0 free tier requires phone verification you can't complete tonight | Phone-network issues               | Skip Auth0 for tonight; wire it on Day 0 morning before StudyBuddy second-tenant cutover at 13:00 EDT                                                                    |
 | Stripe asks for business info even in test mode                        | Sometimes does                     | You can use test-mode without activation — just make sure the `Test mode` toggle is ON. If forced to activate, defer to Day 0 morning                                    |
 
@@ -621,3 +579,7 @@ morning before the 08:00 EDT VPS work begins (start at 06:30 instead).
 | Date       | Version | Change                                                                                                                                                                                                                                                                                                                          |
 | ---------- | ------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | 2026-05-09 | 1.0     | Initial — chronological 9-section operator checklist for Day -1 (Sat May 16) 17:00–20:30 EDT account + email setup. Cloudflare → Hetzner → Zoho → Gmail → Grafana Cloud → DNS pre-stage → studybuddy.app + Zoho mailboxes → Auth0 → Stripe + Sentry. Plus a §10 "values to paste tomorrow" cheat-sheet and a contingency table. |
+| 2026-05-16 | 1.1     | §1.2 rewritten: register `mambakkam.net` fresh at Cloudflare Registrar (~$10–11/yr) instead of presuming it's already registered elsewhere. No nameserver-change step needed. §3.2 prerequisite note updated to match. Credit-card line, prereq checklist, and password-manager naming list updated. |
+| 2026-05-16 | 1.2     | **Email-provider switch — Zoho free plan no longer reliably available for new signups.** §3 rewritten to Cloudflare Email Routing (free, inbound-only forwarding to personal Gmail). §4 switched to Gmail send-as in alias mode (no SMTP needed). §7.4–7.6 same pattern for studybuddy.app. §10 SMTP env vars marked "omit for demo" since no app-originated email ships. DMARC set to `p=none` for both domains (alias mode doesn't align). Plan: revisit when real inbound traffic justifies paid mail (Zoho Mail Lite ~$12/yr, Migadu ~$19/yr). |
+| 2026-05-16 | 1.3     | **Domain rename — studybuddy.app → usestudybuddy.com.** studybuddy.app was unavailable at registration time; usestudybuddy.com chosen as the "use<product>.com" fallback per the contingency table. Subdomain convention preserved: `demo.studybuddy.app` → `demo.usestudybuddy.com`. Body of §1.3 (Origin Cert SAN), §7 (DNS, Email Routing) updated. Origin Cert regenerated at Cloudflare with new SAN list; old cert revoked. Sibling docs DEPLOYMENT_PLAN.md, DEMO_LAUNCH_PLAN.md, MONITORING.md, LOGGING.md, RUNBOOK.md, BACKUPS.md updated in the same pass, plus infra (nginx vhost, prometheus.yml, alert rules YAML, provision.sh, provision-local.sh). StudyBuddy_OnDemand sibling repo requires the same sweep on its side. |
+| 2026-05-16 | 1.4     | **Stripe + Sentry deferred from tonight.** Stripe — verified in StudyBuddy_OnDemand `config.py`: `STRIPE_SECRET_KEY: str \| None = None` with all usage sites doing `getattr(..., None)`, raising only when a billing endpoint is hit. Demo flow (admin-provisioned Teacher + Student accounts browsing pre-built content) never touches billing, so app boots fine without keys. §9.1–§9.3 deferred to Phase 5. Sentry — replaced by Grafana Cloud Loki (§5) for error visibility; §9.4–§9.5 dropped. §9 collapses to the original §9.6 go/no-go (renamed to just "§9 — Final go/no-go"). §10 env-var table marks `STRIPE_*` and `SENTRY_DSN` as "omit for demo". TL;DR row §9 retitled. Total time: 3.5h → ~3h. |

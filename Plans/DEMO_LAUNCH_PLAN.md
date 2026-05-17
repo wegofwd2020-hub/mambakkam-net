@@ -6,7 +6,7 @@
 
 - [`DEMO_LAUNCH_PLAN.md`](https://github.com/wegofwd2020-hub/StudyBuddy_OnDemand/blob/main/docs/DEMO_LAUNCH_PLAN.md) (StudyBuddy_OnDemand — co-tenant on the same Hetzner CX22)
 - [`DEMO_HOSTING_GUIDE.md`](https://github.com/wegofwd2020-hub/studybuddy-docs/blob/main/docs/dev/DEMO_HOSTING_GUIDE.md) (Hetzner-based architecture rationale)
-- [`dns-and-email-setup.md`](https://github.com/wegofwd2020-hub/studybuddy-docs/blob/main/docs/operations/dns-and-email-setup.md) (Cloudflare DNS + Zoho Mail pattern, applied here to `mambakkam.net`)
+- [`dns-and-email-setup.md`](https://github.com/wegofwd2020-hub/studybuddy-docs/blob/main/docs/operations/dns-and-email-setup.md) (Cloudflare DNS pattern, applied here to `mambakkam.net`; email handled via Cloudflare Email Routing per §1.A.bis Phase 3)
 
 mambakkam.net is the **primary site** for the Day 0 (Sun May 17) launch and the **first
 tenant** on a fresh Hetzner CX22 box. StudyBuddy_OnDemand
@@ -121,7 +121,7 @@ These ship with this PR. Use them as-is; no further code work needed.
 | Weekly restic check + prune  | [`scripts/launch/backup-check.sh`](../scripts/launch/backup-check.sh)                 | `restic check --read-data-subset 5%` (silent bit-rot detection) → `restic prune --max-unused 5%` (reclaim disk that daily `forget`s marked unreferenced). Cron Sun 03:30 UTC, 1h after the daily so they don't compete for the repo lock. |
 | Host nginx vhost             | [`infra/nginx/mambakkam.net.conf`](../infra/nginx/mambakkam.net.conf)                 | SSL termination via Cloudflare Origin Cert; proxy_pass to `127.0.0.1:8081`; HSTS; gzip; long-cache for `/_astro/*`         |
 | Auto-deploy on merge to main | [`.github/workflows/deploy-mambakkam.yml`](../.github/workflows/deploy-mambakkam.yml) | SSH to Hetzner → `scripts/launch/deploy.sh` → smoke against public domain → open issue on failure                          |
-| Env skeleton                 | [`.env.demo.example`](../.env.demo.example)                                           | Placeholders for analytics ID + Zoho SMTP (future contact form)                                                            |
+| Env skeleton                 | [`.env.demo.example`](../.env.demo.example)                                           | Placeholders for analytics ID + SMTP (future contact form; needs paid mail provider, see §1.A.bis Phase 3)                  |
 
 ### 1.A.bis Domain + Email — must-have
 
@@ -156,38 +156,43 @@ verifying the zone is healthy).
 - [ ] Pre-launch (Day -1 / Sat May 16 EOD): TTL on the apex A record lowered to 300s
       · _verify:_ Cloudflare DNS UI shows "TTL: 5 min" instead of "Auto"
 
-#### Phase 3 — Zoho Mail free-tier (~30 min)
+#### Phase 3 — Cloudflare Email Routing (~10 min)
 
-mambakkam.net is the first domain in this Zoho free-tier org; StudyBuddy
-will be added as a second domain on its launch day. Each domain has its
-own MX/SPF/DKIM/DMARC records; the Zoho **tenant** is shared across both.
+Demo-grade inbound: Cloudflare forwards `siva@mambakkam.net` (and an
+optional catch-all) to the operator's personal Gmail. No mailbox, no
+IMAP, no SMTP, $0. StudyBuddy uses the same pattern on its launch day
+for `support@usestudybuddy.com` and `sales@usestudybuddy.com`. Original
+Zoho free-tier path was dropped on 2026-05-16 after Zoho hid the
+Forever Free Plan signup; upgrade to a paid mail provider (Zoho Mail
+Lite, Migadu, Fastmail) when real inbound volume or a contact form
+justifies it.
 
-- [ ] `mambakkam.net` added to Zoho; domain-verification TXT record added to Cloudflare DNS
-      · _verify:_ `dig TXT mambakkam.net +short` shows `zoho-verification=zb...`
-- [ ] One mailbox live: `siva@mambakkam.net` (operator can extend later)
-      · _verify:_ Send a test from Zoho webmail to your personal Gmail; reply arrives back in Zoho
-- [ ] MX records (mx.zoho.com priorities 10/20/50) added to Cloudflare DNS
-      · _verify:_ `dig MX mambakkam.net +short` lists `mx.zoho.com`, `mx2.zoho.com`, `mx3.zoho.com`
-- [ ] SPF record `v=spf1 include:zoho.com ~all` added (single TXT at apex)
-      · _verify:_ `dig TXT mambakkam.net +short | grep spf1` returns the record
-- [ ] DKIM record `zmail._domainkey` added with the Zoho-supplied public key
-      · _verify:_ All three (MX, SPF, DKIM) show green checkmarks in Zoho's verification UI
-- [ ] DMARC record `_dmarc` added with `v=DMARC1; p=quarantine; rua=mailto:siva@mambakkam.net`
+- [ ] Cloudflare → mambakkam.net → **Email → Email Routing → Get started** → Cloudflare auto-adds 3× MX (`route1/2/3.mx.cloudflare.net`) + 1× SPF TXT (`v=spf1 include:_spf.mx.cloudflare.net ~all`)
+      · _verify:_ `dig MX mambakkam.net +short` lists three `*.mx.cloudflare.net` hostnames
+      · _verify:_ `dig TXT mambakkam.net +short | grep spf1` returns the auto-added SPF
+- [ ] Destination address verified: your personal Gmail
+      · _verify:_ Destination shows green ✓ in Cloudflare Email Routing UI
+- [ ] Route created: `siva@mambakkam.net` → personal Gmail (+ optional Catch-all → personal Gmail)
+      · _verify:_ External sender → `siva@mambakkam.net` lands in personal Gmail within 30 sec; `Received:` chain shows `*.mx.cloudflare.net` first hop
+- [ ] DMARC record `_dmarc` added manually with `v=DMARC1; p=none; rua=mailto:<your-gmail>`
       · _verify:_ `dig TXT _dmarc.mambakkam.net +short` returns the policy
+      · _why `p=none`:_ Gmail send-as in Phase 4 signs DKIM as `gmail.com`, not `mambakkam.net` — no DMARC alignment, so anything stricter would block your own send-as mail
 
-#### Phase 4 — Gmail send-as (~10 min, optional but recommended)
+#### Phase 4 — Gmail send-as in alias mode (~10 min, recommended)
 
-- [ ] Zoho App Password generated for the Gmail integration
-      · _verify:_ App Password copied to a password manager
-- [ ] `siva@mambakkam.net` added as a send-as identity in Gmail (SMTP `smtp.zoho.com:465`, SSL on)
+- [ ] `siva@mambakkam.net` added as a send-as identity in Gmail with **Treat as alias = YES** (uses Gmail's own outbound — no SMTP server, no App Password needed)
       · _verify:_ Compose new mail in Gmail; From dropdown shows `Siva Mambakkam <siva@mambakkam.net>`
+- [ ] Gmail's verification email (sent to `siva@mambakkam.net`) arrives via Cloudflare forwarding in personal Gmail; Confirm link clicked
+      · _verify:_ Send to a non-Gmail address you control; reply lands back in personal Gmail via Cloudflare Email Routing
 
 #### Phase 5 — Wire SMTP into the site (deferred — no contact form on day 1)
 
 mambakkam.net has no contact form, no auth, no app-originated email at launch.
-The Zoho mailbox covers human inbox/outbox via Gmail send-as. The
-`SMTP_*` env vars in `.env.demo.example` are placeholders for the future
-contact form/newsletter; nothing to wire up for Day 0 (Sun May 17).
+Cloudflare Email Routing covers inbound; Gmail send-as covers outbound from
+a familiar UI. The `SMTP_*` placeholders in `.env.demo.example` stay unused
+until a contact form ships — at which point you'll need a paid mail provider
+for provider SMTP + domain-aligned DKIM (and DMARC tightens to
+`p=quarantine`).
 
 ### 1.B Content — must-have
 
@@ -260,16 +265,18 @@ manager, and a §10 cheat-sheet for which value goes into which `.env`
 line tomorrow morning.
 
 **One-paragraph summary:**
-17:00 Cloudflare account + Origin Cert generation (SAN list = mambakkam.net
+17:00 Cloudflare account + register mambakkam.net at Cloudflare Registrar
++ Origin Cert generation (SAN list = mambakkam.net
 
 - \*.mambakkam.net + demo.usestudybuddy.com); 17:15 Hetzner sign-up + SSH
-  key (no CX22 yet); 17:25 Zoho Mail with mambakkam.net mailbox + MX/SPF/
-  DKIM/DMARC; 17:55 Gmail send-as; 18:15 Grafana Cloud account + Access
-  Policy token (3 scopes); 18:40 pre-stage mambakkam DNS A record at
-  TTL=300s; 19:00 register usestudybuddy.com + add mailboxes; 19:25 Auth0
-  dev tenant + 3 applications; 19:50 Stripe test mode + webhook + Sentry.
-  20:30 final go/no-go before bed. Total 3.5 hours; budget 4 if Zoho DKIM
-  verification stalls.
+  key (no CX22 yet); 17:25 Cloudflare Email Routing for mambakkam.net +
+  DMARC `p=none`; 17:35 Gmail send-as in alias mode; 18:15 Grafana Cloud
+  account + Access Policy token (3 scopes); 18:40 pre-stage mambakkam DNS
+  A record at TTL=300s; 19:00 register usestudybuddy.com + Cloudflare Email
+  Routing for support@/sales@; 19:25 Auth0 dev tenant + 3 applications;
+  19:50 Stripe test mode + webhook + Sentry. 20:30 final go/no-go before
+  bed. Total 3.5 hours; comfortable now that email is no longer the
+  bottleneck.
 
 **Hard "no" tonight:**
 
@@ -781,9 +788,15 @@ alternatives (dedicated CX22 or Cloudflare Pages). Trade-off: shared
 failure domain with StudyBuddy in exchange for a single $7/mo bill and
 a unified ops surface. Re-evaluate if either site outgrows the box.
 
-**Email — Zoho free tier on `mambakkam.net`.** Confirmed 2026-05-08. Mailbox:
-`siva@mambakkam.net`. No app-originated email at launch (no contact form);
-SMTP wiring deferred to whenever a contact form ships.
+**Email — Cloudflare Email Routing + Gmail send-as on `mambakkam.net`.**
+Original 2026-05-08 decision was Zoho free tier; reversed 2026-05-16
+after Zoho hid the Forever Free Plan signup. Inbound: Cloudflare Email
+Routing forwards `siva@mambakkam.net` (and catch-all) to operator's
+personal Gmail. Outbound: Gmail send-as in alias mode (no SMTP, no
+App Password). DMARC `p=none` because alias-mode mail can't align DKIM
+to `mambakkam.net`. No app-originated email at launch (no contact
+form); SMTP wiring deferred to whenever a contact form ships, at which
+point a paid mail provider replaces Cloudflare Email Routing.
 
 ### Decided 2026-05-09 — closed for the launch
 
@@ -974,3 +987,5 @@ Outstanding before alerts are "ready":
 | 2026-05-09 | **Day-N labels + date shift** — launch slipped from May 16 → May 17 (Day 0 = Sun May 17). Day -5 to Day -1 labels added to the 4-day test phase (May 13-16); Day 0 = launch, Day 1 = first day live (May 18). Code-freeze cutoff stays at May 12 EOD (now Day -5). Day-of-week labels in the original timeline were corrected (off by one). All section headers + body text updated; sibling docs (DEPLOYMENT/MONITORING/LOGGING/BACKUPS/RUNBOOK + provision.sh) shifted in the same pass.                                                                                                                                                                                                                                                                                                         |
 | 2026-05-09 | **Concrete Day -1 / Day 0 timing** — operator anchored times: Day -1 (Sat May 16) 17:00-19:00 EDT for account + email setup (Cloudflare, Hetzner, Zoho, Grafana Cloud); Day 0 (Sun May 17) 08:00 EDT operator arrives at the VPS, T-0 (public cutover) at 09:00 EDT. Replaced the prior abstract T-2h/T-1h/T-30m table with a wall-clock minute-by-minute version anchored on 08:00 EDT start.                                                                                                                                                                                                                                                                                                                                                                                                     |
 | 2026-05-09 | **GitHub deploy auth deferred to Day 0** — the SSH keypair + 3 repo secrets (`MAMBAKKAM_VPS_HOST`, `MAMBAKKAM_VPS_USER`, `MAMBAKKAM_VPS_SSH_KEY`) + the `MAMBAKKAM_DEPLOY_ENABLED` Variable now happen on Day 0 morning instead of pre-launch. §2 cutover table split into two rows at 08:28 + 08:30 (keypair gen + pubkey paste; then GitHub Settings UI). Subsequent rows shifted +2 min (.env.demo edit at 08:32, container build at 08:34). Prerequisites list updated to call out the deferral explicitly. Rationale: consolidates all "credentials and pasting" work into the Day 0 cutover window, reduces pre-launch operator overhead, keeps the deploy workflow's existing `if: vars.MAMBAKKAM_DEPLOY_ENABLED == 'true'` gate as the single switch that goes from "skipped" to "active". |
+| 2026-05-16 | **Email provider switch + domain registration** — (1) mambakkam.net registered fresh at Cloudflare Registrar (~$10–11/yr); §1.A.bis Phase 1/2 prereqs simplified (no nameserver migration). (2) Zoho Forever Free Plan no longer reliably available; Phase 3 rewritten to Cloudflare Email Routing (inbound-only forwarding to personal Gmail) + Phase 4 to Gmail send-as in alias mode. DMARC posture set to `p=none` for the demo (alias-mode mail doesn't DMARC-align). Will revisit when contact form or real inbound volume justifies paid mail (Zoho Mail Lite ~$12/yr, Migadu ~$19/yr). Sibling docs DEPLOYMENT_PLAN.md (cost row, §4 narrative) and ACCOUNT_SETUP.md (§3, §4, §7.4–7.6, §10) updated in the same pass. |
+| 2026-05-16 | **Domain rename — studybuddy.app → usestudybuddy.com.** studybuddy.app was unavailable at registration time; usestudybuddy.com chosen as the "use<product>.com" fallback per the contingency table. Subdomain convention preserved (`demo.usestudybuddy.com`). All body references in this doc updated; cross-doc sweep across ACCOUNT_SETUP/DEPLOYMENT_PLAN/MONITORING/LOGGING/RUNBOOK/BACKUPS and infra (nginx/prometheus/alerts/provision) executed in the same pass. Origin Cert regenerated at Cloudflare with new SAN list (`mambakkam.net`, `*.mambakkam.net`, `demo.usestudybuddy.com`); old cert revoked. StudyBuddy_OnDemand sibling repo requires the same rename sweep on its side. |

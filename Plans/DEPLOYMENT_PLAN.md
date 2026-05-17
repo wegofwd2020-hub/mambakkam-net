@@ -98,7 +98,7 @@ see Change Log.)
 | Domain `mambakkam.net`              | Cloudflare Registrar                                       | ~$1 (annual ÷ 12)             |
 | SSL certificate                     | Cloudflare (Universal at edge) + Origin Cert (free, 15-yr) | $0                            |
 | DNS + DDoS protection + CDN         | Cloudflare free tier                                       | $0                            |
-| Email — 1 mailbox                   | Zoho free tier                                             | $0                            |
+| Email — inbound forwarding          | Cloudflare Email Routing → personal Gmail (free)           | $0                            |
 | Backups (image rsync + log archive) | Local to VPS                                               | $0                            |
 | GitHub Actions CI/CD                | Free (public repo)                                         | $0                            |
 | **Total**                           |                                                            | **~$6/month**                 |
@@ -128,9 +128,12 @@ what a visitor sees.
 - **No headless CMS** — content authored as markdown in `src/data/`,
   committed via PR. (Migrating to Decap/Tina later is a hosting change with
   no code rewrite.)
-- **No contact form** — no app-originated email, no Zoho SMTP integration in
-  the running container. Mailbox `siva@mambakkam.net` exists for human use
-  only via webmail / Gmail send-as.
+- **No contact form** — no app-originated email, no SMTP integration in
+  the running container. `siva@mambakkam.net` is inbound-only via
+  Cloudflare Email Routing (forwarded to personal Gmail); outbound is
+  Gmail send-as in alias mode. When a contact form ships, pair it with
+  a paid mail provider (Zoho Mail Lite, Migadu, Fastmail) for SMTP +
+  DKIM alignment.
 - **No analytics at runtime** — Plausible/GA4 decision is open
   (`DEMO_LAUNCH_PLAN.md` §6); shipping after first quiet week post-launch.
 - **No staging environment 24×7** — `staging.mambakkam.net` exists only
@@ -177,12 +180,21 @@ at `/etc/ssl/cloudflare/origin-{cert,key}.pem`. Read by the host nginx
 vhost. Cloudflare's "Full (strict)" SSL/TLS mode verifies the chain.
 StudyBuddy reuses the same cert when it joins on Day 0 (Sun May 17) — no re-issue.
 
-### 4. Zoho free-tier email (one mailbox)
+### 4. Cloudflare Email Routing + Gmail send-as (zero-cost, demo-grade)
 
-One mailbox: `siva@mambakkam.net`. SPF + DKIM + DMARC at Cloudflare DNS;
-Gmail send-as for outbound from a familiar UI. No SMTP integration with the
-running container at launch — placeholders in `.env.demo.example` for whenever
-a contact form ships.
+Inbound: Cloudflare Email Routing auto-adds MX + SPF, forwards
+`siva@mambakkam.net` (and any catch-all) to the operator's personal
+Gmail. Outbound: Gmail send-as in "Treat as alias" mode — Gmail's own
+outbound, From header rewritten. DMARC at `p=none` since alias-mode
+mail signs DKIM as `gmail.com` not `mambakkam.net` (no DMARC alignment).
+No SMTP integration with the running container at launch.
+
+When a contact form ships or real inbound volume justifies a separate
+inbox, upgrade to a paid mail provider (Zoho Mail Lite ~$12/yr, Migadu
+~$19/yr, Fastmail ~$36/yr) — that gives you provider SMTP + domain-aligned
+DKIM, at which point DMARC can tighten to `p=quarantine`. Original Zoho
+free-tier plan was scratched on 2026-05-16 after Zoho hid the Forever
+Free Plan signup for new accounts.
 
 ### 5. Git is the source of truth
 
@@ -271,9 +283,10 @@ Quick-check before showing anyone the site:
 
 ### Email
 
-- [ ] Zoho domain verification TXT record green
-- [ ] MX, SPF, DKIM, DMARC all green in Zoho's verification UI
-- [ ] Gmail send-as for `siva@mambakkam.net` round-trips a test email
+- [ ] Cloudflare Email Routing enabled for mambakkam.net (auto-MX + SPF visible in DNS)
+- [ ] `_dmarc` TXT present (`v=DMARC1; p=none; rua=mailto:...`)
+- [ ] Inbound test: external sender → `siva@mambakkam.net` lands in personal Gmail
+- [ ] Outbound test: Gmail send-as for `siva@mambakkam.net` round-trips a test email
 
 ### Content
 
@@ -329,7 +342,7 @@ below is a hosting swap, not a code rewrite. Don't pre-optimize.
 | Content team grows                   | Add Decap CMS or TinaCMS (still static output, editors via UI)                | $0       |
 | Tamil i18n launches                  | Astro i18n routing; same hosting                                              | $0       |
 | Cloudflare Pages free-tier cap hit   | Pages Pro                                                                     | $20/mo   |
-| Newsletter/contact form ships        | Wire `.env.demo` SMTP placeholders to Zoho; add a single observability metric | $0       |
+| Newsletter/contact form ships        | Sign up for paid mail provider (Zoho Mail Lite ~$12/yr or Migadu ~$19/yr); replace Cloudflare Email Routing MX with provider's MX; add SMTP_* env vars; tighten DMARC to `p=quarantine` | ~$1–2/mo |
 
 ---
 
@@ -355,3 +368,5 @@ below is a hosting swap, not a code rewrite. Don't pre-optimize.
 | ---------- | ------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | 2026-05-09 | 1.0     | Initial — Day 0 (Sun May 17) launch hosting plan, modeled on StudyBuddy's `DEMO_HOSTING_GUIDE.md`                                                                                                                                                                                                                                                                                                                                     |
 | 2026-05-09 | 1.1     | **Tenancy-order flip** — mambakkam.net is now the first tenant on a fresh CX22; pays the full $5/mo VPS bill (~$6/mo all-in with the domain). StudyBuddy joins as second tenant on Day 0 (Sun May 17) at zero marginal infra cost. Origin Cert with SAN list (covering both domains) is generated up-front during the mambakkam.net cold start on Day -1 (Sat May 16). Cron offsets: mambakkam at 02:30 UTC, StudyBuddy at 02:00 UTC. |
+| 2026-05-16 | 1.2     | **Email provider switch** — Zoho Forever Free Plan no longer reliably available for new signups; replaced with Cloudflare Email Routing (inbound-only forwarding to personal Gmail, free) + Gmail send-as in alias mode for outbound. Cost row, §4 narrative, launch checklist, and "contact form ships" trigger row all updated. DMARC posture relaxed to `p=none` for the demo (no domain-aligned DKIM in alias mode). |
+| 2026-05-16 | 1.3     | **Domain rename — studybuddy.app → usestudybuddy.com.** studybuddy.app was unavailable at registration; usestudybuddy.com chosen as fallback. Subdomain convention preserved: `demo.usestudybuddy.com`. All body references updated; Origin Cert SAN regenerated. Cross-doc sweep across MONITORING/LOGGING/RUNBOOK/BACKUPS and infra (nginx/prometheus/alerts/provision) executed in the same pass. |
