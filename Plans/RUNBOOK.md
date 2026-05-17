@@ -124,7 +124,7 @@ Order: `[PAGE]` first (the ones that matter), then `[WARN]`.
 
 **What it means**
 
-blackbox-exporter on the CX22 has been unable to reach `https://mambakkam.net` for >2 min. The probe goes Cloudflare → host nginx → astrowind container; a failure can be at any layer.
+blackbox-exporter on the CX23 has been unable to reach `https://mambakkam.net` for >2 min. The probe goes Cloudflare → host nginx → astrowind container; a failure can be at any layer.
 
 **Likely causes**
 
@@ -286,7 +286,7 @@ sudo find /data/content -type f -size +50M
 **Escalation**
 
 - If can't free enough fast: shrink the restic forget policy temporarily (`--keep-daily 3 --keep-weekly 0` — recovers ~50% of repo size).
-- If still tight: upgrade CX22 → CX32 (40 → 80 GB SSD; €5/mo extra) via Hetzner console. Live resize.
+- If still tight: upgrade CX23 → CX33 (40 → 80 GB SSD + 4 GB → 8 GB RAM; ~$3/mo extra: $4.99 → $7.99) via Hetzner console. Live resize.
 
 ---
 

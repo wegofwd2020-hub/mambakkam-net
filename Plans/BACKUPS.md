@@ -1,4 +1,4 @@
-# Backups & Restore — mambakkam.net + StudyBuddy (shared CX22)
+# Backups & Restore — mambakkam.net + StudyBuddy (shared CX23)
 
 **Document version:** 1.0
 **Date:** 2026-05-09
@@ -66,9 +66,9 @@ The 3-2-1 rule (3 copies / 2 media / 1 offsite) is the textbook target. We delib
 - Off-box destinations add provider friction (Hetzner Storage Box is €1.20/mo + setup; B2 is free-tier-eligible but adds bandwidth charges if a 30 d restore goes badly)
 - The restic encryption + dedup posture covers most of the wins (encrypted-at-rest reduces leak risk if disk is stolen / imaged; dedup means we keep more history without ballooning disk)
 
-**Residual risk we accept:** total data loss if the CX22's disk fails or the box is rooted (in either case the local repo is gone too). Acceptable until first paying customer.
+**Residual risk we accept:** total data loss if the CX23's disk fails or the box is rooted (in either case the local repo is gone too). Acceptable until first paying customer.
 
-**To upgrade off-box later:** `restic copy` to a second repo on Hetzner Storage Box or Backblaze B2 — the on-CX22 repo stays as-is; nothing else changes. ~30 min of work + the operator pasting an SFTP password / B2 keypair.
+**To upgrade off-box later:** `restic copy` to a second repo on Hetzner Storage Box or Backblaze B2 — the on-CX23 repo stays as-is; nothing else changes. ~30 min of work + the operator pasting an SFTP password / B2 keypair.
 
 ---
 
@@ -314,11 +314,11 @@ exporter that runs `restic stats --json` periodically and emits
 
 ## Outstanding / future work
 
-- **Off-box destination.** When the first paying customer arrives, add a Hetzner Storage Box (€1.20/mo) and copy snapshots there nightly via `restic copy`. The on-CX22 repo stays as the primary; the Storage Box becomes the disaster-recovery copy. ~30 min of setup work.
+- **Off-box destination.** When the first paying customer arrives, add a Hetzner Storage Box (€1.20/mo) and copy snapshots there nightly via `restic copy`. The on-CX23 repo stays as the primary; the Storage Box becomes the disaster-recovery copy. ~30 min of setup work.
 - **Restore drill cadence.** Today: one drill on Day -2 (Fri 2026-05-15) of the test phase. After launch: quarterly restore drills (next: 2026-08-14).
 - **Password escrow.** If only the operator has the restic passwords and the operator is unavailable, the backups are unreachable. Two practical options: (a) dual-control via a sealed envelope kept somewhere safe, (b) a second team member's password manager once there's a second team member. Defer until there's a second person.
 - **Restic exporter for Prometheus.** Would emit `restic_snapshot_count`, `restic_repo_size_bytes`, `restic_last_backup_seconds_ago`. Cheap to add (~50 lines of Python in a sidecar); deferred until we want the size-growth alerts above to be cleaner.
-- **Secrets in repo.** `.env.demo` is in the restic repo. The repo is encrypted at rest but anyone with shell access on the CX22 + the password file can read it. This matches the existing security boundary (root on the box ≈ full compromise) so the marginal exposure is small. Revisit when there's a customer-data-breach posture to maintain.
+- **Secrets in repo.** `.env.demo` is in the restic repo. The repo is encrypted at rest but anyone with shell access on the CX23 + the password file can read it. This matches the existing security boundary (root on the box ≈ full compromise) so the marginal exposure is small. Revisit when there's a customer-data-breach posture to maintain.
 
 ---
 

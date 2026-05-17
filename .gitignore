@@ -22,3 +22,8 @@ pnpm-debug.log*
 pnpm-lock.yaml
 
 .astro
+
+# Nightly doc-index drift report — regenerated every run; commit if you want
+# history, otherwise leave as a working-tree artefact. See
+# scripts/docs_index/README.md.
+DRIFT_REPORT.md

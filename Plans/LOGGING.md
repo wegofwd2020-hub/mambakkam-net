@@ -1,4 +1,4 @@
-# Logging — mambakkam.net + StudyBuddy (shared CX22)
+# Logging — mambakkam.net + StudyBuddy (shared CX23)
 
 **Document version:** 1.0
 **Date:** 2026-05-09
@@ -29,7 +29,7 @@ Free-tier Loki: 50 GB monthly ingest + 14-day retention.
 ## Topology
 
 ```
-┌─ Hetzner CX22 ─────────────────────────────────────────────────────────┐
+┌─ Hetzner CX23 ─────────────────────────────────────────────────────────┐
 │                                                                         │
 │  Tenant 1: mambakkam-astrowind                                          │
 │    └─ stdout/stderr → Docker json-file driver                           │
@@ -87,7 +87,7 @@ Free-tier Loki: 50 GB monthly ingest + 14-day retention.
 
 **No local Loki to host.**
 
-Same trade-off as no-local-Grafana for metrics: ~80 MB RAM saved on the CX22
+Same trade-off as no-local-Grafana for metrics: ~80 MB RAM saved on the CX23
 in exchange for a SaaS dependency. Acceptable at our traffic forecast.
 
 ---
@@ -389,4 +389,4 @@ The set as of 2026-05-09: `StudyBuddyErrorBurst` (warn),
 
 | Date       | Version | Change                                                                                                                                                                                                                                                            |
 | ---------- | ------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| 2026-05-09 | 1.0     | Initial — Promtail on the CX22 ships docker / nginx / journald / backup logs to Grafana Cloud Loki free tier; LogQL cheatsheet + local-fallback runbook; suggested log-based alerts; Loki creds added to `.env.monitoring` template via mambakkam `provision.sh`. |
+| 2026-05-09 | 1.0     | Initial — Promtail on the CX23 ships docker / nginx / journald / backup logs to Grafana Cloud Loki free tier; LogQL cheatsheet + local-fallback runbook; suggested log-based alerts; Loki creds added to `.env.monitoring` template via mambakkam `provision.sh`. |

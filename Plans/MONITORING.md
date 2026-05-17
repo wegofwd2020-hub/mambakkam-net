@@ -1,4 +1,4 @@
-# Observability — mambakkam.net + StudyBuddy (shared CX22)
+# Observability — mambakkam.net + StudyBuddy (shared CX23)
 
 **Document version:** 1.0
 **Date:** 2026-05-09
@@ -17,11 +17,11 @@
 | What                              | Where                                                                  | How to reach                                 |
 | --------------------------------- | ---------------------------------------------------------------------- | -------------------------------------------- |
 | **Grafana** (dashboards + alerts) | Grafana Cloud free tier — `https://<your-stack>.grafana.net`           | Grafana SSO (Google / GitHub / email)        |
-| **Prometheus UI** (ad-hoc PromQL) | Local on the CX22 — `127.0.0.1:9090`                                   | `ssh -L 9090:127.0.0.1:9090 deploy@<vps-ip>` |
+| **Prometheus UI** (ad-hoc PromQL) | Local on the CX23 — `127.0.0.1:9090`                                   | `ssh -L 9090:127.0.0.1:9090 deploy@<vps-ip>` |
 | **mambakkam scrape target**       | nginx_exporter sidecar on container net                                | scraped only by local Prometheus             |
 | **StudyBuddy `/metrics`**         | bearer-token-protected, `127.0.0.1:8443/metrics` (loopback)            | scraped only by local Prometheus             |
 | **Public `/metrics`** (optional)  | `https://mambakkam.net/metrics`, `https://demo.usestudybuddy.com/metrics` | Cloudflare Access policy required            |
-| **Synthetic uptime**              | blackbox-exporter on the CX22                                          | probes 5 public URLs every 15s               |
+| **Synthetic uptime**              | blackbox-exporter on the CX23                                          | probes 5 public URLs every 15s               |
 | **Host metrics**                  | node-exporter on host net                                              | scraped only by local Prometheus             |
 
 Free-tier Grafana Cloud limits (2026-05): 10k active series, 13-month retention, no card required.
@@ -31,7 +31,7 @@ Free-tier Grafana Cloud limits (2026-05): 10k active series, 13-month retention,
 ## Topology
 
 ```
-┌─ Hetzner CX22 (4 GB RAM) ───────────────────────────────────────────────┐
+┌─ Hetzner CX23 (4 GB RAM) ───────────────────────────────────────────────┐
 │                                                                          │
 │  Tenant 1: mambakkam-astrowind                                           │
 │    ├─ nginx (8080) serves static dist/                                   │
@@ -69,7 +69,7 @@ Free-tier Grafana Cloud limits (2026-05): 10k active series, 13-month retention,
 **Prometheus runs locally; Grafana lives in the cloud.**
 
 - **Prometheus on the VPS** is small (~150 MB RAM, 7d local retention, 2 GB disk cap). It's the cheapest way to scrape co-located targets without a network round-trip per scrape, and it gives the operator a `127.0.0.1:9090` UI for ad-hoc PromQL when something is on fire.
-- **Grafana Cloud free tier** at \*.grafana.net is where dashboards + long-term retention + alerting live. No local Grafana service to host means ~150 MB RAM saved on the CX22.
+- **Grafana Cloud free tier** at \*.grafana.net is where dashboards + long-term retention + alerting live. No local Grafana service to host means ~150 MB RAM saved on the CX23.
 - **`remote_write`** ships every series Prometheus collects to Grafana Cloud. This is Prometheus's standard pattern for "send to managed backend"; same wire protocol Grafana Cloud documents.
 - **`write_relabel_configs` in `prometheus.yml`** drops noisy series (especially node-exporter's ~600 default metrics) before they ship — keeps active-series count well under the 10k free-tier cap.
 
@@ -154,7 +154,7 @@ Dashboard signal: alert if `probe_success == 0` for 2 consecutive scrapes (60 s)
 ### Phase 1 — Grafana Cloud account (one-time, ~5 min)
 
 1. Sign up at https://grafana.com/auth/sign-up/create-user (free, no card)
-2. Create a stack — pick a region close to the CX22 (e.g. `prod-eu-west-2` for Falkenstein)
+2. Create a stack — pick a region close to the CX23 (e.g. `prod-eu-west-2` for Falkenstein)
 3. Stack → **Connections → Hosted Prometheus metrics → Send Metrics**
    - Copy the `URL` value → paste into `.env.monitoring` as `GRAFANA_CLOUD_REMOTE_WRITE_URL`
    - Click **Generate now** under "Password / API Token" → paste the token as `GRAFANA_CLOUD_API_KEY`
@@ -204,7 +204,7 @@ Suggested starter dashboards in Grafana Cloud:
 
 | Dashboard          | Top panels                                                                                                                                       |
 | ------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------ |
-| **CX22 Host**      | CPU, memory available, disk free, load avg, network throughput                                                                                   |
+| **CX23 Host**      | CPU, memory available, disk free, load avg, network throughput                                                                                   |
 | **Public Uptime**  | `probe_success` per target as a status timeline; `probe_duration_seconds` p50/p95                                                                |
 | **mambakkam.net**  | nginx requests/sec, active connections, 5xx rate (derived from nginx access log if you wire mtail later)                                         |
 | **StudyBuddy API** | `sb_requests_total` rate by status, `sb_request_duration_seconds` p50/p95, `sb_db_pool_connections{state="free"}`, `sb_auth_failures_total` rate |
@@ -233,7 +233,7 @@ issues; `[WARN]` for everything else. Single Gmail destination
 
 - **Local Grafana** — Grafana Cloud has the UI; saving the local RAM
 - **Alertmanager** — Grafana Cloud handles routing on the same metrics
-- **Loki / log aggregation** — nginx access logs stay on the CX22 for the operator to grep; Loki on the free tier is plausible follow-up work
+- **Loki / log aggregation** — nginx access logs stay on the CX23 for the operator to grep; Loki on the free tier is plausible follow-up work
 - **Tempo / tracing** — no app-side tracing instrumentation today
 - **Pushgateway** — no batch jobs to push from yet
 - **mtail / log-based exporters** — page-level KPIs from nginx access logs deferred; nginx_exporter's stub_status counters are enough for traffic-shape monitoring at launch
@@ -245,7 +245,7 @@ issues; `[WARN]` for everything else. Single Gmail destination
 
 1. **Cloudflare Access policies** for `mambakkam.net/metrics` and `demo.usestudybuddy.com/metrics` are NOT auto-configured by any script — operator action in the Cloudflare dashboard. Without them, the nginx-side IP allowlist + JWT-header check is the only gate (still safe — direct curls return 403 — but not the full zero-trust posture).
 
-2. **Cloudflare IPv6 ranges** are not in the host nginx vhost allowlist yet. If the CX22 enables IPv6, regenerate the allowlist from https://www.cloudflare.com/ips-v6/.
+2. **Cloudflare IPv6 ranges** are not in the host nginx vhost allowlist yet. If the CX23 enables IPv6, regenerate the allowlist from https://www.cloudflare.com/ips-v6/.
 
 3. **Quarterly re-check of Cloudflare's IP allowlist.** Calendar reminder: Aug 2026, Nov 2026, Feb 2027.
 
@@ -262,4 +262,4 @@ issues; `[WARN]` for everything else. Single Gmail destination
 
 | Date       | Version | Change                                                                                                                                                                                                                                                                   |
 | ---------- | ------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| 2026-05-09 | 1.0     | Initial — Prometheus on CX22 + remote_write to Grafana Cloud free tier; nginx-prometheus-exporter for mambakkam; bearer-token /metrics for StudyBuddy; blackbox-exporter for synthetic uptime; node-exporter for host; Cloudflare-Access-gated public /metrics surfaces. |
+| 2026-05-09 | 1.0     | Initial — Prometheus on CX23 + remote_write to Grafana Cloud free tier; nginx-prometheus-exporter for mambakkam; bearer-token /metrics for StudyBuddy; blackbox-exporter for synthetic uptime; node-exporter for host; Cloudflare-Access-gated public /metrics surfaces. |

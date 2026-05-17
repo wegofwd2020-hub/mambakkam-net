@@ -22,7 +22,7 @@ into the password manager. By 20:30 EDT you have everything tomorrow's
 | Section | Time block  | Account                                      | Why                                               |
 | ------- | ----------- | -------------------------------------------- | ------------------------------------------------- |
 | 1       | 17:00–17:20 | Cloudflare                                   | Register mambakkam.net, DNS, Origin Cert with shared SAN |
-| 2       | 17:15–17:25 | Hetzner Cloud                                | VPS provider; SSH key only — no CX22 yet          |
+| 2       | 17:15–17:25 | Hetzner Cloud                                | VPS provider; SSH key only — no CX23 yet          |
 | 3       | 17:25–17:35 | Cloudflare Email Routing (mambakkam)         | Forward siva@mambakkam.net → personal Gmail       |
 | 4       | 17:35–17:45 | Gmail send-as                                | Compose-from custom domain (alias mode)           |
 | 5       | 18:15–18:40 | Grafana Cloud                                | Metrics + logs + alert rules                      |
@@ -34,7 +34,7 @@ into the password manager. By 20:30 EDT you have everything tomorrow's
 **Total:** ~3 hours. Email is no longer a bottleneck (Cloudflare Email Routing is ~5 min/zone with no DKIM wait). §9 Stripe + Sentry deferred — neither blocks the demo (Stripe is Phase 5; Sentry replaced by Grafana Cloud Loki for error visibility).
 
 **No credit card needed for:** Cloudflare Email Routing, Grafana Cloud, Auth0 free tier, Stripe (test mode), Sentry free tier, Plausible has paid only.
-**Credit card needed for:** Cloudflare (one-time ~$10–11 for the `mambakkam.net` registration in §1.2), Hetzner Cloud (€7.50 deposit credit; CX22 billing starts Day 0 morning when you spin one up).
+**Credit card needed for:** Cloudflare (one-time ~$10–11 for the `mambakkam.net` registration in §1.2), Hetzner Cloud (€7.50 deposit credit; CX23 billing starts Day 0 morning when you spin one up).
 
 ---
 
@@ -132,7 +132,7 @@ whois mambakkam.net | grep -iE "registrar:|expir"
 
 ## §2 — Hetzner Cloud (17:15–17:25, 10 min)
 
-Sign up + add SSH key. **Don't actually create the CX22 yet** — that's
+Sign up + add SSH key. **Don't actually create the CX23 yet** — that's
 Day 0 (Sun May 17) morning at 08:00 EDT, after you've slept.
 
 ### 2.1 — Account
@@ -178,7 +178,7 @@ Skip if you don't want Hetzner-side snapshots — restic local backups are suffi
 ### 2.4 — Pick the region
 
 - [ ] Decide: **Falkenstein (Germany)** is the default for EU/GDPR + cheapest. Helsinki (Finland) and Ashburn (USA) are alternatives if your demo audience is geographically distinct.
-- [ ] **Note**: `Falkenstein (DEU)` (or your choice) — you'll select this tomorrow when creating the CX22
+- [ ] **Note**: `Falkenstein (DEU)` (or your choice) — you'll select this tomorrow when creating the CX23
 
 ---
 
@@ -333,7 +333,7 @@ during Day -2 alert-test-fire (Fri May 15) instead.
 ## §6 — Pre-stage DNS for `mambakkam.net` (18:40–18:50, 10 min)
 
 Create the apex A record now with a placeholder IP and TTL=300s. Tomorrow
-morning you change the value to the real CX22 IP — much faster than
+morning you change the value to the real CX23 IP — much faster than
 creating a new record under launch-day pressure.
 
 - [ ] Cloudflare → mambakkam.net → DNS → **+ Add record**
@@ -341,7 +341,7 @@ creating a new record under launch-day pressure.
 - [ ] Save
 - [ ] **+ Add record** for **www**: Type: **CNAME**, Name: **www**, Target: **mambakkam.net**, Proxy: **DNS only**
 
-> Tomorrow morning at ~08:45 EDT (mambakkam T-15m), you'll edit the apex A record value from `192.0.2.1` to the real Hetzner CX22 IP and **enable proxy** (orange cloud).
+> Tomorrow morning at ~08:45 EDT (mambakkam T-15m), you'll edit the apex A record value from `192.0.2.1` to the real Hetzner CX23 IP and **enable proxy** (orange cloud).
 
 **Verify:**
 
@@ -495,7 +495,7 @@ Run through this checklist before closing the laptop:
 - [ ] DNS for both `mambakkam.net` and `demo.usestudybuddy.com` is pre-staged at Cloudflare with TTL=5min, proxy off
 - [ ] Cloudflare Origin Cert + key are in the password manager (SAN: `mambakkam.net`, `*.mambakkam.net`, `demo.usestudybuddy.com`)
 - [ ] Hetzner SSH private key is in the password manager
-- [ ] You have NOT yet provisioned a CX22 (Day 0 morning at 08:00 EDT)
+- [ ] You have NOT yet provisioned a CX23 (Day 0 morning at 08:00 EDT)
 - [ ] Tomorrow morning's checklist starts with: open this file, open the password manager, open `mambakkam-net/Plans/DEMO_LAUNCH_PLAN.md` §2 Day 0 runbook
 
 If any unchecked, finish before 22:00 EDT or set an alarm to do them at 06:00 EDT Sunday before starting Day 0 work.
@@ -560,10 +560,10 @@ These you set in **GitHub → repo → Settings → Secrets and variables → Ac
 
 | Secret name             | Value                                                                                                                                     | Used by                               |
 | ----------------------- | ----------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------- |
-| `MAMBAKKAM_VPS_HOST`    | (filled in tomorrow once you know the CX22 public IP)                                                                                     | mambakkam-net deploy workflow         |
+| `MAMBAKKAM_VPS_HOST`    | (filled in tomorrow once you know the CX23 public IP)                                                                                     | mambakkam-net deploy workflow         |
 | `MAMBAKKAM_VPS_USER`    | `deploy`                                                                                                                                  | same                                  |
 | `MAMBAKKAM_VPS_SSH_KEY` | content of `~/.ssh/mambakkam_cx22` (the private key)                                                                                      | same                                  |
-| `DEMO_VPS_HOST`         | same as MAMBAKKAM_VPS_HOST (shared CX22)                                                                                                  | StudyBuddy deploy workflow            |
+| `DEMO_VPS_HOST`         | same as MAMBAKKAM_VPS_HOST (shared CX23)                                                                                                  | StudyBuddy deploy workflow            |
 | `DEMO_VPS_USER`         | `deploy`                                                                                                                                  | same                                  |
 | `DEMO_VPS_SSH_KEY`      | a separate SSH keypair (generate one for studybuddy in §2.2 if not done) — or reuse the mambakkam key if you prefer one shared deploy key | same                                  |
 | `GHCR_TOKEN`            | personal access token with `write:packages` scope                                                                                         | StudyBuddy deploy (Docker image push) |

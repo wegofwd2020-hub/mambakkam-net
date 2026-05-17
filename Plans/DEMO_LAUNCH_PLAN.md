@@ -4,14 +4,14 @@
 **Document type:** End-to-end runbook from "today's main branch" → "live site at `https://mambakkam.net`"
 **Companion docs:**
 
-- [`DEMO_LAUNCH_PLAN.md`](https://github.com/wegofwd2020-hub/StudyBuddy_OnDemand/blob/main/docs/DEMO_LAUNCH_PLAN.md) (StudyBuddy_OnDemand — co-tenant on the same Hetzner CX22)
+- [`DEMO_LAUNCH_PLAN.md`](https://github.com/wegofwd2020-hub/StudyBuddy_OnDemand/blob/main/docs/DEMO_LAUNCH_PLAN.md) (StudyBuddy_OnDemand — co-tenant on the same Hetzner CX23)
 - [`DEMO_HOSTING_GUIDE.md`](https://github.com/wegofwd2020-hub/studybuddy-docs/blob/main/docs/dev/DEMO_HOSTING_GUIDE.md) (Hetzner-based architecture rationale)
 - [`dns-and-email-setup.md`](https://github.com/wegofwd2020-hub/studybuddy-docs/blob/main/docs/operations/dns-and-email-setup.md) (Cloudflare DNS pattern, applied here to `mambakkam.net`; email handled via Cloudflare Email Routing per §1.A.bis Phase 3)
 
 mambakkam.net is the **primary site** for the Day 0 (Sun May 17) launch and the **first
-tenant** on a fresh Hetzner CX22 box. StudyBuddy_OnDemand
+tenant** on a fresh Hetzner CX23 box. StudyBuddy_OnDemand
 (`demo.usestudybuddy.com`) launches the same day, **later in the morning**, by
-joining the same CX22 as a second tenant. mambakkam.net's `provision.sh`
+joining the same CX23 as a second tenant. mambakkam.net's `provision.sh`
 performs the full system bootstrap (Docker, UFW, fail2ban, deploy user,
 Origin Cert directory, daily-backup cron); StudyBuddy's provisioning is the
 shorter "second-tenant" variant that reuses what's already there.
@@ -49,10 +49,10 @@ code-freeze cutoff, and shifts the 4-day test phase to May 13-16.
 
 ---
 
-## §0 · Architecture — Co-located on the StudyBuddy Hetzner CX22
+## §0 · Architecture — Co-located on the StudyBuddy Hetzner CX23
 
 ```
-┌─ Hetzner CX22 (single VPS, ~$7/mo total) ───────────────────┐
+┌─ Hetzner CX23 (single VPS, ~$7.30/mo all-in) ───────────────┐
 │                                                              │
 │  HOST nginx  (Ubuntu apt, listens on :80 + :443)             │
 │      │                                                       │
@@ -80,16 +80,24 @@ code-freeze cutoff, and shifts the 4-day test phase to May 13-16.
 ```
 
 **Why co-locate.** The static site uses a few hundred KB of memory and ~zero
-CPU. Running a second VPS would double the bill ($14/mo vs ~$7/mo) for no
-practical isolation gain on a launch with no production traffic forecast.
-Both projects' lifecycles are operator-driven; a coordinated reboot is fine.
+CPU. Running a second VPS would roughly double the Hetzner line ($11.18/mo vs
+$5.59/mo) for no practical isolation gain on a launch with no production
+traffic forecast. Both projects' lifecycles are operator-driven; a coordinated
+reboot is fine.
 
 **Tenancy order (decided 2026-05-09).** mambakkam.net is the **first tenant**
-on the box: it pays the $5/mo VPS bill (plus ~$1/mo domain) and its
-`provision.sh` performs the full system bootstrap. StudyBuddy joins as the
-second tenant later the same day, at zero marginal infra cost from its
-side. This inverts the original 2026-05-08 framing (which assumed
-StudyBuddy provisioned first); see Change Log.
+on the box: it pays the $5.59/mo Hetzner bill ($4.99 server + $0.60 IPv4,
+plus ~$0.85/mo domain) and its `provision.sh` performs the full system
+bootstrap. StudyBuddy joins as the second tenant later the same day, at
+zero marginal infra cost from its side (just its own ~$0.85/mo domain).
+This inverts the original 2026-05-08 framing (which assumed StudyBuddy
+provisioned first); see Change Log.
+
+**All-in monthly cost (both tenants together).** $7.30/mo: Hetzner $5.59
+(server + IPv4) + 2 × ~$0.85/mo (domains) + $0 for Cloudflare/Grafana
+Cloud/restic-local/Cloudflare Email Routing/GitHub Actions, all on free
+tiers. Quote captured from Hetzner console 2026-05-17 (USD, excl. VAT —
+Hetzner does not bill VAT on non-EU accounts).
 
 **Listening-port discipline.** Both compose stacks publish on `127.0.0.1:<port>`
 only — never `0.0.0.0`. The host's `nginx` is the single entry point on
@@ -114,7 +122,7 @@ These ship with this PR. Use them as-is; no further code work needed.
 | Deliverable                  | File                                                                                  | Purpose                                                                                                                    |
 | ---------------------------- | ------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------- |
 | Production compose           | [`docker-compose.demo.yml`](../docker-compose.demo.yml)                               | Standalone production-shaped compose: binds to `127.0.0.1:8081`, `restart: always`, named log volume, healthcheck          |
-| First-time provisioning      | [`scripts/launch/provision.sh`](../scripts/launch/provision.sh)                       | Idempotent Hetzner CX22 add-on — host nginx install, `/opt/mambakkam` clone, deploy user, vhost dropped, daily-backup cron |
+| First-time provisioning      | [`scripts/launch/provision.sh`](../scripts/launch/provision.sh)                       | Idempotent Hetzner CX23 add-on — host nginx install, `/opt/mambakkam` clone, deploy user, vhost dropped, daily-backup cron |
 | Manual / CI deploy           | [`scripts/launch/deploy.sh`](../scripts/launch/deploy.sh)                             | `git pull && docker compose build && up -d` + post-deploy smoke                                                            |
 | Post-deploy smoke check      | [`scripts/launch/smoke.sh`](../scripts/launch/smoke.sh)                               | Curl-based: `/`, `/sitemap-index.xml`, key landing-page words present, 404 returns 404                                     |
 | Daily content backup         | [`scripts/launch/backup.sh`](../scripts/launch/backup.sh)                             | restic-based, encrypted at-rest. Sources: `src/assets/images/` + `/var/log/nginx/mambakkam.net.*` + `/etc/ssl/cloudflare/` + `.env.demo` → `restic forget` with 7d/4w/3m/1y policy. Cron 02:30 UTC. |
@@ -269,7 +277,7 @@ line tomorrow morning.
 + Origin Cert generation (SAN list = mambakkam.net
 
 - \*.mambakkam.net + demo.usestudybuddy.com); 17:15 Hetzner sign-up + SSH
-  key (no CX22 yet); 17:25 Cloudflare Email Routing for mambakkam.net +
+  key (no CX23 yet); 17:25 Cloudflare Email Routing for mambakkam.net +
   DMARC `p=none`; 17:35 Gmail send-as in alias mode; 18:15 Grafana Cloud
   account + Access Policy token (3 scopes); 18:40 pre-stage mambakkam DNS
   A record at TTL=300s; 19:00 register usestudybuddy.com + Cloudflare Email
@@ -280,7 +288,7 @@ line tomorrow morning.
 
 **Hard "no" tonight:**
 
-- Don't actually provision the Hetzner CX22 (that's Day 0 at 08:00 EDT)
+- Don't actually provision the Hetzner CX23 (that's Day 0 at 08:00 EDT)
 - Don't enable Cloudflare proxy on either pre-staged A record (would 502)
 - Don't push past 21:00 EDT — sleep beats finishing
 
@@ -294,7 +302,7 @@ at 09:00 EDT.
 
 | Time (EDT)         | Δ       | Action                                                                                                                                                                                                                                                                                                                           | Owner    | Pass criterion                                                                                                  |
 | ------------------ | ------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------- | --------------------------------------------------------------------------------------------------------------- |
-| 08:00              | T-1h    | **Open laptop**, Hetzner console — provision a fresh CX22 (Ubuntu 22.04, SSH key from Day -1, Falkenstein)                                                                                                                                                                                                                       | Operator | VPS public IP visible; SSH-able as root within ~3 min                                                           |
+| 08:00              | T-1h    | **Open laptop**, Hetzner console — provision a fresh CX23 (Ubuntu 22.04, SSH key from Day -1, Falkenstein)                                                                                                                                                                                                                       | Operator | VPS public IP visible; SSH-able as root within ~3 min                                                           |
 | 08:03              | T-57m   | `ssh root@<vps-ip>` + run `provision.sh` one-liner from §2.5 Sequence A step 1                                                                                                                                                                                                                                                   | Operator | All 14 steps complete (~20 min); restic password printed once and saved                                         |
 | 08:25              | T-35m   | Paste Cloudflare Origin Cert + key into `/etc/ssl/cloudflare/origin-{cert,key}.pem` (mode 600)                                                                                                                                                                                                                                   | Operator | `nginx -t` is clean                                                                                             |
 | 08:28              | T-32m   | **Generate the GH-Actions deploy keypair + paste pubkey** (task 20, part 1): on laptop, `ssh-keygen -t ed25519 -f ~/.ssh/mambakkam_deploy -C "gh-actions deploy@mambakkam"`. Paste `~/.ssh/mambakkam_deploy.pub` to `/home/deploy/.ssh/authorized_keys` on the VPS (mode 600, owned by deploy:deploy)                            | Operator | `ssh -i ~/.ssh/mambakkam_deploy deploy@<vps-ip> 'whoami'` returns `deploy`                                      |
@@ -338,7 +346,7 @@ Two distinct sequences:
 
 ### Sequence A — Cold start (manual; ~20 minutes the first time)
 
-This sequence runs against a **fresh Hetzner CX22**. mambakkam.net is the
+This sequence runs against a **fresh Hetzner CX23**. mambakkam.net is the
 first tenant on the box, so its `provision.sh` must perform the full
 system bootstrap — Docker, UFW, fail2ban, the `deploy` user, host nginx,
 the `/etc/ssl/cloudflare/` directory, and the daily-backup cron.
@@ -352,7 +360,7 @@ the `/etc/ssl/cloudflare/` directory, and the daily-backup cron.
      ssh root@<vps-ip>
      curl -fsSL https://raw.githubusercontent.com/wegofwd2020-hub/mambakkam-net/main/scripts/launch/provision.sh \
        | bash
-     As the first tenant on a fresh CX22, this installs:
+     As the first tenant on a fresh CX23, this installs:
        - Docker CE + Compose plugin (apt)
        - UFW firewall (allow ssh / 80 / 443) + fail2ban
        - Host nginx (apt) — the single :80 + :443 entry point for both
@@ -493,7 +501,7 @@ bootstrap — StudyBuddy's later `provision.sh` is the shorter second-tenant
 variant that reuses what's already here.
 
 ```bash
-# After ssh-ing into a fresh Hetzner CX22 Ubuntu 22.04 box:
+# After ssh-ing into a fresh Hetzner CX23 Ubuntu 22.04 box:
 curl -fsSL https://raw.githubusercontent.com/wegofwd2020-hub/mambakkam-net/main/scripts/launch/provision.sh | bash
 ```
 
@@ -645,7 +653,7 @@ fails, the next day's tests don't start until the issue is fixed.
 
 | Time           | Activity                                                                                                                                                                                                        | Pass criterion                                                                                                           |
 | -------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------ |
-| Morning        | Provision a fresh Hetzner CX22 (the **staging** box, separate from the production box that gets cut on Day -1 (Sat May 16)) by running `scripts/launch/provision.sh` from scratch — full first-tenant bootstrap | Docker installed, UFW/fail2ban active, host nginx serves a "hello" page from a temp container                            |
+| Morning        | Provision a fresh Hetzner CX23 (the **staging** box, separate from the production box that gets cut on Day -1 (Sat May 16)) by running `scripts/launch/provision.sh` from scratch — full first-tenant bootstrap | Docker installed, UFW/fail2ban active, host nginx serves a "hello" page from a temp container                            |
 |                | Configure Cloudflare DNS for `staging.mambakkam.net` (proxied)                                                                                                                                                  | `dig` resolves the new A-record to a Cloudflare-edge IP                                                                  |
 |                | Run `scripts/launch/deploy.sh`                                                                                                                                                                                  | Container `Up`; `smoke.sh http://127.0.0.1:8081` exits 0                                                                 |
 |                | Run `scripts/launch/smoke.sh https://staging.mambakkam.net`                                                                                                                                                     | Exit 0                                                                                                                   |
@@ -739,7 +747,7 @@ post-launch drill cadence has a baseline.
 | Morning   | Re-run all of Day 2's content walkthrough against staging                                                                                                                                      | Same passes as Day 2                                                                                  |
 | Morning   | `npm run check && npm run build` on a clean clone                                                                                                                                              | Exit code 0                                                                                           |
 | Midday    | Lower DNS TTL on `mambakkam.net` apex A record to 300s                                                                                                                                         | Cloudflare confirms TTL=300                                                                           |
-| Midday    | Provision the **production** Hetzner CX22 (separate from staging — same `provision.sh` from scratch). Paste Origin Cert with the SAN list covering both mambakkam.net and demo.usestudybuddy.com. | Production box healthy; `staging.mambakkam.net` stays running for last-mile testing                   |
+| Midday    | Provision the **production** Hetzner CX23 (separate from staging — same `provision.sh` from scratch). Paste Origin Cert with the SAN list covering both mambakkam.net and demo.usestudybuddy.com. | Production box healthy; `staging.mambakkam.net` stays running for last-mile testing                   |
 | Midday    | Confirm StudyBuddy is ready to join the production box on Day 0 (Sun May 17) (read its launch plan §4 day 4)                                                                                   | StudyBuddy second-tenant gate is green; its `provision.sh` validated against the staging box on Day 1 |
 | Afternoon | Final go/no-go meeting with self — separate decisions for mambakkam.net (T-0 = 09:00) and StudyBuddy (T+4h = 13:00)                                                                            | Both boxes ticked → GO for both cutovers                                                              |
 
@@ -759,7 +767,7 @@ The known risks worth pre-mitigating, ordered by likelihood × impact:
 | Image assets bloat git repo size over time                                        | Low        | Low    | `backup.sh` only rsyncs assets; if repo grows past 1 GB, move large originals to git LFS or S3                                                                                        |
 | Cloudflare DNS cutover takes longer than 5 min                                    | Low        | Medium | Pre-stage TTL=300s on Day -1 (Sat May 16); have the staging URL bookmark as fallback during the announcement                                                                          |
 | Apex/www redirect loop on Cloudflare proxy                                        | Low        | Medium | Test `curl -sI https://www.mambakkam.net/` resolves to a single 301 (not a chain). Page Rule must not conflict with `Always Use HTTPS`                                                |
-| Hetzner CX22 OOM under combined load (mambakkam is tiny but StudyBuddy is hungry) | Low        | Medium | mambakkam container resource limit set in compose (cpus: 0.25, mem: 128M); `docker stats` monitored on Day 1                                                                          |
+| Hetzner CX23 OOM under combined load (mambakkam is tiny but StudyBuddy is hungry) | Low        | Medium | mambakkam container resource limit set in compose (cpus: 0.25, mem: 128M); `docker stats` monitored on Day 1                                                                          |
 | Static site goes stale (no fresh content for 6 months)                            | Medium     | Low    | Schedule monthly content review; `news/` collection acts as the heartbeat                                                                                                             |
 
 ---
@@ -783,8 +791,8 @@ These need a decision before Day -5 (Tue May 12) — flagging now so they don't 
 
 ### Decided 2026-05-08 — closed for the launch
 
-**Hosting — co-located Hetzner CX22.** Confirmed 2026-05-08 over two
-alternatives (dedicated CX22 or Cloudflare Pages). Trade-off: shared
+**Hosting — co-located Hetzner CX23.** Confirmed 2026-05-08 over two
+alternatives (dedicated CX23 or Cloudflare Pages). Trade-off: shared
 failure domain with StudyBuddy in exchange for a single $7/mo bill and
 a unified ops surface. Re-evaluate if either site outgrows the box.
 
@@ -822,11 +830,11 @@ StudyBuddy provisioned the box first). Concrete consequences:
 
 ## §7 · Observability
 
-A third compose stack on the same CX22 ships metrics to Grafana Cloud free
+A third compose stack on the same CX23 ships metrics to Grafana Cloud free
 tier. Full design + setup runbook in [`MONITORING.md`](MONITORING.md).
 
 **One-paragraph summary:**
-Local Prometheus on the CX22 (`127.0.0.1:9090`, ~150 MB RAM) scrapes a
+Local Prometheus on the CX23 (`127.0.0.1:9090`, ~150 MB RAM) scrapes a
 small set of co-located targets — mambakkam's nginx via a sidecar exporter,
 StudyBuddy's `/metrics` over loopback, the host via node-exporter, and a
 blackbox-exporter probing both public hostnames every 15 s — then
@@ -912,7 +920,7 @@ files-as-timestamped-tarballs. Each site has its own repo at
 3 monthly / 1 yearly` (~15 snapshots, ~1.2× one full snapshot on disk
 thanks to dedup). A new `backup-check.sh` runs `restic check
 --read-data-subset 5%` + `restic prune` weekly on Sundays. **Local-only
-posture** — both repos live on the same CX22 disk as the originals, which
+posture** — both repos live on the same CX23 disk as the originals, which
 is acceptable for the demo and documented as residual risk in
 `BACKUPS.md`.
 
@@ -978,9 +986,9 @@ Outstanding before alerts are "ready":
 
 | Date       | Change                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             |
 | ---------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| 2026-05-09 | Initial — comprehensive plan for May 16 launch (4 days code freeze + 4 days test phase); co-located on StudyBuddy Hetzner CX22; Zoho free-tier email                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               |
-| 2026-05-09 | **Tenancy-order flip** — mambakkam.net is now the first tenant on a fresh CX22; StudyBuddy joins as second tenant later the same day on May 16 (T+4h after mambakkam.net cutover). Re-framed §0 cost narrative, §1.A.bis Phase 3 Zoho note, §2 launch-day timing, §2.5 cold-start sequence, §3.1 provision.sh inventory, Day 1 + Day 4 of test plan. Added §6 "Decided 2026-05-09" block. Flagged outstanding work on `scripts/launch/provision.sh` (must add Docker/UFW/fail2ban/deploy-user steps before May 12).                                                                                                                                                                                                                                                                                |
-| 2026-05-09 | **Observability scaffolded** — added §7 plus full design in `MONITORING.md`. Prometheus + nginx-exporter + blackbox + node-exporter as a third compose stack on the CX22; remote_write to Grafana Cloud free tier (no local Grafana). `provision.sh` writes the `.env.monitoring` template; operator brings the stack up post-cutover. Public `/metrics` on both vhosts is Cloudflare-Access-gated.                                                                                                                                                                                                                                                                                                                                                                                                |
+| 2026-05-09 | Initial — comprehensive plan for May 16 launch (4 days code freeze + 4 days test phase); co-located on StudyBuddy Hetzner CX23; Zoho free-tier email                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               |
+| 2026-05-09 | **Tenancy-order flip** — mambakkam.net is now the first tenant on a fresh CX23; StudyBuddy joins as second tenant later the same day on May 16 (T+4h after mambakkam.net cutover). Re-framed §0 cost narrative, §1.A.bis Phase 3 Zoho note, §2 launch-day timing, §2.5 cold-start sequence, §3.1 provision.sh inventory, Day 1 + Day 4 of test plan. Added §6 "Decided 2026-05-09" block. Flagged outstanding work on `scripts/launch/provision.sh` (must add Docker/UFW/fail2ban/deploy-user steps before May 12).                                                                                                                                                                                                                                                                                |
+| 2026-05-09 | **Observability scaffolded** — added §7 plus full design in `MONITORING.md`. Prometheus + nginx-exporter + blackbox + node-exporter as a third compose stack on the CX23; remote_write to Grafana Cloud free tier (no local Grafana). `provision.sh` writes the `.env.monitoring` template; operator brings the stack up post-cutover. Public `/metrics` on both vhosts is Cloudflare-Access-gated.                                                                                                                                                                                                                                                                                                                                                                                                |
 | 2026-05-09 | **Logging scaffolded** — added §8 plus full design in `LOGGING.md`. Promtail joins the monitoring compose stack as a fifth service; ships docker / nginx / journald / backup logs to Grafana Cloud Loki free tier (50 GB / 14 d). Loki creds added to `.env.monitoring` template (separate URL + numeric user from Prometheus; same access-policy token works if scoped).                                                                                                                                                                                                                                                                                                                                                                                                                          |
 | 2026-05-09 | **Backups rewritten** — added §9 plus full design + restore runbook in `BACKUPS.md`. Replaced rsync+pg_dump+gzip with restic (encrypted + deduped + incremental). New weekly integrity-check script; password auto-generated by `provision.sh` and printed once. Day 3 restore-drill row added to §4 test plan. Local-only posture; off-box deferred until first paying customer.                                                                                                                                                                                                                                                                                                                                                                                                                  |
 | 2026-05-09 | **Alerts as code** — added §10 + new `Plans/RUNBOOK.md` consolidating the 14 alerts that were previously scattered across MONITORING / LOGGING / BACKUPS docs. Rules ship as YAML in `infra/monitoring/alerts/` with an idempotent `apply.sh` upload helper. Two-severity Gmail routing (`[PAGE]` / `[WARN]` subject prefix). Per-alert response runbook entries. Day 3 alert-test-fire row added to §4.                                                                                                                                                                                                                                                                                                                                                                                           |
