@@ -34,7 +34,7 @@ A change merged to `main` flows to the VPS automatically via
 ## Recommended Stack: Co-located Hetzner CX22 + Cloudflare (~$7/mo total)
 
 mambakkam.net is the **first tenant** on a Hetzner CX22 box that will
-also host `demo.studybuddy.app` later the same day. Host nginx routes by
+also host `demo.usestudybuddy.com` later the same day. Host nginx routes by
 Host header. mambakkam.net pays the $5/mo VPS bill plus the ~$1/mo
 domain — total ~$6/mo all-in. StudyBuddy joins as a second tenant at
 **zero marginal infra cost** from its side. (This inverts the framing
@@ -50,7 +50,7 @@ see Change Log.)
 │      ├─ mambakkam.net          → 127.0.0.1:8081              │
 │      │       (this project's astrowind container)            │
 │      │                                                       │
-│      └─ demo.studybuddy.app    → 127.0.0.1:8443              │
+│      └─ demo.usestudybuddy.com    → 127.0.0.1:8443              │
 │              (StudyBuddy stack's compose-internal nginx)     │
 │                                                              │
 │  /opt/mambakkam/        (this project — git clone)           │
@@ -60,13 +60,13 @@ see Change Log.)
 │    └─ docker compose: 7 containers (db, redis, api, ...)     │
 │                                                              │
 │  /etc/ssl/cloudflare/   (shared Origin Cert + key)           │
-│    SAN = mambakkam.net + *.mambakkam.net + demo.studybuddy.app│
+│    SAN = mambakkam.net + *.mambakkam.net + demo.usestudybuddy.com│
 └──────────────────────────────────────────────────────────────┘
                           │
                   Cloudflare (free tier)
             DNS · DDoS · TLS at edge · CDN cache
                           │
-            mambakkam.net + demo.studybuddy.app
+            mambakkam.net + demo.usestudybuddy.com
 ```
 
 ### Why co-locate
@@ -171,7 +171,7 @@ VPS — that bypasses Cloudflare and the host nginx vhost.
 ### 3. One Cloudflare Origin Cert covers both domains
 
 A single Origin Cert with SAN = `mambakkam.net, *.mambakkam.net,
-demo.studybuddy.app` is **generated up-front during the mambakkam.net cold
+demo.usestudybuddy.com` is **generated up-front during the mambakkam.net cold
 start on Day -1 (Sat May 16)** (mambakkam.net is the first tenant on the box) and lives
 at `/etc/ssl/cloudflare/origin-{cert,key}.pem`. Read by the host nginx
 vhost. Cloudflare's "Full (strict)" SSL/TLS mode verifies the chain.
@@ -278,7 +278,7 @@ Quick-check before showing anyone the site:
 ### Content
 
 - [ ] Every navigation entry resolves (home, news, people, landmarks, work)
-- [ ] `/work/studybuddy-ondemand` outbound link reaches `demo.studybuddy.app` cleanly
+- [ ] `/work/studybuddy-ondemand` outbound link reaches `demo.usestudybuddy.com` cleanly
 - [ ] Coming-soon work items (Thittam) render unlinked with a "Coming soon" pill
 - [ ] `/sitemap-index.xml` lists every public page
 - [ ] `/robots.txt` does NOT contain a blanket `Disallow: /`

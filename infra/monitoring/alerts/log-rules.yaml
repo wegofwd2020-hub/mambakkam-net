@@ -16,18 +16,18 @@ groups:
     interval: 1m
     rules:
       - alert: Demo5xxRateHigh
-        # 5xx hits in the host nginx demo.studybuddy.app access log.
+        # 5xx hits in the host nginx demo.usestudybuddy.com access log.
         # >0.5/sec = 30/min = ~one user per minute hitting an error.
         expr: |
           sum by (vhost) (
-            rate({vhost="demo.studybuddy.app", kind="access"} |~ `" 5\d\d ` [5m])
+            rate({vhost="demo.usestudybuddy.com", kind="access"} |~ `" 5\d\d ` [5m])
           ) > 0.5
         for: 5m
         labels:
           severity: page
           site: studybuddy
         annotations:
-          summary: 'demo.studybuddy.app 5xx rate >0.5/sec for 5 min'
+          summary: 'demo.usestudybuddy.com 5xx rate >0.5/sec for 5 min'
           description: 'Sustained 5xx responses in the public access log. Cross-reference with `sb_requests_total{status=~"5.."}` in Grafana to identify which routes are failing.'
           runbook_url: 'https://github.com/wegofwd2020-hub/mambakkam-net/blob/main/Plans/RUNBOOK.md#demo5xxratehigh'
 

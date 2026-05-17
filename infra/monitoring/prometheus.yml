@@ -109,8 +109,8 @@ scrape_configs:
           - https://mambakkam.net
           - https://mambakkam.net/people/siva-m
           - https://mambakkam.net/sitemap-index.xml
-          - https://demo.studybuddy.app
-          - https://demo.studybuddy.app/healthz
+          - https://demo.usestudybuddy.com
+          - https://demo.usestudybuddy.com/healthz
     relabel_configs:
       # Pass the actual target URL through `__param_target` so blackbox-
       # exporter knows what to probe; the `instance` label ends up as the URL.

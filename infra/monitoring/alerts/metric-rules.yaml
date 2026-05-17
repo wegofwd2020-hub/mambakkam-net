@@ -35,13 +35,13 @@ groups:
           runbook_url: 'https://github.com/wegofwd2020-hub/mambakkam-net/blob/main/Plans/RUNBOOK.md#mambakkamdown'
 
       - alert: StudyBuddyDown
-        expr: probe_success{instance="https://demo.studybuddy.app/healthz"} == 0
+        expr: probe_success{instance="https://demo.usestudybuddy.com/healthz"} == 0
         for: 2m
         labels:
           severity: page
           site: studybuddy
         annotations:
-          summary: 'demo.studybuddy.app /healthz not responding'
+          summary: 'demo.usestudybuddy.com /healthz not responding'
           description: 'blackbox /healthz probe failing >2 min. /healthz returns 200 only when DB+Redis are reachable; this catches both API outages and DB/Redis failures.'
           runbook_url: 'https://github.com/wegofwd2020-hub/mambakkam-net/blob/main/Plans/RUNBOOK.md#studybuddydown'
 

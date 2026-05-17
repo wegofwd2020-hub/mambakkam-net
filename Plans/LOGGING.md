@@ -123,8 +123,8 @@ labels:
 | -------------------------------- | --------------------- | -------- |
 | `mambakkam.net.access.log`       | `mambakkam.net`       | `access` |
 | `mambakkam.net.error.log`        | `mambakkam.net`       | `error`  |
-| `demo.studybuddy.app.access.log` | `demo.studybuddy.app` | `access` |
-| `demo.studybuddy.app.error.log`  | `demo.studybuddy.app` | `error`  |
+| `demo.usestudybuddy.com.access.log` | `demo.usestudybuddy.com` | `access` |
+| `demo.usestudybuddy.com.error.log`  | `demo.usestudybuddy.com` | `error`  |
 
 The compose-internal nginx (inside the StudyBuddy stack and the mambakkam
 astrowind container) also writes access logs, but they go to stdout and
@@ -175,10 +175,10 @@ pick streams, `|=` / `!=` / `|~` to filter substrings, `|` followed by a parser
 {project="studybuddy", logger="auth"}
 ```
 
-**All 5xx responses on demo.studybuddy.app, sorted by URL:**
+**All 5xx responses on demo.usestudybuddy.com, sorted by URL:**
 
 ```logql
-{vhost="demo.studybuddy.app", kind="access"} |~ "\" 5\\d\\d "
+{vhost="demo.usestudybuddy.com", kind="access"} |~ "\" 5\\d\\d "
 ```
 
 (LogQL regex; the `\` needs doubling in YAML/JSON contexts.)
@@ -225,10 +225,10 @@ docker compose -f /opt/studybuddy/docker-compose.demo.yml logs --tail 100 -f
 
 # ── Host nginx logs ──────────────────────────────────────────────────────
 sudo tail -f /var/log/nginx/mambakkam.net.access.log
-sudo tail -f /var/log/nginx/demo.studybuddy.app.error.log
+sudo tail -f /var/log/nginx/demo.usestudybuddy.com.error.log
 
 # Top 10 5xx URLs in the last 1000 lines:
-sudo grep -E '" 5\d\d ' /var/log/nginx/demo.studybuddy.app.access.log \
+sudo grep -E '" 5\d\d ' /var/log/nginx/demo.usestudybuddy.com.access.log \
   | tail -1000 \
   | awk '{print $7}' | sort | uniq -c | sort -rn | head
 

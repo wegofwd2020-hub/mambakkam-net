@@ -157,7 +157,7 @@ sudo docker compose -f docker-compose.demo.yml up -d
 **Escalation**
 
 - If host nginx config-test fails: revert `infra/nginx/mambakkam.net.conf` from git (`git -C /opt/mambakkam log -p infra/nginx/`); reload nginx.
-- If Origin Cert expired: regenerate at Cloudflare → SSL/TLS → Origin Server (15 min). SAN list: mambakkam.net + \*.mambakkam.net + demo.studybuddy.app.
+- If Origin Cert expired: regenerate at Cloudflare → SSL/TLS → Origin Server (15 min). SAN list: mambakkam.net + \*.mambakkam.net + demo.usestudybuddy.com.
 - If the VPS is itself unreachable: file Hetzner ticket + post a Cloudflare maintenance worker as cover (5 min via CF dashboard).
 
 ---
@@ -165,7 +165,7 @@ sudo docker compose -f docker-compose.demo.yml up -d
 ### StudyBuddyDown
 
 **Severity:** `[PAGE]`
-**Expr:** `probe_success{instance="https://demo.studybuddy.app/healthz"} == 0` for 2 m
+**Expr:** `probe_success{instance="https://demo.usestudybuddy.com/healthz"} == 0` for 2 m
 
 **What it means**
 
@@ -185,7 +185,7 @@ ssh deploy@<vps-ip>
 cd /opt/studybuddy
 
 # 1. Confirm:
-curl -fsSL https://demo.studybuddy.app/healthz       # expect {"db":"ok","redis":"ok"}
+curl -fsSL https://demo.usestudybuddy.com/healthz       # expect {"db":"ok","redis":"ok"}
 
 # 2. Service health:
 sudo docker compose -f docker-compose.yml -f docker-compose.demo.yml \
@@ -229,7 +229,7 @@ The application is responding, but 1 in 20 requests is a 500-class error. Usuall
 ```bash
 # 1. Identify which routes are 5xx-ing:
 # In Grafana Cloud → Explore → Loki:
-{vhost="demo.studybuddy.app", kind="access"} |~ `" 5\d\d ` | json | line_format "{{.uri}}"
+{vhost="demo.usestudybuddy.com", kind="access"} |~ `" 5\d\d ` | json | line_format "{{.uri}}"
 
 # 2. Confirm via the metric:
 sum by (path) (rate(sb_requests_total{status=~"5.."}[5m]))
@@ -293,7 +293,7 @@ sudo find /data/content -type f -size +50M
 ### Demo5xxRateHigh
 
 **Severity:** `[PAGE]`
-**Expr:** demo.studybuddy.app access log 5xx rate > 0.5/s for 5 m
+**Expr:** demo.usestudybuddy.com access log 5xx rate > 0.5/s for 5 m
 
 **What it means**
 

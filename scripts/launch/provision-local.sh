@@ -21,7 +21,7 @@
 #      resolved doesn't forward into Docker's bridge), writes explicit
 #      DNS servers into /etc/docker/daemon.json and restarts Docker.
 #   3. Generates a self-signed cert at /etc/ssl/cloudflare/origin-{cert,key}.pem
-#      with SAN covering mambakkam.net + www + demo.studybuddy.app, so the
+#      with SAN covering mambakkam.net + www + demo.usestudybuddy.com, so the
 #      host nginx vhost loads cleanly
 #   4. Adds 127.0.0.1 → mambakkam.net (+ www) to /etc/hosts so curl-based
 #      smoke checks can reach the vhost over HTTPS
@@ -158,12 +158,12 @@ else
        -keyout "$KEY_FILE" \
        -out    "$CERT_FILE" \
        -subj "/CN=mambakkam.net" \
-       -addext "subjectAltName=DNS:mambakkam.net,DNS:www.mambakkam.net,DNS:demo.studybuddy.app" \
+       -addext "subjectAltName=DNS:mambakkam.net,DNS:www.mambakkam.net,DNS:demo.usestudybuddy.com" \
        >/dev/null 2>&1; then
     chmod 600 "$KEY_FILE"
     chmod 644 "$CERT_FILE"
     chown root:root "$KEY_FILE" "$CERT_FILE"
-    info "generated self-signed cert (30d, SAN: mambakkam.net + www + demo.studybuddy.app)"
+    info "generated self-signed cert (30d, SAN: mambakkam.net + www + demo.usestudybuddy.com)"
     log_step_ok
   else
     log_step_fail "openssl req failed generating self-signed cert"

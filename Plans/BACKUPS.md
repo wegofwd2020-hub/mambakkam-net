@@ -209,7 +209,7 @@ sudo docker compose -f docker-compose.yml -f docker-compose.demo.yml \
      --env-file .env.demo start api celery-worker celery-beat-primary web
 
 # 8. Smoke-check via the existing script:
-bash /opt/studybuddy/scripts/demo/smoke.sh https://demo.studybuddy.app
+bash /opt/studybuddy/scripts/demo/smoke.sh https://demo.usestudybuddy.com
 
 # 9. After confirming everything works, drop the old DB:
 sudo docker compose -f docker-compose.yml -f docker-compose.demo.yml \
@@ -274,7 +274,7 @@ sudo RESTIC_PASSWORD_FILE=/etc/restic/mambakkam.password \
 sudo nginx -t && sudo systemctl reload nginx
 ```
 
-If both the on-disk repo and your password manager copy are gone: regenerate the cert at Cloudflare → SSL/TLS → Origin Server (15-min recreate path), making sure the SAN list still includes mambakkam.net + \*.mambakkam.net + demo.studybuddy.app.
+If both the on-disk repo and your password manager copy are gone: regenerate the cert at Cloudflare → SSL/TLS → Origin Server (15-min recreate path), making sure the SAN list still includes mambakkam.net + \*.mambakkam.net + demo.usestudybuddy.com.
 
 ### Scenario 5 — historical access-log search (mambakkam)
 

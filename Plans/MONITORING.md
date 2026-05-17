@@ -20,7 +20,7 @@
 | **Prometheus UI** (ad-hoc PromQL) | Local on the CX22 — `127.0.0.1:9090`                                   | `ssh -L 9090:127.0.0.1:9090 deploy@<vps-ip>` |
 | **mambakkam scrape target**       | nginx_exporter sidecar on container net                                | scraped only by local Prometheus             |
 | **StudyBuddy `/metrics`**         | bearer-token-protected, `127.0.0.1:8443/metrics` (loopback)            | scraped only by local Prometheus             |
-| **Public `/metrics`** (optional)  | `https://mambakkam.net/metrics`, `https://demo.studybuddy.app/metrics` | Cloudflare Access policy required            |
+| **Public `/metrics`** (optional)  | `https://mambakkam.net/metrics`, `https://demo.usestudybuddy.com/metrics` | Cloudflare Access policy required            |
 | **Synthetic uptime**              | blackbox-exporter on the CX22                                          | probes 5 public URLs every 15s               |
 | **Host metrics**                  | node-exporter on host net                                              | scraped only by local Prometheus             |
 
@@ -140,8 +140,8 @@ Probes (every 15 s, 5 s timeout):
 - `https://mambakkam.net`
 - `https://mambakkam.net/people/siva-m`
 - `https://mambakkam.net/sitemap-index.xml`
-- `https://demo.studybuddy.app`
-- `https://demo.studybuddy.app/healthz`
+- `https://demo.usestudybuddy.com`
+- `https://demo.usestudybuddy.com/healthz`
 
 Series shipped: `probe_success`, `probe_duration_seconds`, `probe_http_status_code`, `probe_http_ssl`. Cardinality stays low because each target adds 4 series.
 
@@ -243,7 +243,7 @@ issues; `[WARN]` for everything else. Single Gmail destination
 
 ## Outstanding work flagged
 
-1. **Cloudflare Access policies** for `mambakkam.net/metrics` and `demo.studybuddy.app/metrics` are NOT auto-configured by any script — operator action in the Cloudflare dashboard. Without them, the nginx-side IP allowlist + JWT-header check is the only gate (still safe — direct curls return 403 — but not the full zero-trust posture).
+1. **Cloudflare Access policies** for `mambakkam.net/metrics` and `demo.usestudybuddy.com/metrics` are NOT auto-configured by any script — operator action in the Cloudflare dashboard. Without them, the nginx-side IP allowlist + JWT-header check is the only gate (still safe — direct curls return 403 — but not the full zero-trust posture).
 
 2. **Cloudflare IPv6 ranges** are not in the host nginx vhost allowlist yet. If the CX22 enables IPv6, regenerate the allowlist from https://www.cloudflare.com/ips-v6/.
 
@@ -252,7 +252,7 @@ issues; `[WARN]` for everything else. Single Gmail destination
 4. **Origin Cert SAN list.** When mambakkam.net's `provision.sh` generates the Cloudflare Origin Cert, the SAN list MUST include all of:
    - `mambakkam.net`
    - `*.mambakkam.net`
-   - `demo.studybuddy.app`
+   - `demo.usestudybuddy.com`
 
    If you also expose `monitoring.mambakkam.net` later (e.g. for a self-hosted Grafana down the road), re-issue the cert with that hostname added.
 

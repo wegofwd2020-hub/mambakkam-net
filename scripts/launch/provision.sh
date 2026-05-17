@@ -27,7 +27,7 @@
 #       provision — that's why we install the user up-front.
 #   8.  Host nginx vhost (infra/nginx/mambakkam.net.conf → sites-enabled)
 #   9.  /etc/ssl/cloudflare/ (operator pastes Origin Cert with SAN list
-#       covering mambakkam.net + demo.studybuddy.app)
+#       covering mambakkam.net + demo.usestudybuddy.com)
 #   10. cron — daily restic backup (02:30 UTC) + weekly check (Sun 03:30)
 #   11. backup directory
 #   12. restic password generation + repo init at /opt/mambakkam/backups/restic/
@@ -217,7 +217,7 @@ else
   warn "Cert SAN MUST include all of:"
   warn "  - mambakkam.net"
   warn "  - *.mambakkam.net"
-  warn "  - demo.studybuddy.app   (StudyBuddy will join this box on Day 0 (Sun May 17))"
+  warn "  - demo.usestudybuddy.com   (StudyBuddy will join this box on Day 0 (Sun May 17))"
   warn "Generating with the StudyBuddy SAN now avoids a re-issue when the"
   warn "second tenant joins."
 fi
@@ -425,7 +425,7 @@ Next steps (in order):
    SAN list MUST include all of:
      - mambakkam.net
      - *.mambakkam.net
-     - demo.studybuddy.app   (StudyBuddy joins this box on Day 0 (Sun May 17))
+     - demo.usestudybuddy.com   (StudyBuddy joins this box on Day 0 (Sun May 17))
 
 3. Paste the GitHub Actions deploy SSH public key into:
    /home/$DEPLOY_USER/.ssh/authorized_keys

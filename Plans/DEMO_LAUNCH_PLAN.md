@@ -10,7 +10,7 @@
 
 mambakkam.net is the **primary site** for the Day 0 (Sun May 17) launch and the **first
 tenant** on a fresh Hetzner CX22 box. StudyBuddy_OnDemand
-(`demo.studybuddy.app`) launches the same day, **later in the morning**, by
+(`demo.usestudybuddy.com`) launches the same day, **later in the morning**, by
 joining the same CX22 as a second tenant. mambakkam.net's `provision.sh`
 performs the full system bootstrap (Docker, UFW, fail2ban, deploy user,
 Origin Cert directory, daily-backup cron); StudyBuddy's provisioning is the
@@ -59,7 +59,7 @@ code-freeze cutoff, and shifts the 4-day test phase to May 13-16.
 │      ├─ Host: mambakkam.net          → 127.0.0.1:8081        │
 │      │       (this project's astrowind container)            │
 │      │                                                       │
-│      └─ Host: demo.studybuddy.app    → 127.0.0.1:8443        │
+│      └─ Host: demo.usestudybuddy.com    → 127.0.0.1:8443        │
 │              (StudyBuddy stack's compose-internal nginx)     │
 │                                                              │
 │  /opt/mambakkam/         (this project — git clone)          │
@@ -76,7 +76,7 @@ code-freeze cutoff, and shifts the 4-day test phase to May 13-16.
                     Cloudflare (free tier)
               DNS · DDoS · SSL termination at edge
                             │
-              mambakkam.net + demo.studybuddy.app
+              mambakkam.net + demo.usestudybuddy.com
 ```
 
 **Why co-locate.** The static site uses a few hundred KB of memory and ~zero
@@ -97,7 +97,7 @@ only — never `0.0.0.0`. The host's `nginx` is the single entry point on
 verified during the cold-start dry-run.
 
 **Cloudflare Origin Cert.** A single Cloudflare Origin Certificate covers
-both `mambakkam.net` (apex + `www`) and `demo.studybuddy.app`. Generated
+both `mambakkam.net` (apex + `www`) and `demo.usestudybuddy.com`. Generated
 once via the Cloudflare dashboard with both hostnames in the SAN list.
 Lives at `/etc/ssl/cloudflare/origin-cert.pem` and is read by host nginx.
 
@@ -151,7 +151,7 @@ verifying the zone is healthy).
       · _verify:_ `curl -sI https://www.mambakkam.net/` returns `301` to the apex
 - [ ] SSL/TLS mode set to **Full (strict)**; **Always Use HTTPS** toggled on
       · _verify:_ `curl -sI http://mambakkam.net/` returns `301` to https
-- [ ] Cloudflare Origin Certificate generated with SAN = `mambakkam.net, *.mambakkam.net, demo.studybuddy.app`; cert + key installed at `/etc/ssl/cloudflare/origin-{cert,key}.pem` on the VPS (shared with StudyBuddy)
+- [ ] Cloudflare Origin Certificate generated with SAN = `mambakkam.net, *.mambakkam.net, demo.usestudybuddy.com`; cert + key installed at `/etc/ssl/cloudflare/origin-{cert,key}.pem` on the VPS (shared with StudyBuddy)
       · _verify:_ host nginx reloads cleanly; `curl https://mambakkam.net/` returns 200
 - [ ] Pre-launch (Day -1 / Sat May 16 EOD): TTL on the apex A record lowered to 300s
       · _verify:_ Cloudflare DNS UI shows "TTL: 5 min" instead of "Auto"
@@ -201,7 +201,7 @@ external pipeline, no API keys.
 | `src/data/people/siva-m.md` complete with bio + headshot                       | Operator | `npm run build` includes the page; opens at `/people/siva-m`                        |
 | All four landmarks in `src/data/landmarks/` build cleanly                      | Operator | Lighthouse `/landmarks` returns 200 + each landmark page renders its body           |
 | All four work items in `src/data/work/` build cleanly                          | Operator | `/work` lists all four; each detail page returns 200                                |
-| `studybuddy-ondemand.md` work item links to `https://demo.studybuddy.app`      | Operator | `grep -l 'demo.studybuddy.app' src/data/work/*.md` returns the file                 |
+| `studybuddy-ondemand.md` work item links to `https://demo.usestudybuddy.com`      | Operator | `grep -l 'demo.usestudybuddy.com' src/data/work/*.md` returns the file                 |
 | Hero copy + nav final-pass for typos                                           | Operator | Manual read; or `npx cspell '**/*.{md,astro}'` if added later                       |
 | `npm run build` exits clean — zero broken-link warnings, zero typecheck errors | Operator | `npm run check && npm run build` exit code 0                                        |
 
@@ -241,7 +241,7 @@ Green checkboxes on each of these means we enter the test phase clean:
   daily-backup cron). StudyBuddy is **not yet** on this box.
 - `/opt/mambakkam` deployed and serving on `127.0.0.1:8081`
 - Host nginx vhost installed, Origin Cert in place (SAN already includes
-  `demo.studybuddy.app` so StudyBuddy can join later without a re-issue),
+  `demo.usestudybuddy.com` so StudyBuddy can join later without a re-issue),
   `nginx -t` clean
 - `.env.demo` populated (only analytics ID needed at launch; SMTP placeholders OK)
 - Note: the GitHub Actions deploy keypair, the 3 repo secrets
@@ -262,11 +262,11 @@ line tomorrow morning.
 **One-paragraph summary:**
 17:00 Cloudflare account + Origin Cert generation (SAN list = mambakkam.net
 
-- \*.mambakkam.net + demo.studybuddy.app); 17:15 Hetzner sign-up + SSH
+- \*.mambakkam.net + demo.usestudybuddy.com); 17:15 Hetzner sign-up + SSH
   key (no CX22 yet); 17:25 Zoho Mail with mambakkam.net mailbox + MX/SPF/
   DKIM/DMARC; 17:55 Gmail send-as; 18:15 Grafana Cloud account + Access
   Policy token (3 scopes); 18:40 pre-stage mambakkam DNS A record at
-  TTL=300s; 19:00 register studybuddy.app + add mailboxes; 19:25 Auth0
+  TTL=300s; 19:00 register usestudybuddy.com + add mailboxes; 19:25 Auth0
   dev tenant + 3 applications; 19:50 Stripe test mode + webhook + Sentry.
   20:30 final go/no-go before bed. Total 3.5 hours; budget 4 if Zoho DKIM
   verification stalls.
@@ -297,7 +297,7 @@ at 09:00 EDT.
 | 08:40              | T-20m   | Local smoke: `bash scripts/launch/smoke.sh http://127.0.0.1:8081`                                                                                                                                                                                                                                                                | Operator | Exit 0                                                                                                          |
 | 08:45              | T-15m   | DNS cutover: at Cloudflare, change the apex A record value from the Day -1 placeholder IP to the real VPS public IP, **enable proxy** (orange cloud)                                                                                                                                                                             | Operator | `dig +short mambakkam.net` returns a Cloudflare-edge IP within 60s                                              |
 | 08:50              | T-10m   | Public smoke: `bash scripts/launch/smoke.sh https://mambakkam.net` from your laptop                                                                                                                                                                                                                                              | Operator | Exit 0                                                                                                          |
-| 08:55              | T-5m    | Manual click-through: home → about → people/siva-m → landmarks → work → studybuddy link reaches `demo.studybuddy.app` (will 404 until 13:00, that's expected)                                                                                                                                                                    | Operator | Every mambakkam page renders correctly                                                                          |
+| 08:55              | T-5m    | Manual click-through: home → about → people/siva-m → landmarks → work → studybuddy link reaches `demo.usestudybuddy.com` (will 404 until 13:00, that's expected)                                                                                                                                                                    | Operator | Every mambakkam page renders correctly                                                                          |
 | **09:00**          | **T-0** | **GO LIVE** — share `https://mambakkam.net` to the announcement channel                                                                                                                                                                                                                                                          | Operator | Announcement sent                                                                                               |
 | 09:30              | T+30m   | First user-traffic check — Cloudflare Analytics + nginx access log                                                                                                                                                                                                                                                               | Operator | No 5xx in the access log                                                                                        |
 | 11:00              | T+2h    | Stability check — green light for StudyBuddy second-tenant join                                                                                                                                                                                                                                                                  | Operator | Cloudflare Analytics shows steady 200s                                                                          |
@@ -363,7 +363,7 @@ the `/etc/ssl/cloudflare/` directory, and the daily-backup cron.
      SAN list MUST include all of:
        - mambakkam.net
        - *.mambakkam.net
-       - demo.studybuddy.app          (for the StudyBuddy second tenant)
+       - demo.usestudybuddy.com          (for the StudyBuddy second tenant)
      Paste cert + key into:
        /etc/ssl/cloudflare/origin-cert.pem
        /etc/ssl/cloudflare/origin-key.pem
@@ -504,7 +504,7 @@ compose` only — StudyBuddy will reuse this same user when it joins
 - Drops `infra/nginx/mambakkam.net.conf` into `/etc/nginx/sites-available/`
   and enables it
 - Creates `/etc/ssl/cloudflare/` (operator pastes the SAN-list Origin Cert
-  covering both mambakkam.net + demo.studybuddy.app)
+  covering both mambakkam.net + demo.usestudybuddy.com)
 - Sets up `cron` for the daily backup at 02:30 UTC (StudyBuddy will offset
   its own cron to 02:00 UTC when it joins, so the two rsync passes don't
   collide on disk I/O)
@@ -556,7 +556,7 @@ What it checks:
 | `GET /sitemap-index.xml`        | 200 + `<sitemapindex`                     | Empty or missing                           |
 | `GET /people/siva-m`            | 200 + body contains `Siva`                | Any non-200                                |
 | `GET /landmarks/ayyanar-shrine` | 200                                       | Any non-200                                |
-| `GET /work/studybuddy-ondemand` | 200 + body contains `demo.studybuddy.app` | Outbound link missing                      |
+| `GET /work/studybuddy-ondemand` | 200 + body contains `demo.usestudybuddy.com` | Outbound link missing                      |
 | `GET /404-this-does-not-exist`  | 404 (correct error path, not 200)         | A 200 means the 404 page was misconfigured |
 | `GET /robots.txt`               | 200 + does NOT contain `Disallow: /`      | Stale "noindex everything" rule            |
 
@@ -663,7 +663,7 @@ every work item.
 | News (blog) | `/news`, individual posts                                                    | Pagination works; tag/category pages 200                                                               |
 | People      | `/people`, `/people/siva-m`                                                  | Headshot loads at 1x and 2x; bio renders Markdown                                                      |
 | Landmarks   | `/landmarks/{ayyanar-shrine,ellaiyamman-temple,new-temple,pillaiyar-temple}` | Each renders body + photo                                                                              |
-| Work        | `/work`, all four work detail pages                                          | `/work/studybuddy-ondemand` outbound link to `demo.studybuddy.app` is `target="_blank" rel="noopener"` |
+| Work        | `/work`, all four work detail pages                                          | `/work/studybuddy-ondemand` outbound link to `demo.usestudybuddy.com` is `target="_blank" rel="noopener"` |
 | 404         | `/this-doesnt-exist`                                                         | Returns HTTP 404 (not 200) and renders the custom 404                                                  |
 | Sitemap     | `/sitemap-index.xml`                                                         | Returns 200 + lists every public page                                                                  |
 | robots.txt  | `/robots.txt`                                                                | No `Disallow: /`                                                                                       |
@@ -716,7 +716,7 @@ post-launch drill cadence has a baseline.
 | --------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | **Accessibility**           | Alt+D toggles OpenDyslexic (cookie persists). Tab through home — no traps. axe-core scan on home + people + landmarks: no critical violations. Screen-reader test on `/people/siva-m` — heading hierarchy intact, alt text present on every image. |
 | **Mobile**                  | Open `https://staging.mambakkam.net/` on a real phone (iOS Safari + Android Chrome). Hero stacks, nav opens, village map is usable on a small viewport.                                                                                            |
-| **Outbound to StudyBuddy**  | Click the "Visit StudyBuddy" CTA from `/work/studybuddy-ondemand`. Lands on `demo.studybuddy.app` with no certificate warning.                                                                                                                     |
+| **Outbound to StudyBuddy**  | Click the "Visit StudyBuddy" CTA from `/work/studybuddy-ondemand`. Lands on `demo.usestudybuddy.com` with no certificate warning.                                                                                                                     |
 | **Inbound from StudyBuddy** | If StudyBuddy has a back-link, click it from there → arrives on mambakkam.net cleanly.                                                                                                                                                             |
 | **Cloudflare cache check**  | Visit `/_astro/<hash>.css` twice; second response shows `cf-cache-status: HIT`.                                                                                                                                                                    |
 | **Lighthouse**              | Run on home + a content page. Target: Performance ≥ 90, Accessibility ≥ 95, SEO ≥ 95.                                                                                                                                                              |
@@ -732,7 +732,7 @@ post-launch drill cadence has a baseline.
 | Morning   | Re-run all of Day 2's content walkthrough against staging                                                                                                                                      | Same passes as Day 2                                                                                  |
 | Morning   | `npm run check && npm run build` on a clean clone                                                                                                                                              | Exit code 0                                                                                           |
 | Midday    | Lower DNS TTL on `mambakkam.net` apex A record to 300s                                                                                                                                         | Cloudflare confirms TTL=300                                                                           |
-| Midday    | Provision the **production** Hetzner CX22 (separate from staging — same `provision.sh` from scratch). Paste Origin Cert with the SAN list covering both mambakkam.net and demo.studybuddy.app. | Production box healthy; `staging.mambakkam.net` stays running for last-mile testing                   |
+| Midday    | Provision the **production** Hetzner CX22 (separate from staging — same `provision.sh` from scratch). Paste Origin Cert with the SAN list covering both mambakkam.net and demo.usestudybuddy.com. | Production box healthy; `staging.mambakkam.net` stays running for last-mile testing                   |
 | Midday    | Confirm StudyBuddy is ready to join the production box on Day 0 (Sun May 17) (read its launch plan §4 day 4)                                                                                   | StudyBuddy second-tenant gate is green; its `provision.sh` validated against the staging box on Day 1 |
 | Afternoon | Final go/no-go meeting with self — separate decisions for mambakkam.net (T-0 = 09:00) and StudyBuddy (T+4h = 13:00)                                                                            | Both boxes ticked → GO for both cutovers                                                              |
 
@@ -798,7 +798,7 @@ StudyBuddy provisioned the box first). Concrete consequences:
 - mambakkam.net pays the $5/mo VPS bill plus the ~$1/mo domain.
   StudyBuddy joins at zero marginal infra cost from its side.
 - Cloudflare Origin Cert is generated on Day -1 (Sat May 16) (mambakkam.net cold
-  start) with the SAN list including `demo.studybuddy.app` so StudyBuddy
+  start) with the SAN list including `demo.usestudybuddy.com` so StudyBuddy
   can join without a re-issue.
 - Cron offsets: mambakkam.net backup at 02:30 UTC; StudyBuddy at 02:00 UTC.
 - Launch-day timing on Day 0 (Sun May 17): mambakkam.net cutover at T-0 = 09:00 EST;
@@ -845,7 +845,7 @@ Outstanding before the operator can claim observability is "ready":
 - Grafana Cloud account + stack created (one-time, ~5 min)
 - `.env.monitoring` populated with real Grafana Cloud creds
 - Cloudflare Access policies defined for `mambakkam.net/metrics` and
-  `demo.studybuddy.app/metrics` (out-of-repo Cloudflare dashboard work)
+  `demo.usestudybuddy.com/metrics` (out-of-repo Cloudflare dashboard work)
 - Starter dashboards imported in Grafana Cloud (StudyBuddy's existing
   `studybuddy-health` JSON works once data-source is repointed)
 
