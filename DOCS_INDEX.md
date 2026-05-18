@@ -71,12 +71,13 @@ Within each table, rows are ordered roughly architecture-ref → plan → runboo
 
 ### 4. Launch & Day-of Operations
 
-| Doc                                                                          | Purpose                                                                                       |
-| ---------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------- |
-| [ACCOUNT_SETUP](Plans/ACCOUNT_SETUP.md)                                      | Day -1 (Sat May 16) account-setup runbook — Cloudflare, Hetzner, Email Routing, Grafana Cloud |
-| [DEMO_EMAIL_INVENTORY](../StudyBuddy_OnDemand/docs/DEMO_EMAIL_INVENTORY.md)  | StudyBuddy demo email-address inventory + routing                                             |
-| [OPERATIONS](../studybuddy-docs/OPERATIONS.md)                               | StudyBuddy steady-state operations guide                                                      |
-| [school-onboarding](../studybuddy-docs/docs/operations/school-onboarding.md) | Migration runbook: demo → production for a new school                                         |
+| Doc                                                                          | Purpose                                                                                                        |
+| ---------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------- |
+| [ACCOUNT_SETUP](Plans/ACCOUNT_SETUP.md)                                      | Day -1 (Sat May 16) account-setup runbook — Cloudflare, Hetzner, Email Routing, Grafana Cloud                  |
+| [HOSTING_ACTIVITY_LOG](Plans/HOSTING_ACTIVITY_LOG.md)                        | Chronological log of operator actions on live infra — provisioning, deploys, incidents. Appended to over time. |
+| [DEMO_EMAIL_INVENTORY](../StudyBuddy_OnDemand/docs/DEMO_EMAIL_INVENTORY.md)  | StudyBuddy demo email-address inventory + routing                                                              |
+| [OPERATIONS](../studybuddy-docs/OPERATIONS.md)                               | StudyBuddy steady-state operations guide                                                                       |
+| [school-onboarding](../studybuddy-docs/docs/operations/school-onboarding.md) | Migration runbook: demo → production for a new school                                                          |
 
 ### 5. DNS, Email, Edge & Security
 
@@ -383,3 +384,4 @@ cron. Detail in the same README.
 | 2026-05-17 | 1.0     | Initial hand-curated index. 14 topic tables + 6 cross-repo overlap warnings + exclusion list. Built after the CX22→CX23 + cost-table sweep across 9 docs revealed how scattered hosting docs are across the 3 repos.                                                                                                                                                                                                                                                                                                                                  |
 | 2026-05-17 | 1.1     | Overlap cleanup pass: (§1) CX22→CX23 + studybuddy.app→usestudybuddy.com sweep applied to `StudyBuddy_OnDemand/docs/DEMO_LAUNCH_PLAN.md` so both launch-plan files are consistent; (§2) added "Owns / Adjacent in this hosting cluster" headers to 7 hosting docs across all 3 repos so each doc's scope is explicit at first read; (§4) reciprocal cross-link headers added to the two `DEMO_FEEDBACK` files marking `market_research/demo_feedback.md` as canonical for verbatim quotes. §3/§5/§6 left as-is (intentional splits, not duplications). |
 | 2026-05-18 | 1.2     | Cleared the 18 untracked-on-disk entries flagged by the 2026-05-17 drift run: added all 17 `docs/epics/EPIC_NN_*.md` files to §12 (one row per epic mirroring the `epics/INDEX.md` status board, EPIC_14 number unused) + added `web/docs/TEST_CASES.md` to §9. Indexed total: 111 → 129; drift report should now show 0 untracked.                                                                                                                                                                                                                   |
+| 2026-05-18 | 1.3     | Added `Plans/HOSTING_ACTIVITY_LOG.md` to §4 — new chronological log of operator actions on live infra (provisioning, deploys, incidents). First entry covers the 2026-05-18 cold-start launch including the §A Origin Cert mismatch and §B Universal SSL disable incidents. Will be appended to over time.                                                                                                                                                                                                                                            |
