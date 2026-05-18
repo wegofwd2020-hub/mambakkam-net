@@ -17,6 +17,527 @@
 
 ---
 
+## 2026-05-18 — StudyBuddy second-tenant join (demo.usestudybuddy.com)
+
+**Operator:** Siva Mambakkam
+**Duration:** ~4h (12:00 – 16:20 EDT / 16:00 – 20:20 UTC)
+**Outcome:** ✅ `https://demo.usestudybuddy.com` publicly serving the full StudyBuddy
+demo stack on the same shared CX23 as mambakkam.net. End-to-end verified in
+browser: register-for-test-run flow works, email login works, teacher and
+student accounts work as planned. Both tenants now live on the box.
+
+**Summary.** Second-tenant join landed but was much rougher than mambakkam's
+cold-start — the StudyBuddy demo compose had a series of accumulated
+local-dev assumptions that had never been exercised against a fresh CX23.
+We hit **7 separate compose/script issues** in sequence and worked around
+each one live on the VPS. None of the workarounds were committed to the
+StudyBuddy_OnDemand repo; they're tracked as a follow-up
+([[#30 Fix StudyBuddy demo compose env_file + profiles hygiene]],
+[[#31 Fix StudyBuddy demo smoke.sh]]). Also surfaced + cleared a partial
+rename: `studybuddy.app → usestudybuddy.com` had only landed in mambakkam
+docs (commit `8329913`) — 33 files in StudyBuddy_OnDemand still referenced
+the old domain. 15 deployment-critical were swept in commit `b544029`; 17
+remain deferred (Auth0 claim namespaces, tests, docs, Remotion sources).
+
+**Live state at end of session:**
+
+| Item                       | Value                                                                                                                                                                           |
+| -------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| URL                        | `https://demo.usestudybuddy.com`                                                                                                                                                |
+| Cert                       | Cloudflare Origin Cert B, 2-host SAN (`*.usestudybuddy.com`, `demo.usestudybuddy.com`), 15-yr, RSA                                                                              |
+| Cert path on VPS           | `/etc/ssl/cloudflare/usestudybuddy.com-{cert,key}.pem` (separate from mambakkam's Cert A)                                                                                       |
+| DNS                        | A `178.105.160.62` + AAAA `2a01:4f8:1c18:82e4::1`, both proxied (orange cloud)                                                                                                  |
+| Stack                      | 7 services running: api, web, nginx, db (postgres+pgvector), redis, celery-worker, celery-beat-primary                                                                          |
+| Disabled-via-profile-never | pgbouncer, celery-pipeline, celery-beat-standby (replicas: 0, but force-activated for depends_on resolution)                                                                    |
+| Database                   | `studybuddy` (migrations applied, all 5 seeds populated)                                                                                                                        |
+| Seeded accounts            | `wegofwd2020@gmail.com` (super admin); `demo-test@studybuddy.dev` / `DemoTest-2026!`; MilfordWaterford school (4 teachers, 8 students); Dev School (admin/teacher/student trio) |
+| Daily restic backup cron   | `0 2 * * *` UTC, repo at `/opt/studybuddy/backups/restic`                                                                                                                       |
+| GH Actions auto-deploy     | Enabled (3 `DEMO_VPS_*` secrets set); fires on push to StudyBuddy_OnDemand main                                                                                                 |
+| Cosmetic caveat            | Smoke script reports 6 failed checks — all are script-vs-app path/ID mismatches, NOT real app failures (see task #31)                                                           |
+
+---
+
+### Step 0 — Pre-flight readiness check
+
+Confirmed before starting: GHCR images for current main, Cert B + key
+in password manager, content artifacts on dev machine. All three green.
+
+### Step 1 — Repo cleanup commit (StudyBuddy_OnDemand)
+
+Discovered via grep audit that the `studybuddy.app → usestudybuddy.com`
+rename was only partially applied (33 files still stale). Triaged into
+10 deployment-critical + 17 deferred. Edited the critical 10:
+
+```bash
+# [laptop] — applied edits in StudyBuddy_OnDemand checkout
+# Renamed: infra/nginx/demo.studybuddy.app.conf → demo.usestudybuddy.com.conf
+git mv infra/nginx/demo.studybuddy.app.conf infra/nginx/demo.usestudybuddy.com.conf
+
+# Inside the new vhost: server_name + ssl_certificate path (now Cert B's path) +
+# split deprecated `listen 443 ssl http2` into `listen 443 ssl` + `http2 on;` +
+# updated header comment to document two-cert split.
+
+# Plus targeted edits in:
+#   - scripts/demo/provision.sh (SAN check, env-skeleton CORS/URL, vhost paths,
+#     Next-Steps printout)
+#   - docker-compose.demo.yml line 148 (NEXT_PUBLIC_API_URL)
+#   - backend/config.py (EMAIL_FROM default + SMTP_USER example)
+#   - backend/src/core/middleware.py (upgrade_url)
+#   - backend/src/email/service.py (support_email fallback)
+#   - web/app/(public)/demo/{teacher,student}-story/page.tsx (visible support@)
+#   - backend/data/help_chunks.jsonl (chatbot answers)
+#   - scripts/demo/{smoke,sync-content,seed,nginx.conf} + .github/workflows/deploy-demo.yml + web/lib/demo-mode.ts (comments)
+
+# Single commit, pushed after rebase onto trivial PROGRESS.md update on remote
+git commit -m "chore(rename): studybuddy.app → usestudybuddy.com — deployment-critical sweep"
+git pull --rebase origin main
+git push origin main
+# → b544029
+```
+
+CI: 138 pre-existing frontend test failures + Backend Tests fail + API
+Contract fail. Confirmed via earlier scheduled CI run that **all three
+predate our commit** — we didn't regress anything. See task #29.
+
+### Step 2 — Install Cert B (with mid-step recovery)
+
+```bash
+# [vps] as root — first paste from password manager
+cat > /etc/ssl/cloudflare/usestudybuddy.com-cert.pem <<'EOF'
+[Cert B body — REDACTED]
+EOF
+cat > /etc/ssl/cloudflare/usestudybuddy.com-key.pem <<'EOF'
+[Key B body — REDACTED]
+EOF
+chmod 600 /etc/ssl/cloudflare/usestudybuddy.com-{cert,key}.pem
+chown root:root /etc/ssl/cloudflare/usestudybuddy.com-{cert,key}.pem
+
+# SAN verification caught a typo!
+openssl x509 -in /etc/ssl/cloudflare/usestudybuddy.com-cert.pem -noout -ext subjectAltName
+#   X509v3 Subject Alternative Name:
+#     DNS:demo.use.usestudybuddy.com    ← BAD — typo when generating in CF UI
+```
+
+The cert had a `demo.use.usestudybuddy.com` SAN (extra `.use.` in the
+middle — typo when typing the hostname during CF UI cert generation,
+got auto-appended to the zone domain). **Don't proceed with a wrong-SAN
+cert.** Same lesson as today's Cert A: regenerate fresh in CF UI with
+exactly the right hostname, save to pwmgr immediately, re-paste:
+
+```bash
+# [vps] — after regenerating Cert B in CF UI with hostnames
+# `demo.usestudybuddy.com` + `*.usestudybuddy.com`
+cat > /etc/ssl/cloudflare/usestudybuddy.com-cert.pem <<'EOF'
+[new Cert B — REDACTED]
+EOF
+cat > /etc/ssl/cloudflare/usestudybuddy.com-key.pem <<'EOF'
+[new Key B — REDACTED]
+EOF
+chmod 600 ...; chown root:root ...
+
+openssl x509 -in /etc/ssl/cloudflare/usestudybuddy.com-cert.pem -noout -ext subjectAltName
+#   DNS:*.usestudybuddy.com, DNS:demo.usestudybuddy.com  ← ✓
+diff <(openssl x509 -in ...-cert.pem -noout -pubkey) <(openssl pkey -in ...-key.pem -pubout) && echo MATCH
+#   MATCH ✓
+```
+
+### Step 3 — StudyBuddy provision.sh (second-tenant variant)
+
+```bash
+# [vps] as root
+curl -fsSL https://raw.githubusercontent.com/wegofwd2020-hub/StudyBuddy_OnDemand/main/scripts/demo/provision.sh | bash
+```
+
+Ran clean (`9/9 complete`). Pre-flight check verified mambakkam first-tenant
+artifacts + new Cert B at the expected path. Daily backup cron installed
+at 02:00 UTC (offset 30 min before mambakkam's 02:30). Restic password
+printed once — saved to pwmgr as `studybuddy demo restic backup password`.
+
+### Step 4 — Populate `.env.demo`
+
+```bash
+# [vps] as root — generate 5 random secrets
+for k in JWT_SECRET ADMIN_JWT_SECRET METRICS_TOKEN POSTGRES_PASSWORD REDIS_PASSWORD; do
+  printf "%-20s = %s\n" "$k" "$(openssl rand -hex 32)"
+done
+
+# Edit /opt/studybuddy/.env.demo (nano) with:
+#   - the 5 secrets above
+#   - Auth0 from pwmgr (full domain: wegofwd2020.us.auth0.com, derived from
+#     dashboard URL https://manage.auth0.com/dashboard/us/wegofwd2020/;
+#     memory's prior "studybuddy-demo" tenant slug was wrong, corrected)
+#   - Gmail App Password generated at myaccount.google.com/apppasswords
+#   - Sentry DSN from pwmgr
+#   - Stripe LEFT BLANK (skipped for launch; payment endpoints will 500 if
+#     anyone exercises them; subscription paths aren't on the demo happy path)
+
+# Verify
+grep -nE '<(REPLACE|your-|from-|gmail-app|sentry-dsn|with-)' /opt/studybuddy/.env.demo
+# → empty (all placeholders replaced or blanked)
+```
+
+### Step 5 — GH Actions deploy keypair (StudyBuddy)
+
+```bash
+# [laptop] — separate keypair from mambakkam's
+ssh-keygen -t ed25519 -f ~/.ssh/studybuddy_deploy -C "gh-actions deploy@studybuddy" -N ""
+cat ~/.ssh/studybuddy_deploy.pub  # copy line
+
+# [vps] — APPEND to deploy user's authorized_keys (mambakkam's key already there)
+cat >> /home/deploy/.ssh/authorized_keys <<'EOF'
+[deploy pubkey — REDACTED]
+EOF
+chmod 700 /home/deploy/.ssh
+chmod 600 /home/deploy/.ssh/authorized_keys
+chown -R deploy:deploy /home/deploy/.ssh
+
+# [laptop] verify
+ssh -i ~/.ssh/studybuddy_deploy deploy@178.105.160.62 'whoami && id'
+# → deploy, uid=1000, gid=1000, in docker group ✓
+
+# [laptop] — set 3 secrets in StudyBuddy_OnDemand repo
+gh secret set DEMO_VPS_HOST    --repo wegofwd2020-hub/StudyBuddy_OnDemand --body "178.105.160.62"
+gh secret set DEMO_VPS_USER    --repo wegofwd2020-hub/StudyBuddy_OnDemand --body "deploy"
+gh secret set DEMO_VPS_SSH_KEY --repo wegofwd2020-hub/StudyBuddy_OnDemand < ~/.ssh/studybuddy_deploy
+# (Note: no STUDYBUDDY_DEPLOY_ENABLED gating variable — deploy-demo workflow
+# fires unconditionally on push to main; will fail at SSH step until these
+# secrets exist. Setting them activates auto-deploy.)
+```
+
+### Step 6 — Content sync to VPS
+
+```bash
+# [laptop]
+cd /home/sivam/Documents/code/projects/AIStuff/STEM_studybuddy/StudyBuddy_OnDemand
+bash scripts/demo/sync-content.sh deploy@178.105.160.62
+# → 5/5 steps: pre-flight + G11 visual inject + rsync content_store_data → /data/content/ (64MB)
+#   + rsync web/public/sample-visuals → /data/sample-visuals/ (220MB, 44 MP4s)
+# → 582 files / 227MB transferred, 8.82 MB/sec
+```
+
+### Step 7 — `docker compose pull + up -d` — and the cascade of compose hygiene issues
+
+This is where the wheels came off. Each fix unblocked the next failure
+mode. None of these changes were committed; all are workarounds on the
+VPS, tracked in [[#30]] for a proper repo cleanup.
+
+#### Issue #1 — `pgbouncer depends_on` validation
+
+```
+service "celery-worker" depends on undefined service "pgbouncer": invalid compose project
+```
+
+Demo override disables pgbouncer via `profiles: ["never"]` + `replicas: 0`,
+but newer compose versions treat `profiles: [never]` services as
+"not present" → depends_on references fail validation. **Workaround:**
+add `--profile never` to every `docker compose` invocation, which
+activates pgbouncer service for validation purposes while keeping it
+from actually running.
+
+```bash
+# Every command from here on uses this prefix
+docker compose --profile never -f docker-compose.yml -f docker-compose.demo.yml --env-file .env.demo ...
+```
+
+#### Issue #2 — Missing `.env` file
+
+```
+env file /opt/studybuddy/.env not found
+```
+
+Base compose has per-service `env_file: - .env` (separate from
+`--env-file .env.demo`). Demo override doesn't redirect.
+
+```bash
+# [vps] — symlink workaround
+ln -sf .env.demo /opt/studybuddy/.env
+```
+
+#### Issue #3 — Missing `web/.env.local`
+
+Same pattern, different file. Web service's `env_file:` block in base
+compose points at `./web/.env.local`.
+
+```bash
+ln -sf ../.env.demo /opt/studybuddy/web/.env.local
+```
+
+#### Issue #4 — api `PermissionError` on `/data/content/visuals`
+
+Bind mount `./content_store_data:/data/content` (relative path in base
+compose) overlays `/data/content/` in container with
+`/opt/studybuddy/content_store_data/` from host (git-tracked, near-empty
+placeholders). Container tried to `mkdir /data/content/visuals` —
+permission denied / dir not present.
+
+After several rounds of host-side chmod (which were on the wrong directory
+since the container sees the bind-mount target, not the absolute host
+path), the issue self-resolved on a 3rd uvicorn restart attempt — likely
+because mkdir eventually succeeded after one of the chmod cycles
+touched the right inode. App reached "Application startup complete."
+
+**However the api container then showed "unhealthy"** — see Issue #5.
+
+#### Issue #5 — Broken api healthcheck
+
+```bash
+# api's /health endpoint actually works:
+docker exec studybuddy-api-1 python -c "import urllib.request as u; r=u.urlopen('http://localhost:8000/health'); print(r.status, r.read())"
+# → 200 {"db":"ok","redis":"ok","version":"demo"}
+```
+
+But docker's healthcheck uses:
+
+```
+["CMD","curl","-f","http://localhost:8000/healthz"]
+```
+
+Two bugs: `curl` not in the alpine image, AND wrong path
+(`/healthz` vs the real `/health`). App is fine; healthcheck is bogus.
+Web + nginx couldn't start because they depend on
+`api: condition: service_healthy`. **Workaround:** force-start dependents
+with `--no-deps`:
+
+```bash
+docker compose --profile never -f ... up -d --no-deps web nginx
+```
+
+#### Issue #6 — web container crash-loop: `Cannot find module '/app/server.js'`
+
+The image has `/app/server.js` baked in (Next.js standalone build), but
+base compose bind-mounts `./web:/app` (dev hot-reload), overlaying the
+image's built output with raw TypeScript source — no `server.js` there.
+
+**Workaround:** patch demo override to clear web's inherited volumes.
+Started with `volumes: !reset null`; later changed to
+`volumes: !override` with explicit list when we needed to add the
+`/data/videos` mount (see Issue #7).
+
+```bash
+# Live-edit on VPS via python script (idempotent)
+python3 <<'PYEOF'
+path = '/opt/studybuddy/docker-compose.demo.yml'
+content = open(path).read()
+old = '    volumes: !reset null\n'
+new = '    volumes: !override\n      - /data/videos:/app/public/videos:ro\n'
+if old in content:
+    open(path, 'w').write(content.replace(old, new, 1))
+PYEOF
+
+docker compose --profile never -f ... up -d --force-recreate --no-deps web
+```
+
+#### Issue #7 — `seed.sh` path mismatch + `TEST_DB_URL` leak
+
+```bash
+docker compose ... exec api bash /app/scripts/demo/seed.sh
+# → bash: /app/scripts/demo/seed.sh: No such file or directory
+```
+
+`seed.sh` expects to live at `/app/scripts/...` and `cd /app/backend`,
+but in this compose layout `/app` IS the backend (bind from
+`/opt/studybuddy/backend`) and `/scripts/` isn't bind-mounted into the
+container at all. **Workaround:** skip the wrapper, run the 5 underlying
+python seed scripts directly:
+
+```bash
+for s in seed_super_admin seed_demo_milfordwaterford seed_demo_test_account seed_phase_a_dev seed_dev_content; do
+  docker compose ... exec -e TEST_DB_URL= api python scripts/${s}.py
+done
+```
+
+The `-e TEST_DB_URL=` matters too — `alembic/env.py` line 23 has
+`os.environ.get("TEST_DB_URL") or settings.DATABASE_URL`, and a stray
+`TEST_DB_URL` in the .env.demo (pointing at `studybuddy_test` database)
+meant migrations went to the wrong database initially. Blanking it via
+the exec flag forces alembic + seeds to target `studybuddy`.
+
+After running `alembic upgrade head -e TEST_DB_URL=` followed by all 5
+seed scripts, `psql -c "\dt"` showed ~30 tables and seed scripts each
+printed their `done` lines.
+
+#### Issue #8 — Home page videos 404
+
+Browser DevTools showed home page requests `/videos/StudyBuddy_BioStory.mp4`
+returning 404. The 6 MP4s exist on the laptop at `web/public/videos/`
+(BioStory, ChemStory, 4 Hydrocarbon\_\*), are **gitignored**, weren't in
+the GHCR image, and `sync-content.sh` doesn't push them either.
+
+```bash
+# [vps] — create target dir
+mkdir -p /data/videos && chown deploy:deploy /data/videos && chmod 775 /data/videos
+
+# [laptop] — rsync
+rsync -avh --progress web/public/videos/ deploy@178.105.160.62:/data/videos/
+
+# [vps] — bind-mount to web (replaced earlier !reset null with !override + entry)
+# (see Issue #6 — the python patch already did this in one step)
+
+# [vps] — recreate web
+docker compose --profile never -f ... up -d --force-recreate --no-deps web
+
+# Test
+curl -sI https://demo.usestudybuddy.com/videos/StudyBuddy_BioStory.mp4
+# → HTTP/2 200, content-type: video/mp4 ✓
+```
+
+### Step 8 — DNS cutover + public smoke
+
+```bash
+# [browser] CF UI → usestudybuddy.com → DNS
+#   - A record `demo`: 192.0.2.1 (Day -1 placeholder) → 178.105.160.62, proxy ON
+#   - AAAA record `demo`: add 2a01:4f8:1c18:82e4::1, proxy ON
+#   - SSL/TLS mode: confirmed Full (strict)
+#   - Universal SSL: confirmed Active Certificate (do NOT touch — lesson from this morning)
+
+# [laptop] DNS check
+dig +short demo.usestudybuddy.com @1.1.1.1
+# → 104.21.8.65, 172.67.138.160  (CF anycast IPs)
+
+# [laptop] HTTP check
+curl -sI https://demo.usestudybuddy.com/
+# → HTTP/2 200, server: cloudflare ✓
+```
+
+### Step 9 — Browser walkthrough (the launch-validation moment)
+
+Open `https://demo.usestudybuddy.com` in browser:
+
+- ✅ Landing page renders, no cert warning, padlock visible
+- ✅ Home page videos play (after Issue #8 fix)
+- ✅ Register-for-test-run flow works end-to-end
+- ✅ Email login works
+- ✅ Teacher and student account access works as expected
+
+**Demo is launched.**
+
+---
+
+### Step 10 — Post-launch: Grade 11 content population (partial — catalog still 0/0)
+
+Operator reported that **Grade 11 Science Curriculum Catalog shows "0 Subjects, 0
+Units"** despite teacher/student G11 accounts working. Multi-step fix sequence
+revealed several latent issues:
+
+**A. Container couldn't see rsynced curriculum content.** Same bind-mount pattern
+as Issue #4 (api side): container's `/data/content/` is mounted from
+`/opt/studybuddy/content_store_data/` (git-tracked, near-empty), not from
+`/data/content/` on host where the operator's 220MB rsync landed. Symlink fix:
+
+```bash
+mv /opt/studybuddy/content_store_data /opt/studybuddy/content_store_data.preclone
+ln -s /data/content /opt/studybuddy/content_store_data
+docker compose --profile never -f ... up -d --force-recreate --no-deps api
+# Container now sees all 16 curricula at /data/content/curricula/
+```
+
+**B. DB didn't have unit rows for G11 Science.** `seed_dev_content` only seeded
+Grade 8. Ran `seed_content_db.py` to bulk-import 7 curricula × 128 units:
+
+```bash
+docker compose --profile never -f ... exec -e TEST_DB_URL= api \
+  python scripts/seed_content_db.py
+# default-2026-g11-science → 29 units inserted ✓
+```
+
+**C. `recover_curriculum.py --grade 11` only handled the `stem` variant.** The
+script is hardcoded to load `grade{N}_stem.json` and write to
+`default-{year}-g{N}`. No variant flag. **Workaround:** sed-patched the script
+in-place to handle the science variant for this one run, then restored:
+
+```python
+src.replace('f"grade{grade}_stem.json"', 'f"grade{grade}_science.json"')
+src.replace('f"default-{year}-g{grade}"', 'f"default-{year}-g{grade}-science"')
+# ran for grade 11 → 4 content_subject_versions rows inserted (status=pending)
+# restored original script
+```
+
+Also discovered the grade JSONs needed copying from `/opt/studybuddy/data/` to
+`/opt/studybuddy/backend/data/` (recover_curriculum expects them at `/app/data/`
+which is bind-mounted from the latter).
+
+**D. subject_versions had status=pending and published_at=NULL.** Compared
+against G8 (working in catalog) and found the differences. Fixed both:
+
+```sql
+UPDATE content_subject_versions
+SET status = 'published',
+    published_at = generated_at
+WHERE curriculum_id = 'default-2026-g11-science';
+```
+
+**E. Catalog API STILL returns 0/0 — root cause unresolved.** After all of
+A-D, `https://demo.usestudybuddy.com` G11 Science catalog still shows "0
+Subjects, 0 Units" in the browser, and the API returns
+`{"subject_count": 0, "unit_count": 0, "subjects": []}` for default-2026-g11-science.
+
+Verified the DB is correct in every dimension we can test:
+
+- `curriculum_units` has 29 rows (Biology=5, Chemistry=9, Mathematics=5, Physics=10)
+- `content_subject_versions` has 4 rows (all `status=published`, `published_at` set)
+- `classroom_packages` correctly links G11 Science classrooms → `default-2026-g11-science`
+- No RLS policies exist on `curriculum_units` or `content_subject_versions`; `curricula` RLS allows `owner_type='platform'` rows in any context
+- Running the API's exact catalog SQL (extracted from `src/school/service.py:700-810`) directly in psql returns the correct subjects array
+
+Ruled out as causes:
+
+- ❌ Redis cache (FLUSHALL didn't help)
+- ❌ Stale api connection pool (`--force-recreate` api didn't help)
+- ❌ Frontend cache (hard-refresh didn't help)
+- ❌ Browser cache
+
+The API's `list_catalog()` runs the same SQL via asyncpg but gets an empty
+LATERAL-JOIN result. Suspected next-step culprits: middleware-injected SQL
+filter, asyncpg query-parameter handling difference, schema/search_path
+context mismatch, or stale bytecode in the running container. **Not
+investigated further** — operator decided 8+ hour launch session was at its
+limit; deferred to task #32 ([[#32 Debug StudyBuddy catalog API returning 0/0]]).
+
+**Workaround for the launch:** ship the demo as-is. G8 catalog works as a
+reference for what "populated" looks like. G11 teacher + student accounts work
+for login/navigation/test-run flows. Curriculum-content browsing is the
+specific feature broken until task #32 is resolved.
+
+---
+
+### Follow-ups created during this session
+
+- [ ] **[#30](#) Fix StudyBuddy demo compose env_file + profiles hygiene** —
+      the 5 compose-level workarounds (`--profile never`, two env-file
+      symlinks, web volume override, broken healthcheck) all need to land
+      in `docker-compose.demo.yml` so the next cold-start operator doesn't
+      hit the same gauntlet.
+- [ ] **[#31](#) Fix StudyBuddy demo smoke.sh** — script checks endpoints
+      that don't match the deployed app (`/healthz`, `/readyz`,
+      hardcoded `G8-MATH-001` unit IDs vs `default-2026-g8/...` from
+      seed). App actually works; smoke is stale.
+- [ ] **[#28](#) Deferred rename sweep (17 files)** —
+      `backend/src/auth/router.py` Auth0 claim namespaces (requires
+      coordinated Auth0 console update); 4 backend tests; 4 docs;
+      7 Remotion video sources.
+- [ ] **[#29](#) Pre-existing StudyBuddy CI failures** — Backend Tests +
+      API Contract + ~138 Frontend Unit Tests have been failing since
+      before today; not introduced by today's commits but worth a
+      focused session.
+- [ ] **StudyBuddy Stripe wiring** — `STRIPE_SECRET_KEY` + `STRIPE_WEBHOOK_SECRET`
+      left blank in `.env.demo` for this launch. Subscription endpoints
+      will 500 if exercised; fix when a paying-customer flow is needed.
+- [ ] **[#32](#) Debug catalog API 0/0 for G11 Science** — DB is correct,
+      SQL works in psql, but API returns empty subjects/units. Needs an
+      api-side debug session (add `print()` to `list_catalog`, or invoke
+      it directly from python REPL inside the container).
+- [ ] **Symlink fix needed for `seed_demo` re-runs** — replaced
+      `/opt/studybuddy/content_store_data` with a symlink to `/data/content`
+      so the rsynced content is visible to the container. Future
+      `seed_dev_content` runs will write through this symlink. The original
+      dir is preserved at `/opt/studybuddy/content_store_data.preclone`.
+- [ ] **Variant-grade JSONs in `/app/data/`** — copied `grade*_{science,
+commerce,humanities,english,advanced}.json` from `/opt/studybuddy/data/`
+      to `/opt/studybuddy/backend/data/`. Without this, `recover_curriculum.py`
+      won't find variant grade JSONs. Should be done at provision time.
+
+---
+
 ## 2026-05-18 — Cold-start launch
 
 **Operator:** Siva Mambakkam
