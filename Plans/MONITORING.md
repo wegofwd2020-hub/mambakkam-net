@@ -14,15 +14,15 @@
 
 ## TL;DR
 
-| What                              | Where                                                                  | How to reach                                 |
-| --------------------------------- | ---------------------------------------------------------------------- | -------------------------------------------- |
-| **Grafana** (dashboards + alerts) | Grafana Cloud free tier — `https://<your-stack>.grafana.net`           | Grafana SSO (Google / GitHub / email)        |
-| **Prometheus UI** (ad-hoc PromQL) | Local on the CX23 — `127.0.0.1:9090`                                   | `ssh -L 9090:127.0.0.1:9090 deploy@<vps-ip>` |
-| **mambakkam scrape target**       | nginx_exporter sidecar on container net                                | scraped only by local Prometheus             |
-| **StudyBuddy `/metrics`**         | bearer-token-protected, `127.0.0.1:8443/metrics` (loopback)            | scraped only by local Prometheus             |
+| What                              | Where                                                                     | How to reach                                 |
+| --------------------------------- | ------------------------------------------------------------------------- | -------------------------------------------- |
+| **Grafana** (dashboards + alerts) | Grafana Cloud free tier — `https://<your-stack>.grafana.net`              | Grafana SSO (Google / GitHub / email)        |
+| **Prometheus UI** (ad-hoc PromQL) | Local on the CX23 — `127.0.0.1:9090`                                      | `ssh -L 9090:127.0.0.1:9090 deploy@<vps-ip>` |
+| **mambakkam scrape target**       | nginx_exporter sidecar on container net                                   | scraped only by local Prometheus             |
+| **StudyBuddy `/metrics`**         | bearer-token-protected, `127.0.0.1:8443/metrics` (loopback)               | scraped only by local Prometheus             |
 | **Public `/metrics`** (optional)  | `https://mambakkam.net/metrics`, `https://demo.usestudybuddy.com/metrics` | Cloudflare Access policy required            |
-| **Synthetic uptime**              | blackbox-exporter on the CX23                                          | probes 5 public URLs every 15s               |
-| **Host metrics**                  | node-exporter on host net                                              | scraped only by local Prometheus             |
+| **Synthetic uptime**              | blackbox-exporter on the CX23                                             | probes 5 public URLs every 15s               |
+| **Host metrics**                  | node-exporter on host net                                                 | scraped only by local Prometheus             |
 
 Free-tier Grafana Cloud limits (2026-05): 10k active series, 13-month retention, no card required.
 

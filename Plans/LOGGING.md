@@ -119,10 +119,10 @@ Drop rules in `pipeline_stages`:
 Tails `/var/log/nginx/*.log`. The filename is parsed into `vhost` and `kind`
 labels:
 
-| Filename                         | `vhost`               | `kind`   |
-| -------------------------------- | --------------------- | -------- |
-| `mambakkam.net.access.log`       | `mambakkam.net`       | `access` |
-| `mambakkam.net.error.log`        | `mambakkam.net`       | `error`  |
+| Filename                            | `vhost`                  | `kind`   |
+| ----------------------------------- | ------------------------ | -------- |
+| `mambakkam.net.access.log`          | `mambakkam.net`          | `access` |
+| `mambakkam.net.error.log`           | `mambakkam.net`          | `error`  |
 | `demo.usestudybuddy.com.access.log` | `demo.usestudybuddy.com` | `access` |
 | `demo.usestudybuddy.com.error.log`  | `demo.usestudybuddy.com` | `error`  |
 

@@ -14,10 +14,10 @@ reviewed topic config — see "Future v2" below).
 
 ## What's in here
 
-| File | Purpose |
-|---|---|
+| File             | Purpose                                                                                                                        |
+| ---------------- | ------------------------------------------------------------------------------------------------------------------------------ |
 | `check_drift.py` | The drift detector. Walks the 3 repos, diffs against `DOCS_INDEX.md`, writes `DRIFT_REPORT.md` to the mambakkam-net repo root. |
-| `README.md` | This file. |
+| `README.md`      | This file.                                                                                                                     |
 
 **What it produces:** `mambakkam-net/DRIFT_REPORT.md` (gitignored by default).
 
@@ -30,6 +30,7 @@ python3 scripts/docs_index/check_drift.py
 ```
 
 Exit codes:
+
 - `0` — index in sync with filesystem
 - `1` — drift detected (open `DRIFT_REPORT.md` to see what)
 - `2` — fatal (missing sibling repo or unreadable index)
@@ -50,6 +51,7 @@ Install **once** with `crontab -e` and add:
 ```
 
 Notes:
+
 - Uses absolute paths because cron's working directory and `$PATH` are
   minimal — never relies on whatever shell happens to be configured.
 - Stdout is the report file itself (written by the script). The cron log
@@ -90,6 +92,7 @@ any topic table in `DOCS_INDEX.md`. Three responses:
 ### "Stale references"
 
 `DOCS_INDEX.md` points to a path that doesn't exist on disk. Either:
+
 - The file was moved/renamed → update the path in `DOCS_INDEX.md`.
 - The file was deleted → remove the index entry.
 
@@ -128,18 +131,19 @@ scripts/docs_index/
 
 ```yaml
 topics:
-  - name: "Hosting, Deployment & Cost"
+  - name: 'Hosting, Deployment & Cost'
     order: 1
     includes:
-      - "mambakkam-net/Plans/DEPLOYMENT_PLAN.md"
-      - "studybuddy-docs/docs/dev/DEMO_HOSTING_GUIDE.md"
+      - 'mambakkam-net/Plans/DEPLOYMENT_PLAN.md'
+      - 'studybuddy-docs/docs/dev/DEMO_HOSTING_GUIDE.md'
       # ...
 overrides:
-  "mambakkam-net/Plans/DEPLOYMENT_PLAN.md":
-    purpose: "mambakkam.net deployment + monthly cost breakdown"
+  'mambakkam-net/Plans/DEPLOYMENT_PLAN.md':
+    purpose: 'mambakkam.net deployment + monthly cost breakdown'
 ```
 
 Deferred to v2 because:
+
 - The hand-written purposes in `DOCS_INDEX.md` are accurate and useful.
   Overwriting them automatically risks losing nuance.
 - A config-driven rebuild is most valuable once the index changes
@@ -176,6 +180,6 @@ formatting concern.
 
 ## Maintenance
 
-| Date | Version | Change |
-|---|---|---|
-| 2026-05-17 | 1.0 | Initial — `check_drift.py` + this README. Detects drift between `DOCS_INDEX.md` and the filesystem. No auto-regen yet. |
+| Date       | Version | Change                                                                                                                 |
+| ---------- | ------- | ---------------------------------------------------------------------------------------------------------------------- |
+| 2026-05-17 | 1.0     | Initial — `check_drift.py` + this README. Detects drift between `DOCS_INDEX.md` and the filesystem. No auto-regen yet. |

@@ -103,17 +103,17 @@ see Change Log.)
 
 Snapshot taken from Hetzner console 2026-05-17 (USD, excl. VAT).
 
-| Item                                | Provider                                                   | Cost to mambakkam.net            |
-| ----------------------------------- | ---------------------------------------------------------- | -------------------------------- |
-| VPS (Hetzner CX23, 2 vCPU / 4 GB / 40 GB) | Hetzner Cloud                                        | $4.99 (full bill — first tenant) |
-| Primary IPv4                        | Hetzner Cloud                                              | $0.60                            |
-| Domain `mambakkam.net`              | Cloudflare Registrar                                       | ~$0.85 (annual ÷ 12)             |
-| SSL certificate                     | Cloudflare (Universal at edge) + Origin Cert (free, 15-yr) | $0                               |
-| DNS + DDoS protection + CDN         | Cloudflare free tier                                       | $0                               |
-| Email — inbound forwarding          | Cloudflare Email Routing → personal Gmail (free)           | $0                               |
-| Backups (image rsync + log archive) | Local to VPS                                               | $0                               |
-| GitHub Actions CI/CD                | Free (public repo)                                         | $0                               |
-| **Total (mambakkam side)**          |                                                            | **~$6.44/month**                 |
+| Item                                      | Provider                                                   | Cost to mambakkam.net            |
+| ----------------------------------------- | ---------------------------------------------------------- | -------------------------------- |
+| VPS (Hetzner CX23, 2 vCPU / 4 GB / 40 GB) | Hetzner Cloud                                              | $4.99 (full bill — first tenant) |
+| Primary IPv4                              | Hetzner Cloud                                              | $0.60                            |
+| Domain `mambakkam.net`                    | Cloudflare Registrar                                       | ~$0.85 (annual ÷ 12)             |
+| SSL certificate                           | Cloudflare (Universal at edge) + Origin Cert (free, 15-yr) | $0                               |
+| DNS + DDoS protection + CDN               | Cloudflare free tier                                       | $0                               |
+| Email — inbound forwarding                | Cloudflare Email Routing → personal Gmail (free)           | $0                               |
+| Backups (image rsync + log archive)       | Local to VPS                                               | $0                               |
+| GitHub Actions CI/CD                      | Free (public repo)                                         | $0                               |
+| **Total (mambakkam side)**                |                                                            | **~$6.44/month**                 |
 
 StudyBuddy joins as a second tenant for $0 marginal infra cost; its only
 StudyBuddy-attributable monthly line is the `usestudybuddy.com` domain
@@ -123,12 +123,12 @@ domain all sit in free tiers. Combined operator outlay (both tenants):
 
 ### Alternatives considered
 
-| Platform                                         | Monthly cost      | Decided not to pick because…                                                                                           |
-| ------------------------------------------------ | ----------------- | ---------------------------------------------------------------------------------------------------------------------- |
+| Platform                                         | Monthly cost                       | Decided not to pick because…                                                                                           |
+| ------------------------------------------------ | ---------------------------------- | ---------------------------------------------------------------------------------------------------------------------- |
 | **Co-located Hetzner CX23 (mambakkam first)** ⭐ | ~$6.44 (mambakkam) / ~$7.30 (both) | Chosen — see "Why co-locate" above                                                                                     |
-| Dedicated Hetzner CX23 (mambakkam-only)          | $6.44             | Same cost since mambakkam pays the bill anyway; co-locating just buys back the value of the second slot for StudyBuddy |
-| Cloudflare Pages                                 | $0                | Best long-term fit, but committing during launch week is risky; decided to revisit post-launch                         |
-| Netlify / Vercel                                 | $0 hobby          | Same as Pages — defer the move                                                                                         |
+| Dedicated Hetzner CX23 (mambakkam-only)          | $6.44                              | Same cost since mambakkam pays the bill anyway; co-locating just buys back the value of the second slot for StudyBuddy |
+| Cloudflare Pages                                 | $0                                 | Best long-term fit, but committing during launch week is risky; decided to revisit post-launch                         |
+| Netlify / Vercel                                 | $0 hobby                           | Same as Pages — defer the move                                                                                         |
 
 ---
 
@@ -349,14 +349,14 @@ GitHub Actions  (deploy-mambakkam.yml)
 The static-site architecture is the load-bearing decision: every graduation
 below is a hosting swap, not a code rewrite. Don't pre-optimize.
 
-| Trigger                              | Action                                                                        | New cost |
-| ------------------------------------ | ----------------------------------------------------------------------------- | -------- |
-| StudyBuddy traffic eats CX23 RAM/CPU | Move mambakkam to Cloudflare Pages                                            | $0       |
-| Operator wants out of VPS admin      | Cloudflare Pages                                                              | $0       |
-| Content team grows                   | Add Decap CMS or TinaCMS (still static output, editors via UI)                | $0       |
-| Tamil i18n launches                  | Astro i18n routing; same hosting                                              | $0       |
-| Cloudflare Pages free-tier cap hit   | Pages Pro                                                                     | $20/mo   |
-| Newsletter/contact form ships        | Sign up for paid mail provider (Zoho Mail Lite ~$12/yr or Migadu ~$19/yr); replace Cloudflare Email Routing MX with provider's MX; add SMTP_* env vars; tighten DMARC to `p=quarantine` | ~$1–2/mo |
+| Trigger                              | Action                                                                                                                                                                                    | New cost |
+| ------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------- |
+| StudyBuddy traffic eats CX23 RAM/CPU | Move mambakkam to Cloudflare Pages                                                                                                                                                        | $0       |
+| Operator wants out of VPS admin      | Cloudflare Pages                                                                                                                                                                          | $0       |
+| Content team grows                   | Add Decap CMS or TinaCMS (still static output, editors via UI)                                                                                                                            | $0       |
+| Tamil i18n launches                  | Astro i18n routing; same hosting                                                                                                                                                          | $0       |
+| Cloudflare Pages free-tier cap hit   | Pages Pro                                                                                                                                                                                 | $20/mo   |
+| Newsletter/contact form ships        | Sign up for paid mail provider (Zoho Mail Lite ~$12/yr or Migadu ~$19/yr); replace Cloudflare Email Routing MX with provider's MX; add SMTP\_\* env vars; tighten DMARC to `p=quarantine` | ~$1–2/mo |
 
 ---
 
@@ -382,5 +382,5 @@ below is a hosting swap, not a code rewrite. Don't pre-optimize.
 | ---------- | ------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | 2026-05-09 | 1.0     | Initial — Day 0 (Sun May 17) launch hosting plan, modeled on StudyBuddy's `DEMO_HOSTING_GUIDE.md`                                                                                                                                                                                                                                                                                                                                     |
 | 2026-05-09 | 1.1     | **Tenancy-order flip** — mambakkam.net is now the first tenant on a fresh CX23; pays the full $5/mo VPS bill (~$6/mo all-in with the domain). StudyBuddy joins as second tenant on Day 0 (Sun May 17) at zero marginal infra cost. Origin Cert with SAN list (covering both domains) is generated up-front during the mambakkam.net cold start on Day -1 (Sat May 16). Cron offsets: mambakkam at 02:30 UTC, StudyBuddy at 02:00 UTC. |
-| 2026-05-16 | 1.2     | **Email provider switch** — Zoho Forever Free Plan no longer reliably available for new signups; replaced with Cloudflare Email Routing (inbound-only forwarding to personal Gmail, free) + Gmail send-as in alias mode for outbound. Cost row, §4 narrative, launch checklist, and "contact form ships" trigger row all updated. DMARC posture relaxed to `p=none` for the demo (no domain-aligned DKIM in alias mode). |
-| 2026-05-16 | 1.3     | **Domain rename — studybuddy.app → usestudybuddy.com.** studybuddy.app was unavailable at registration; usestudybuddy.com chosen as fallback. Subdomain convention preserved: `demo.usestudybuddy.com`. All body references updated; Origin Cert SAN regenerated. Cross-doc sweep across MONITORING/LOGGING/RUNBOOK/BACKUPS and infra (nginx/prometheus/alerts/provision) executed in the same pass. |
+| 2026-05-16 | 1.2     | **Email provider switch** — Zoho Forever Free Plan no longer reliably available for new signups; replaced with Cloudflare Email Routing (inbound-only forwarding to personal Gmail, free) + Gmail send-as in alias mode for outbound. Cost row, §4 narrative, launch checklist, and "contact form ships" trigger row all updated. DMARC posture relaxed to `p=none` for the demo (no domain-aligned DKIM in alias mode).              |
+| 2026-05-16 | 1.3     | **Domain rename — studybuddy.app → usestudybuddy.com.** studybuddy.app was unavailable at registration; usestudybuddy.com chosen as fallback. Subdomain convention preserved: `demo.usestudybuddy.com`. All body references updated; Origin Cert SAN regenerated. Cross-doc sweep across MONITORING/LOGGING/RUNBOOK/BACKUPS and infra (nginx/prometheus/alerts/provision) executed in the same pass.                                  |
