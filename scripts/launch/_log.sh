@@ -91,7 +91,14 @@ __log_json_str() {
 #   Set up the log file path and install the EXIT trap.
 log_init() {
   __LOG_SCRIPT="${1:-unknown}"
-  mkdir -p "$LOG_DIR" 2>/dev/null || true
+  # If LOG_DIR isn't writable (typical when smoke.sh runs from a laptop
+  # where /opt/mambakkam doesn't exist), skip logging entirely. The
+  # __log_finalize early-returns on empty __LOG_FILE, so log_step et al
+  # become no-ops at write time. Override LOG_DIR to keep logs locally.
+  if ! mkdir -p "$LOG_DIR" 2>/dev/null || [[ ! -w "$LOG_DIR" ]]; then
+    __LOG_FILE=""
+    return 0
+  fi
   local ts
   ts=$(date -u +%Y%m%dT%H%M%SZ)
   __LOG_FILE="$LOG_DIR/${__LOG_SCRIPT}-${ts}.json"
