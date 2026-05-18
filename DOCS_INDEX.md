@@ -136,6 +136,7 @@ Within each table, rows are ordered roughly architecture-ref → plan → runboo
 | [TESTING_SETUP](../studybuddy-docs/docs/dev/TESTING_SETUP.md) | Test-environment setup |
 | [LOCAL_TESTING_GUIDE](../StudyBuddy_OnDemand/LOCAL_TESTING_GUIDE.md) | Local end-to-end testing guide |
 | [TESTING_VISUALS](../StudyBuddy_OnDemand/docs/TESTING_VISUALS.md) | Visual-content testing approach |
+| [web/TEST_CASES](../StudyBuddy_OnDemand/web/docs/TEST_CASES.md) | Web test-case catalog: 56 routes × 99 unit + 34 E2E tests across Public/Student/School/Admin portals (TC-ID table per route) |
 
 ### 10. Content, Visuals & Curriculum Authoring
 
@@ -168,10 +169,32 @@ Within each table, rows are ordered roughly architecture-ref → plan → runboo
 
 ### 12. Epics (status-driven, large work units)
 
+> **Sub-index first:** [`epics/INDEX.md`](../StudyBuddy_OnDemand/docs/epics/INDEX.md) is the
+> canonical status board (status + ticket prefix per epic). The rows below mirror
+> that list so this index stays drift-detectable. 17 active epics (1–13, 15–18;
+> EPIC_14 number unused).
+
 | Doc | Purpose |
 |---|---|
-| [epics/INDEX](../StudyBuddy_OnDemand/docs/epics/INDEX.md) | **Sub-index** of all EPIC_NN_*.md files — 13 active epics, status + ticket prefix per epic |
+| [epics/INDEX](../StudyBuddy_OnDemand/docs/epics/INDEX.md) | **Sub-index** of all EPIC_NN_*.md files — canonical status + ticket-prefix board |
 | [PROGRESS](../StudyBuddy_OnDemand/docs/PROGRESS.md) | **Auto-generated** nightly from epics + git log by `progress.yml` workflow |
+| [EPIC_01_multi_provider_llm](../StudyBuddy_OnDemand/docs/epics/EPIC_01_multi_provider_llm.md) | Epic 1 — Multi-Provider LLM Pipeline. ✅ Complete (F-1–F-5, 19 tests, migration 0043). Full design in [[DESIGN_EXPLORATION_MULTI_PROVIDER_LLM]] |
+| [EPIC_02_production_launch](../StudyBuddy_OnDemand/docs/epics/EPIC_02_production_launch.md) | Epic 2 — Production Launch & Demo Readiness. 🚧 G-2/G-3/G-5 done; G-1/G-4 blocked on hosting decision |
+| [EPIC_03_student_mobile](../StudyBuddy_OnDemand/docs/epics/EPIC_03_student_mobile.md) | Epic 3 — Student Mobile App (Expo / React Native). ✅ Path B chosen 2026-04-14; not yet started (parked behind testing + hosting) |
+| [EPIC_04_parent_portal](../StudyBuddy_OnDemand/docs/epics/EPIC_04_parent_portal.md) | Epic 4 — Parent Portal. 💭 Your call |
+| [EPIC_05_district_admin](../StudyBuddy_OnDemand/docs/epics/EPIC_05_district_admin.md) | Epic 5 — District Admin. 💭 Your call |
+| [EPIC_06_platform_hardening](../StudyBuddy_OnDemand/docs/epics/EPIC_06_platform_hardening.md) | Epic 6 — Platform Hardening. 🚧 K-1/K-2/K-3/K-6 done; K-4/K-5 need staging |
+| [EPIC_07_self_serve_demo](../StudyBuddy_OnDemand/docs/epics/EPIC_07_self_serve_demo.md) | Epic 7 — Self-Serve Demo System. ✅ Complete (Option C guided tour, 15 tests) |
+| [EPIC_08_onboarding_completeness](../StudyBuddy_OnDemand/docs/epics/EPIC_08_onboarding_completeness.md) | Epic 8 — Onboarding Completeness (address + measurement units). 🚧 H-8/H-9/H-10 shipped; address + units phases pending |
+| [EPIC_09_accessibility_personalization](../StudyBuddy_OnDemand/docs/epics/EPIC_09_accessibility_personalization.md) | Epic 9 — Accessibility & Personalization. 🚧 Umbrella for GH issue #189 (3 axe rules disabled in persona e2e) |
+| [EPIC_10_curriculum_lifecycle](../StudyBuddy_OnDemand/docs/epics/EPIC_10_curriculum_lifecycle.md) | Epic 10 — Curriculum Lifecycle & Governance. 🚧 L-1–L-5 backend shipped; L-6 sweeper paused; L-7–L-10 pending |
+| [EPIC_11_content_formatting](../StudyBuddy_OnDemand/docs/epics/EPIC_11_content_formatting.md) | Epic 11 — Content Presentation & Formatting. 🚧 C-1–C-4, C-6, C-9 shipped; C-5 regen in flight; C-7/C-8 pending |
+| [EPIC_12_teacher_content_authoring](../StudyBuddy_OnDemand/docs/epics/EPIC_12_teacher_content_authoring.md) | Epic 12 — Teacher Content Authoring. ✅ Go — Option B (fork model) adopted; ready to build TA-0 |
+| [EPIC_13_branding_refresh](../StudyBuddy_OnDemand/docs/epics/EPIC_13_branding_refresh.md) | Epic 13 — Branding Refresh: STEM → Education Enhancement. ✅ Complete 2026-04-21 (all five tickets across EN/FR/ES) |
+| [EPIC_15_backup_restore](../StudyBuddy_OnDemand/docs/epics/EPIC_15_backup_restore.md) | Epic 15 — School Curriculum Backup & Restore. ✅ Go — spec locked; ready to build BR-1 through BR-6 |
+| [EPIC_16_public_site_redesign](../StudyBuddy_OnDemand/docs/epics/EPIC_16_public_site_redesign.md) | Epic 16 — Public Site Redesign: School-First Marketing. 🔜 Ready to build — start 2026-05-03 (S-1 → S-5) |
+| [EPIC_17_corporate_ld_fork](../StudyBuddy_OnDemand/docs/epics/EPIC_17_corporate_ld_fork.md) | Epic 17 — Corporate L&D Fork. ⏸ Contested — advisor recommends Path A (validate first via `tenant_type` + design-partner pilot); user picks A/B/C |
+| [EPIC_18_corporate_scenario_catalog](../StudyBuddy_OnDemand/docs/epics/EPIC_18_corporate_scenario_catalog.md) | Epic 18 — Corporate Compliance Scenario Catalog. 🚧 2 scenarios live; 48 seed scenarios across 9 domains catalogued; gated on Epic 17 |
 
 ### 13. Market Research
 
@@ -358,3 +381,4 @@ cron. Detail in the same README.
 |---|---|---|
 | 2026-05-17 | 1.0 | Initial hand-curated index. 14 topic tables + 6 cross-repo overlap warnings + exclusion list. Built after the CX22→CX23 + cost-table sweep across 9 docs revealed how scattered hosting docs are across the 3 repos. |
 | 2026-05-17 | 1.1 | Overlap cleanup pass: (§1) CX22→CX23 + studybuddy.app→usestudybuddy.com sweep applied to `StudyBuddy_OnDemand/docs/DEMO_LAUNCH_PLAN.md` so both launch-plan files are consistent; (§2) added "Owns / Adjacent in this hosting cluster" headers to 7 hosting docs across all 3 repos so each doc's scope is explicit at first read; (§4) reciprocal cross-link headers added to the two `DEMO_FEEDBACK` files marking `market_research/demo_feedback.md` as canonical for verbatim quotes. §3/§5/§6 left as-is (intentional splits, not duplications). |
+| 2026-05-18 | 1.2 | Cleared the 18 untracked-on-disk entries flagged by the 2026-05-17 drift run: added all 17 `docs/epics/EPIC_NN_*.md` files to §12 (one row per epic mirroring the `epics/INDEX.md` status board, EPIC_14 number unused) + added `web/docs/TEST_CASES.md` to §9. Indexed total: 111 → 129; drift report should now show 0 untracked. |
