@@ -17,6 +17,91 @@
 
 ---
 
+## 2026-05-19 — Demo end-to-end walkthrough validated (teacher + student)
+
+**Outcome:** ✅ Fresh demo signup → email verify → teacher login → catalog →
+library → unit drill-down → student login → subjects → lesson view all
+work end-to-end through Cloudflare. Tagged as the
+`demo-walkthrough-2026-05-19` milestone.
+
+**Live URL:** `https://demo.usestudybuddy.com`
+**Tenants:** mambakkam.net + demo.usestudybuddy.com both healthy on shared CX23.
+
+**Summary.** Started session #2 of the day to validate the demo flow as a
+real visitor would experience it. Walked the full teacher + student
+journey and fixed 9 bugs surfaced along the way — most caused by the
+asyncpg JSON codec interacting badly with pre-existing call sites that
+manually serialised JSON. The compose-hygiene + catalog fixes from
+session #1 (commits `63f7bdd`, `63a78a3`) were prerequisites; this
+session #2 built on top.
+
+**Bugs found + fixed today (chronological, all committed + auto-deployed):**
+
+| # | Symptom | Root cause | Fix |
+| - | ------- | ---------- | --- |
+| 1 | Catalog page blank for new teachers | `school_adopted_curricula` had no rows | `7b579ec` — auto-adopt G11 Science in `verify_test_run` |
+| 2 | "Failed to load units" on a clicked curriculum | `curriculum_units.title` was NULL for 6 of 7 platform curricula (yesterday's `recover_curriculum` workaround never populated titles) | One-shot backfill from `data/grade*.json` → 108 titles |
+| 3 | Curriculum Catalog → has_content cell crashed Pydantic | SQL returned NULL when no `content_subject_versions` row existed | `COALESCE(... > 0, false)` |
+| 4 | Curriculum Content page empty for the demo teacher | `c.is_default = false` on every platform curriculum | one-shot UPDATE + safeguard in `preimport_demo_units.py` |
+| 5 | Sign Out → "Not Found" | nginx routed `/api/auth/logout` to FastAPI which only has `/api/v1/auth/logout` | `71f96d6` — split nginx into `/api/v1/` (backend) and `/api/` (Next.js) |
+| 6 | Sign Out → redirect to `http://localhost:3000/` | `NEXT_PUBLIC_APP_URL` unset on the web container | `02b25ec` — set to `https://demo.usestudybuddy.com` |
+| 7 | Subjects page → "Could not load curriculum" (intermittent) | Demo student JWT TTL = 15 min (too short for a demo walkthrough) | `1d986fc` — bump to 240 min in `.env.demo` |
+| 8 | Subjects page → 404 (persistent) | `curriculum_units` rows only exist on the OOB curriculum, but resolver returned the school's fork | `d93e9ee` — follow `source_curriculum_id` for the units lookup |
+| 9 | Biology lessons → "Could not load lessons" (other subjects worked) | Manual `json.dumps(body)` paired with the asyncpg codec's own `json.dumps` → bodies stored as jsonb _string_ instead of _object_ | `7dec328` — drop manual `json.dumps` at all 7 jsonb write sites; one-shot UPDATE to repair 18 already-bad rows |
+
+**Other ground-clearing landed today:**
+
+- `1a01526` — preimport script now imports ALL 29 G11 Science units as
+  approved + published (was 8 as drafts), so Content Library is fully
+  populated on a fresh signup. Removes the "manually exercise the
+  import flow" demo step that didn't add value.
+- `209d122` — `is_default = true` UPDATE baked into the preimport
+  script so the drift can't recur.
+
+**Account state at end of session:**
+
+- 2 active demo accounts (1 walked the full demo: `callmds+student@gmail.com`
+  + `callmds+teacher@gmail.com`).
+- All 29 G11 Science units imported, approved, published.
+- 18 previously double-encoded `unit_content_overrides` body rows repaired.
+
+**Memory updated:**
+
+- `[[feedback-asyncpg-json-codec-required]]` — added write-side trap
+  documentation (the `json.dumps(x)` × codec double-encode pattern), and
+  a SQL repair recipe for already-malformed rows.
+- `[[feedback-nginx-upstream-ip-cache]]` (landed earlier) — already
+  covered the bind-mount inode + IP cache traps that bit us during
+  the nginx config edits.
+
+**Follow-ups remaining (from earlier launch, not blocking demo):**
+
+- **#28** — Deferred rename sweep (17 files inc. Auth0 claim namespaces).
+- **#29** — Pre-existing CI failures (138 frontend tests + Backend + API Contract).
+- **#31** — `DEMO_VPS_HOST` set to bare IP, so the workflow's smoke
+  check always 000's. Needs splitting into SSH-host (IP) + smoke-host
+  (DNS name).
+- **#12** — `/opt/mambakkam/.git` ownership.
+- **Stripe wiring** — blanked in `.env.demo`; subscription endpoints
+  500 if anyone exercises them on the demo.
+
+**StudyBuddy_OnDemand commits this session (most recent first):**
+
+```
+7dec328 fix(asyncpg): drop manual json.dumps() on every jsonb write path
+d93e9ee fix(curriculum): use source_curriculum_id for unit lookup on school forks
+1d986fc feat(demo): extend JWT access-token TTL to 4h in .env.demo skeleton
+02b25ec fix(demo): set NEXT_PUBLIC_APP_URL so /api/auth/logout redirects to demo URL
+71f96d6 fix(demo): scope nginx /api/v1 to backend, let Next.js handle other /api/* paths
+209d122 fix(demo): ensure platform curricula have is_default=true (Curriculum Content visibility)
+1a01526 feat(demo): preimport all G11 Science units as approved+published (full Content Library)
+7b579ec fix(demo): auto-adopt Grade 11 Science into the sandbox school's library on test-run verify
+674cf83 feat(demo): add preimport_demo_units.py — curated 2-units-per-subject pre-import
+c310b12 fix(catalog): COALESCE has_content boolean (curricula without content_subject_versions rows)
+```
+
+---
+
 ## 2026-05-19 — Tasks #32 + #30 closed in single session
 
 **Outcome:** ✅ Catalog API fixed AND yesterday's 5 compose workarounds
