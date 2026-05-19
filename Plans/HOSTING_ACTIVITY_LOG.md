@@ -17,7 +17,126 @@
 
 ---
 
-## 2026-05-18 — StudyBuddy second-tenant join (demo.usestudybuddy.com)
+## 2026-05-19 — Tasks #32 + #30 closed in single session
+
+**Outcome:** ✅ Catalog API fixed AND yesterday's 5 compose workarounds
+landed cleanly in the demo override. Demo auto-deploy now runs without
+the `--profile never` hack and without symlink/curl band-aids.
+
+**Commits:**
+
+- `63f7bdd` fix(catalog): asyncpg json/jsonb codecs
+- `63a78a3` fix(demo): codify launch-time compose workarounds
+
+**Compose hygiene fixes (task #30) landed in `docker-compose.demo.yml`:**
+
+| Old workaround                       | Codified in demo override                                                                            |
+| ------------------------------------ | ---------------------------------------------------------------------------------------------------- |
+| `--profile never` on every command   | `depends_on: !override` on every service that referenced `*depends-all`, dropping pgbouncer entirely |
+| `ln -sf .env.demo .env`              | `env_file: !override - .env.demo` on api/celery-worker/celery-beat-primary/migrate                   |
+| `ln -sf ../.env.demo web/.env.local` | `env_file: !override - .env.demo` on web                                                             |
+| `volumes: !reset null` on web        | `volumes: !override - /data/videos:/app/public/videos:ro` (drops `./web:/app` overlay, keeps videos) |
+| `mv content_store_data && ln -s ...` | `volumes: !override - /data/content:/data/content` on api/celery/migrate                             |
+| broken curl healthcheck override     | Override removed entirely; api inherits the correct python+urllib healthcheck from base              |
+| stray `TEST_DB_URL` blanking in base | Moved to `TEST_DB_URL: ""` overrides in demo for api/celery/migrate; base file restored              |
+
+Validated via `docker compose -f docker-compose.yml -f docker-compose.demo.yml --env-file .env.demo config --quiet` → exit 0.
+
+**VPS reconciliation order (executed live):**
+
+1. Stashed 4 modified files (`backend/src/core/app_factory.py`, `backend/src/school/service.py`, `docker-compose.yml`, `docker-compose.demo.yml`) into `stash@{0}` with message `task#30-launch-workarounds-2026-05-18`.
+2. Pushed `63a78a3` to main; deploy workflow auto-fired.
+3. Workflow's `git pull --ff-only` then succeeded (working tree clean from step 1).
+4. `docker compose pull` brought in api image from the catalog-fix build (`2026-05-19T13:27:47Z`).
+5. `docker compose up -d --remove-orphans` recreated containers with the new compose layout — no `--profile never` needed, no symlinks needed.
+
+The stash on the VPS is retained for forensic purposes; safe to drop
+manually with `sudo /usr/bin/git -C /opt/studybuddy stash drop` once
+operator is satisfied no rollback is wanted. Stash contents are 100%
+codified by the two commits above plus the now-redundant
+TEST_DB_URL hack on `docker-compose.yml` (base).
+
+---
+
+## 2026-05-19 — Task #32 resolved: catalog API 0/0 root-caused + fixed
+
+**Operator:** Siva Mambakkam
+**Duration:** ~45 min
+**Outcome:** ✅ Catalog API now returns correct subject/unit counts for all 7
+platform curricula. Fix committed (`StudyBuddy_OnDemand@63f7bdd`) and
+auto-deploying.
+
+**Summary.** Picked up the deferred task #32 from yesterday's launch session.
+Root-caused the catalog "0 subjects / 0 units" symptom in ~30 min by invoking
+`list_catalog()` directly inside the running api container.
+
+**Root cause.** asyncpg returns `json`/`jsonb` columns as raw strings unless a
+codec is registered. `list_catalog()` had a defensive guard
+`isinstance(row["subjects"], list) else []` that silently swapped the
+JSON string for `[]`. **Bug was catalog-wide, not G11-specific** — every
+platform curriculum (G8 through G12, all variants) had been returning
+empty subject arrays. Yesterday's note that "G8 catalog works as a
+reference for what populated looks like" was unverified speculation;
+that catalog endpoint was equally broken.
+
+**Why yesterday's psql validation didn't catch it.** Two compounding red
+herrings: (1) the `studybuddy` Postgres role used in psql is `SUPERUSER`
+**and** `BYPASSRLS` — so any RLS hypothesis would be untestable in psql;
+(2) psql renders json columns as if structured, masking that they're
+actually strings until the application calls `len()` / `isinstance(...,
+list)` on them.
+
+**Fix.** Pool-level — register `set_type_codec('json'/'jsonb',
+encoder=json.dumps, decoder=json.loads, schema='pg_catalog')` via a new
+`_init_db_conn` hook passed to `asyncpg.create_pool(init=...)` in
+`backend/src/core/app_factory.py`. Also simplified the now-redundant
+guard in `service.py:770` and dropped two naked `json.loads(row["theme"])`
+calls at `service.py:1233` + `:1275` that would have broken under the
+codec. Codebase audit confirmed no other naked `json.loads(row[...])`
+patterns; all 7 other `json.loads(d["subjects"])` etc. call sites
+already guard with `isinstance(..., str)`, so they become no-ops under
+the codec.
+
+**Validation.** Patched live container via `docker cp` + `docker restart
+studybuddy-api-1`. Invoked `list_catalog(conn, grade=11)` via Python REPL
+inside the container with `_init_db_conn(conn)` registering the codecs —
+returned the correct 4 subjects / 29 units for `default-2026-g11-science`
+with `has_content=True` on all four. All 7 platform curricula
+(G8/G10/G11/G11-commerce/G11-science/G12-science/G12-commerce) now
+return correct counts. Then committed + pushed; GH Actions auto-deploy
+running.
+
+**Files changed:**
+
+- `backend/src/core/app_factory.py` — `+15 / -1` (json codec + import)
+- `backend/src/school/service.py` — `+3 / -3` (3 simplification edits)
+
+Commit: `9faedcc` → rebased onto remote nightly bot → `63f7bdd` pushed.
+
+**Investigative path / negative results:**
+
+- ✗ RLS hypothesis — `curriculum_units` and `content_subject_versions`
+  have RLS disabled entirely. `curricula.tenant_isolation` policy
+  unconditionally allows `owner_type='platform'` rows. Also moot since
+  the app's `studybuddy` role bypasses RLS anyway.
+- ✗ `retention_status != 'archived'` NULL-comparison trap — verified
+  row has `retention_status='active'`.
+- ✗ Container source drift — `/app/src/school/service.py` in container
+  matched local source byte-for-byte before the patch.
+- ✓ asyncpg JSON serialization — root cause.
+
+**Follow-ups / corrections to yesterday's log:**
+
+- The §10 "G8 catalog works as a reference" workaround note is now known
+  to have been inaccurate — that endpoint was equally broken at the
+  serialization layer. Yesterday's fixes A-D (symlink, seed_content_db,
+  recover_curriculum sed-patch, status=published UPDATE) were still all
+  real and necessary to make the _data_ correct; they just couldn't fix
+  the symptom because the symptom is purely a serialization bug.
+
+---
+
+
 
 **Operator:** Siva Mambakkam
 **Duration:** ~4h (12:00 – 16:20 EDT / 16:00 – 20:20 UTC)
