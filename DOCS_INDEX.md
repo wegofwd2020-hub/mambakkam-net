@@ -109,6 +109,8 @@ Within each table, rows are ordered roughly architecture-ref → plan → runboo
 | [DESIGN_content_versioning_lifecycle](../StudyBuddy_OnDemand/docs/DESIGN_content_versioning_lifecycle.md)     | Content versioning lifecycle design                                                     |
 | [DESIGN_demo_request_access](../StudyBuddy_OnDemand/docs/DESIGN_demo_request_access.md)                       | Self-service request-access flow design (draft, not implemented)                        |
 | [DESIGN_demo_videos](../StudyBuddy_OnDemand/docs/DESIGN_demo_videos.md)                                       | Feature-videos design for demo site (draft, not implemented)                            |
+| [DESIGN_curriculum_mgmt_capability](../StudyBuddy_OnDemand/docs/DESIGN_curriculum_mgmt_capability.md)         | Design doc for the `curriculum_mgmt` capability — lets a school_admin delegate curriculum-management powers to a chosen teacher (migration 0059, implemented).  |
+| [ADR_004](../StudyBuddy_OnDemand/docs/ADR_004_authoring_studio_home_repo.md)                                  | Architecture Decision Record #4 — home repo for the standalone authoring + reader (StudyBuddy Q, not OnDemand); status: Accepted 2026-05-26.                    |
 
 ### 7. API & Services
 
@@ -139,6 +141,7 @@ Within each table, rows are ordered roughly architecture-ref → plan → runboo
 | [LOCAL_TESTING_GUIDE](../StudyBuddy_OnDemand/LOCAL_TESTING_GUIDE.md) | Local end-to-end testing guide                                                                                               |
 | [TESTING_VISUALS](../StudyBuddy_OnDemand/docs/TESTING_VISUALS.md)    | Visual-content testing approach                                                                                              |
 | [web/TEST_CASES](../StudyBuddy_OnDemand/web/docs/TEST_CASES.md)      | Web test-case catalog: 56 routes × 99 unit + 34 E2E tests across Public/Student/School/Admin portals (TC-ID table per route) |
+| [VISUAL_VALIDATION_GUIDE](../StudyBuddy_OnDemand/docs/feedback/VISUAL_VALIDATION_GUIDE.md)                    | Step-by-step visual walkthrough to confirm FEEDBACK_TRACKER.md fixes (VT-1–VT-5, GG-1, AR-1–AR-3, SR-1, AP-1–AP-5) shipped correctly.                         |
 
 ### 10. Content, Visuals & Curriculum Authoring
 
@@ -150,6 +153,7 @@ Within each table, rows are ordered roughly architecture-ref → plan → runboo
 | [VISUAL_LIBRARY_SIDECAR](../StudyBuddy_OnDemand/docs/VISUAL_LIBRARY_SIDECAR.md)             | Visual-library sidecar metadata format                       |
 | [visual_presentation_research](../StudyBuddy_OnDemand/docs/visual_presentation_research.md) | Research notes on visual presentation patterns               |
 | [SCENARIO_AUTHORING_TEMPLATE](../StudyBuddy_OnDemand/docs/SCENARIO_AUTHORING_TEMPLATE.md)   | Template for authoring new scenarios/lessons                 |
+| [CURRICULUM_ONBOARDING_FLOW](../StudyBuddy_OnDemand/docs/CURRICULUM_ONBOARDING_FLOW.md)     | Flow map tracing curriculum from creation to student-accessible, including role-based approval gates (grounded in live backend as of 2026-05-21).               |
 
 ### 11. Product, Requirements & Roadmap
 
@@ -168,6 +172,8 @@ Within each table, rows are ordered roughly architecture-ref → plan → runboo
 | [BRANDING_I18N_DRAFT](../StudyBuddy_OnDemand/docs/BRANDING_I18N_DRAFT.md)                   | Branding + internationalization draft notes                         |
 | [BRANDING_TAGLINE_OPTIONS](../StudyBuddy_OnDemand/docs/BRANDING_TAGLINE_OPTIONS.md)         | Tagline option exploration (see Overlaps §3)                        |
 | [TaglineOptions (promos)](../studybuddy-docs/docs/promos/TaglineOptions.md)                 | Tagline options as presented to outside audiences (see Overlaps §3) |
+| [RESPONSIVE_TARGET](../StudyBuddy_OnDemand/docs/RESPONSIVE_TARGET.md)                      | Device and surface target matrix for each StudyBuddy interface — expected screen/device context so reviewers and demo audiences test correctly.                 |
+| [SPEC_curriculum_mgmt_capability](../StudyBuddy_OnDemand/docs/SPEC_curriculum_mgmt_capability.md) | Implementation spec for the `curriculum_mgmt` capability (migration 0059, issue #358) — API contracts, permission rules, and test coverage.              |
 
 ### 12. Epics (status-driven, large work units)
 
@@ -208,6 +214,8 @@ Within each table, rows are ordered roughly architecture-ref → plan → runboo
 | [authentication_flows](../studybuddy-docs/market_research/authentication_flows.md)                         | Auth-flow patterns research                                                          |
 | [demo_feedback](../studybuddy-docs/market_research/demo_feedback.md)                                       | **Canonical** verbatim quotes + test cases from K-12 demo reviewers (see Overlap §4) |
 | [going_public_infrastructure_plan](../studybuddy-docs/market_research/going_public_infrastructure_plan.md) | Infrastructure plan for going-public scale                                           |
+| [FEEDBACK_TRACKER](../StudyBuddy_OnDemand/docs/feedback/FEEDBACK_TRACKER.md)               | Running log of external-reviewer and prospective-user feedback on the live product, with grounded analysis and tracked action items.                             |
+| [STRATEGIC_FEEDBACK](../StudyBuddy_OnDemand/docs/feedback/STRATEGIC_FEEDBACK.md)           | Strategic and market-direction feedback — competitive positioning bets, product wedges, and partnership leads from reviewers and prospective users.              |
 
 ### 14. Sales, Demo & Promo Material
 
@@ -226,6 +234,9 @@ Within each table, rows are ordered roughly architecture-ref → plan → runboo
 | [USER_STORY_PRODUCTION_GUIDE](../studybuddy-docs/docs/promos/USER_STORY_PRODUCTION_GUIDE.md)   | Production guide for user-story video content                                                                                             |
 | [USER_STORY_STORYBOARD](../studybuddy-docs/docs/promos/USER_STORY_STORYBOARD.md)               | User-story storyboard                                                                                                                     |
 | [ashish-larivee-meeting-prep](../studybuddy-docs/docs/promos/ashish-larivee-meeting-prep.md)   | Meeting-prep notes for Ashish Larivee                                                                                                     |
+| [PROMO_CANONICAL_OVERVIEW (StudyBuddy)](../StudyBuddy_OnDemand/docs/PROMO_CANONICAL_OVERVIEW.md) | StudyBuddy canonical overview for promo work — single source-of-truth to paste into Claude.ai when drafting teacher emails, one-pagers, or investor content. |
+| [WHATSAPP_DEMO_INVITE](../StudyBuddy_OnDemand/docs/outreach/WHATSAPP_DEMO_INVITE.md)          | Reusable WhatsApp message template (WhatsApp-formatted bold/italic) for inviting people to try the live StudyBuddy demo.                                      |
+| [PROMO_CANONICAL_OVERVIEW (mambakkam-net)](PROMO_CANONICAL_OVERVIEW.md)                       | mambakkam.net canonical overview for promo and outreach work — single source-of-truth for diaspora outreach emails and visitor content.                       |
 
 ### 15. Reference
 
@@ -245,6 +256,7 @@ Within each table, rows are ordered roughly architecture-ref → plan → runboo
 | [README (studybuddy-docs)](../studybuddy-docs/README.md)           | studybuddy-docs intro                                 |
 | [README (StudyBuddy_OnDemand)](../StudyBuddy_OnDemand/README.md)   | StudyBuddy_OnDemand intro                             |
 | [README (web)](../StudyBuddy_OnDemand/web/README.md)               | Web sub-tree intro                                    |
+| [RESUME](../StudyBuddy_OnDemand/docs/RESUME.md)                    | Git-tracked machine-agnostic checkpoint for resuming work across Claude Code sessions; updated per session.                                                   |
 
 ---
 
@@ -385,3 +397,4 @@ cron. Detail in the same README.
 | 2026-05-17 | 1.1     | Overlap cleanup pass: (§1) CX22→CX23 + studybuddy.app→usestudybuddy.com sweep applied to `StudyBuddy_OnDemand/docs/DEMO_LAUNCH_PLAN.md` so both launch-plan files are consistent; (§2) added "Owns / Adjacent in this hosting cluster" headers to 7 hosting docs across all 3 repos so each doc's scope is explicit at first read; (§4) reciprocal cross-link headers added to the two `DEMO_FEEDBACK` files marking `market_research/demo_feedback.md` as canonical for verbatim quotes. §3/§5/§6 left as-is (intentional splits, not duplications). |
 | 2026-05-18 | 1.2     | Cleared the 18 untracked-on-disk entries flagged by the 2026-05-17 drift run: added all 17 `docs/epics/EPIC_NN_*.md` files to §12 (one row per epic mirroring the `epics/INDEX.md` status board, EPIC_14 number unused) + added `web/docs/TEST_CASES.md` to §9. Indexed total: 111 → 129; drift report should now show 0 untracked.                                                                                                                                                                                                                   |
 | 2026-05-18 | 1.3     | Added `Plans/HOSTING_ACTIVITY_LOG.md` to §4 — new chronological log of operator actions on live infra (provisioning, deploys, incidents). First entry covers the 2026-05-18 cold-start launch including the §A Origin Cert mismatch and §B Universal SSL disable incidents. Will be appended to over time.                                                                                                                                                                                                                                            |
+| 2026-06-02 | 1.4     | Nightly drift sweep: +12 rows (§6: +2, §9: +1, §10: +1, §11: +2, §13: +2, §14: +3, §15: +1), -0 rows.                                                                                                                                                                                                                                                                                                                                                                                                                                               |
