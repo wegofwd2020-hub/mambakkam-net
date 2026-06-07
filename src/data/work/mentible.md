@@ -4,6 +4,7 @@ excerpt: An AI book-authoring app for adult self-learners. Structure a topic, ge
 author: siva-m
 type: product
 status: in-progress
+image: ~/assets/images/work/mentible-logo.png
 tags:
   - React Native
   - Expo
