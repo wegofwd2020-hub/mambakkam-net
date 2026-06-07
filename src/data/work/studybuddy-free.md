@@ -50,4 +50,4 @@ Usage is metered by tokens — the same unit the Anthropic API uses. Students pu
 
 ## Status
 
-**Shipped.** Version 1.1.0 released March 2025. Active on Android and desktop. This is the earliest production StudyBuddy product — the experience and learnings from building it directly shaped the architecture of [StudyBuddy OnDemand](/work/studybuddy-ondemand) and [StudyBuddy Q](/work/studybuddy-q).
+**Shipped.** Version 1.1.0 released March 2025. Active on Android and desktop. This is the earliest production StudyBuddy product — the experience and learnings from building it directly shaped the architecture of [StudyBuddy OnDemand](/work/studybuddy-ondemand) and [Mentible](/work/mentible).
