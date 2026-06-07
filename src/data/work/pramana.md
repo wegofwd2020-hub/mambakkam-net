@@ -4,6 +4,7 @@ excerpt: A compliance-training tracking platform that produces auditable proof o
 author: siva-m
 type: product
 status: in-progress
+image: ~/assets/images/work/pramana-logo.svg
 tags:
   - Python
   - FastAPI
