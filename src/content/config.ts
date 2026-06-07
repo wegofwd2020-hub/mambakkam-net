@@ -116,6 +116,15 @@ const peopleCollection = defineCollection({
 
     image: z.string().optional(),
 
+    stats: z
+      .array(
+        z.object({
+          value: z.string(),
+          label: z.string(),
+        })
+      )
+      .optional(),
+
     work: z
       .array(
         z.object({

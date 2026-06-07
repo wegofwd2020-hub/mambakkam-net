@@ -15,10 +15,24 @@ const images = import.meta.glob<{ default: ImageMetadata }>('/src/assets/images/
 
 const { person } = Astro.props;
 const { Content } = await render(person);
-const { name, nameTamil, role, bio, image, links } = person.data;
+const { name, nameTamil, role, bio, image, stats, links } = person.data;
 
 const allWork = await getCollection('work', ({ data }) => !data.draft && data.author === person.id);
 const work = allWork.sort((a, b) => (b.data.featured ? 1 : 0) - (a.data.featured ? 1 : 0));
+
+// Status badge — label + the (dark-mode-aware) colour token.
+const statusBadge = (item: (typeof work)[number]) => {
+  if (item.data.comingSoon) return { label: 'Coming Soon', token: 'var(--status-soon)' };
+  switch (item.data.status) {
+    case 'live':
+      return { label: 'Live', token: 'var(--status-live)' };
+    case 'archived':
+      return { label: 'Archived', token: 'var(--status-archived)' };
+    default:
+      return { label: 'In Progress', token: 'var(--status-progress)' };
+  }
+};
+const MAX_TAGS = 5;
 
 const imageKey = image ? image.replace('~/', '/src/') : null;
 const resolvedImage = imageKey && images[imageKey] ? (await images[imageKey]()).default : null;
@@ -27,62 +41,128 @@ const metadata = {
   title: name,
   description: bio,
 };
+
+const githubUrl = links?.github;
+const linkedinUrl = links?.linkedin;
 ---
 
 <Layout metadata={metadata}>
-  <div class="mx-auto max-w-3xl px-6 py-16">
-    <!-- Header -->
-    <header class="mb-12">
-      <p class="text-sm font-heading font-medium text-muted uppercase tracking-widest mb-6">People of Mambakkam</p>
+  <!-- ── Hero ─────────────────────────────────────────── -->
+  <section class="profile-hero relative overflow-hidden">
+    <!-- decorative gradient orbs -->
+    <div
+      class="pointer-events-none absolute -top-24 -right-24 w-96 h-96 rounded-full blur-3xl opacity-30"
+      style="background: radial-gradient(circle, var(--aw-color-primary), transparent 70%);"
+      aria-hidden="true"
+    >
+    </div>
+    <div
+      class="pointer-events-none absolute -bottom-32 -left-20 w-96 h-96 rounded-full blur-3xl opacity-20"
+      style="background: radial-gradient(circle, var(--aw-color-accent), transparent 70%);"
+      aria-hidden="true"
+    >
+    </div>
 
-      <div class="flex flex-col sm:flex-row gap-8 items-start">
+    <div class="relative mx-auto max-w-5xl px-6 pt-16 pb-14 sm:pt-20 sm:pb-16">
+      <p class="text-xs font-mono uppercase tracking-[0.25em] text-accent mb-6">People of Mambakkam</p>
+
+      <div class="flex flex-col-reverse sm:flex-row gap-10 items-start sm:items-center">
+        <div class="flex-1 animate-fade">
+          <h1 class="text-5xl sm:text-6xl font-heading font-extrabold leading-[1.05] mb-3 profile-name">
+            {name}
+          </h1>
+          {nameTamil && <p class="text-lg text-muted mb-4 font-serif">{nameTamil}</p>}
+
+          <p
+            class="text-base sm:text-lg font-mono text-secondary dark:text-primary mb-6 tracking-tight border-l-2 border-accent pl-3"
+          >
+            {role}
+          </p>
+
+          <p class="text-lg sm:text-xl leading-relaxed text-default max-w-2xl mb-8">{bio}</p>
+
+          <div class="flex flex-wrap gap-3">
+            {
+              linkedinUrl && (
+                <a
+                  href={linkedinUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  class="inline-flex items-center gap-2 btn btn-primary text-sm shadow-lg shadow-primary/20"
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 0 1-2.063-2.065 2.064 2.064 0 1 1 2.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z" />
+                  </svg>
+                  LinkedIn
+                </a>
+              )
+            }
+            {
+              githubUrl && (
+                <a
+                  href={githubUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  class="inline-flex items-center gap-2 btn btn-secondary text-sm"
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12" />
+                  </svg>
+                  GitHub
+                </a>
+              )
+            }
+          </div>
+        </div>
+
         {
           resolvedImage && (
-            <div class="shrink-0">
-              <Image
-                src={resolvedImage}
-                alt={`Photo of ${name}`}
-                width={160}
-                height={160}
-                class="w-40 h-40 rounded-2xl object-cover object-top shadow-md"
+            <div class="shrink-0 relative">
+              <div
+                class="absolute inset-0 rounded-[2rem] blur-2xl opacity-40 scale-105"
+                style="background: linear-gradient(135deg, var(--aw-color-primary), var(--aw-color-gold), var(--aw-color-accent));"
+                aria-hidden="true"
               />
+              <div
+                class="relative rounded-[2rem] p-[3px]"
+                style="background: linear-gradient(135deg, var(--aw-color-primary), var(--aw-color-gold), var(--aw-color-accent));"
+              >
+                <Image
+                  src={resolvedImage}
+                  alt={`Photo of ${name}`}
+                  width={224}
+                  height={224}
+                  class="w-44 h-44 sm:w-52 sm:h-52 rounded-[1.85rem] object-cover object-top"
+                />
+              </div>
             </div>
           )
         }
-
-        <div class="flex-1">
-          <h1 class="text-4xl font-heading font-bold text-gray-900 dark:text-white mb-1">
-            {name}
-          </h1>
-          {nameTamil && <p class="text-base text-muted mb-3">{nameTamil}</p>}
-          <p class="text-lg font-heading font-medium text-accent mb-6">{role}</p>
-
-          {
-            links?.linkedin && (
-              <a
-                href={links.linkedin}
-                target="_blank"
-                rel="noopener noreferrer"
-                class="inline-flex items-center gap-2 btn btn-primary text-sm"
-              >
-                <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" viewBox="0 0 24 24" fill="currentColor">
-                  <path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 0 1-2.063-2.065 2.064 2.064 0 1 1 2.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z" />
-                </svg>
-                View full CV on LinkedIn
-              </a>
-            )
-          }
-        </div>
       </div>
-    </header>
+    </div>
+  </section>
 
-    <!-- Bio -->
-    <section class="mb-12">
-      <p class="text-lg leading-relaxed">{bio}</p>
-    </section>
+  <!-- ── Stat band ────────────────────────────────────── -->
+  {
+    stats && stats.length > 0 && (
+      <section class="border-y border-primary/15 bg-primary/[0.04] dark:bg-primary/[0.07]">
+        <div class="mx-auto max-w-5xl px-6 py-8">
+          <dl class="grid grid-cols-2 sm:grid-cols-4 gap-6 text-center">
+            {stats.map((s) => (
+              <div class="flex flex-col items-center">
+                <dt class="text-4xl sm:text-5xl font-heading font-extrabold profile-stat">{s.value}</dt>
+                <dd class="mt-1 text-xs sm:text-sm font-mono uppercase tracking-wider text-muted">{s.label}</dd>
+              </div>
+            ))}
+          </dl>
+        </div>
+      </section>
+    )
+  }
 
-    <!-- Extended content from markdown body -->
-    <section class="prose dark:prose-invert max-w-none mb-12">
+  <!-- ── Body ─────────────────────────────────────────── -->
+  <div class="mx-auto max-w-3xl px-6 py-16">
+    <section class="profile-prose prose dark:prose-invert max-w-none mb-12">
       <Content />
     </section>
 
@@ -90,60 +170,109 @@ const metadata = {
     {
       work.length > 0 && (
         <section class="mb-12">
-          <div class="flex items-center justify-between mb-6">
-            <h2 class="text-2xl font-heading font-bold text-gray-900 dark:text-white">Work</h2>
-            <a href="/work" class="text-sm font-heading font-medium text-primary hover:underline">
+          <div class="flex items-end justify-between mb-6">
+            <div>
+              <h2 class="text-2xl font-heading font-extrabold section-heading">Work</h2>
+              <p class="text-sm text-muted mt-1">
+                {work.length} {work.length === 1 ? 'project' : 'projects'} in the field.
+              </p>
+            </div>
+            <a href="/work" class="text-sm font-heading font-medium text-primary hover:underline shrink-0">
               All work →
             </a>
           </div>
-          <div class="space-y-4">
-            {work.map((item) => (
-              <a
-                href={`/work/${item.id}`}
-                class="group block border border-gray-200 dark:border-gray-700 rounded-xl p-5 hover:border-primary hover:shadow-sm transition-all duration-200"
-              >
-                <div class="flex items-center justify-between mb-1">
-                  <h3 class="font-heading font-semibold text-gray-900 dark:text-white group-hover:text-primary transition-colors">
+
+          <div class="grid sm:grid-cols-2 gap-5">
+            {work.map((item) => {
+              const badge = statusBadge(item);
+              const tags = item.data.tags ?? [];
+              const shown = tags.slice(0, MAX_TAGS);
+              const extra = tags.length - shown.length;
+              return (
+                <a
+                  href={`/work/${item.id}`}
+                  class:list={[
+                    'work-card group relative flex flex-col rounded-2xl p-5 border bg-white dark:bg-gray-900/40 transition-all duration-200 hover:-translate-y-1 hover:shadow-xl',
+                    item.data.featured
+                      ? 'border-transparent work-card--featured'
+                      : 'border-gray-200 dark:border-gray-700 hover:border-primary',
+                  ]}
+                >
+                  <div class="flex items-center justify-between gap-3 mb-2">
+                    <span class="text-[0.65rem] font-mono uppercase tracking-[0.18em] text-muted">
+                      {item.data.type}
+                    </span>
+                    <span
+                      class="inline-flex items-center gap-1.5 text-[0.7rem] font-mono font-semibold uppercase tracking-wider rounded-full px-2.5 py-1"
+                      style={`color:${badge.token};background:color-mix(in srgb, ${badge.token} 14%, transparent);`}
+                    >
+                      <span
+                        class="w-1.5 h-1.5 rounded-full"
+                        style={`background:${badge.token};`}
+                        aria-hidden="true"
+                      />
+                      {badge.label}
+                    </span>
+                  </div>
+
+                  <h3 class="font-heading font-bold text-lg text-gray-900 dark:text-white group-hover:text-primary transition-colors leading-tight mb-1.5">
                     {item.data.title}
                   </h3>
-                  <span class="text-xs font-mono text-muted capitalize">{item.data.type}</span>
-                </div>
-                <p class="text-sm text-muted line-clamp-2">{item.data.excerpt}</p>
-                {item.data.tags && item.data.tags.length > 0 && (
-                  <div class="flex flex-wrap gap-1.5 mt-3">
-                    {item.data.tags.map((tag) => (
-                      <span class="text-xs font-mono px-2 py-0.5 rounded bg-gray-100 dark:bg-gray-800 text-muted">
-                        {tag}
-                      </span>
-                    ))}
-                  </div>
-                )}
-              </a>
-            ))}
+                  <p class="text-sm text-muted line-clamp-3 mb-4">{item.data.excerpt}</p>
+
+                  {shown.length > 0 && (
+                    <div class="flex flex-wrap gap-1.5 mt-auto">
+                      {shown.map((tag) => (
+                        <span class="text-[0.7rem] font-mono px-2 py-0.5 rounded-full bg-primary/10 text-primary">
+                          {tag}
+                        </span>
+                      ))}
+                      {extra > 0 && <span class="text-[0.7rem] font-mono px-2 py-0.5 text-muted">+{extra}</span>}
+                    </div>
+                  )}
+                </a>
+              );
+            })}
           </div>
         </section>
       )
     }
 
-    <!-- LinkedIn CTA -->
+    <!-- Connect CTA -->
     {
-      links?.linkedin && (
-        <section class="mb-12 rounded-2xl bg-amber-50/60 dark:bg-amber-900/10 border border-amber-200 dark:border-amber-800 p-6 flex flex-col sm:flex-row items-center justify-between gap-4">
-          <div>
-            <p class="font-heading font-semibold text-gray-900 dark:text-white">Looking for the full CV?</p>
-            <p class="text-sm text-muted">Experience, projects, and recommendations on LinkedIn.</p>
+      (linkedinUrl || githubUrl) && (
+        <section
+          class="mb-12 rounded-2xl p-[1.5px]"
+          style="background: linear-gradient(135deg, var(--aw-color-primary), var(--aw-color-gold), var(--aw-color-accent));"
+        >
+          <div class="rounded-2xl bg-page p-6 flex flex-col sm:flex-row items-center justify-between gap-4">
+            <div>
+              <p class="font-heading font-semibold text-gray-900 dark:text-white">Let’s build something that lasts.</p>
+              <p class="text-sm text-muted">Architecture, platform engineering, modernization, AI — or just trading ideas.</p>
+            </div>
+            <div class="flex gap-3 shrink-0">
+              {linkedinUrl && (
+                <a
+                  href={linkedinUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  class="inline-flex items-center gap-2 btn btn-primary text-sm"
+                >
+                  Open LinkedIn
+                </a>
+              )}
+              {githubUrl && (
+                <a
+                  href={githubUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  class="inline-flex items-center gap-2 btn btn-secondary text-sm"
+                >
+                  GitHub
+                </a>
+              )}
+            </div>
           </div>
-          <a
-            href={links.linkedin}
-            target="_blank"
-            rel="noopener noreferrer"
-            class="shrink-0 inline-flex items-center gap-2 btn btn-primary text-sm"
-          >
-            <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" viewBox="0 0 24 24" fill="currentColor">
-              <path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 0 1-2.063-2.065 2.064 2.064 0 1 1 2.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z" />
-            </svg>
-            Open LinkedIn
-          </a>
         </section>
       )
     }
@@ -154,3 +283,167 @@ const metadata = {
     </div>
   </div>
 </Layout>
+
+<style>
+  /* ── Dark hero banner ────────────────────────────────── */
+  /* Deep panel behind the name + photo. We locally remap the palette
+     to its brighter (dark-mode) values so every child — gradient name,
+     role, bio, muted text, photo ring — reads clearly on the dark bg,
+     regardless of the page's light/dark theme. */
+  .profile-hero {
+    --aw-color-primary: rgb(126 168 99);
+    --aw-color-secondary: rgb(150 185 120);
+    --aw-color-accent: rgb(226 132 82);
+    --aw-color-gold: rgb(226 182 72);
+    --aw-color-text-heading: rgb(245 240 228);
+    --aw-color-text-default: rgb(228 222 208);
+    --aw-color-text-muted: rgb(228 222 208 / 72%);
+
+    color: var(--aw-color-text-default);
+    background-color: rgb(17 19 14);
+    background-image:
+      radial-gradient(ellipse 90% 70% at 75% -10%, rgb(126 168 99 / 26%) 0%, transparent 60%),
+      radial-gradient(ellipse 70% 60% at -5% 115%, rgb(226 132 82 / 20%) 0%, transparent 55%),
+      repeating-linear-gradient(180deg, transparent 0 47px, rgb(255 255 255 / 4%) 47px 49px),
+      linear-gradient(160deg, rgb(30 35 26) 0%, rgb(17 19 14) 100%);
+  }
+
+  /* GitHub / secondary button needs light text + border on the dark panel */
+  .profile-hero :global(.btn-secondary) {
+    color: var(--aw-color-text-heading);
+    border-color: rgb(255 255 255 / 30%);
+  }
+  .profile-hero :global(.btn-secondary:hover) {
+    background-color: rgb(255 255 255 / 10%);
+    border-color: rgb(255 255 255 / 50%);
+  }
+
+  /* ── Work status colours (conventional, dark-mode aware) ── */
+  :global(:root) {
+    --status-live: rgb(74 107 60); /* green  */
+    --status-progress: rgb(193 124 17); /* amber  */
+    --status-soon: rgb(37 99 235); /* blue   */
+    --status-archived: var(--aw-color-text-muted); /* gray   */
+  }
+  :global(.dark) {
+    --status-live: rgb(126 168 99);
+    --status-progress: rgb(228 168 70);
+    --status-soon: rgb(110 150 245);
+    --status-archived: var(--aw-color-text-muted);
+  }
+
+  /* ── Legibility: deepen text on the warm background ──── */
+  /* The global body weight is 300 (light); lift it on this page for depth. */
+  .profile-prose {
+    font-weight: 400;
+  }
+  .profile-prose :global(p),
+  .profile-prose :global(li) {
+    color: var(--aw-color-text-default);
+  }
+  /* Pull muted text out of the background (default is 60% opacity). */
+  .text-muted {
+    color: var(--aw-color-text-default);
+    opacity: 0.8;
+  }
+
+  /* Section heading with gradient underline (matches prose h2) */
+  .section-heading {
+    color: var(--aw-color-text-heading);
+    display: inline-block;
+    padding-bottom: 0.35rem;
+    border-bottom: 3px solid transparent;
+    border-image: linear-gradient(90deg, var(--aw-color-primary), var(--aw-color-accent)) 1;
+  }
+
+  /* Featured work card — gradient border via mask */
+  .work-card--featured {
+    background-clip: padding-box;
+    position: relative;
+  }
+  .work-card--featured::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: 1rem;
+    padding: 1.5px;
+    background: linear-gradient(135deg, var(--aw-color-primary), var(--aw-color-gold), var(--aw-color-accent));
+    -webkit-mask:
+      linear-gradient(#fff 0 0) content-box,
+      linear-gradient(#fff 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+    pointer-events: none;
+  }
+
+  /* Gradient name + stat numerals — village palette */
+  .profile-name,
+  .profile-stat {
+    background-image: linear-gradient(120deg, var(--aw-color-primary), var(--aw-color-gold), var(--aw-color-accent));
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+
+  /* ── Elevated prose for the profile body ─────────────── */
+  .profile-prose :global(h2) {
+    font-family: var(--aw-font-heading);
+    color: var(--aw-color-text-heading);
+    font-weight: 800;
+    margin-top: 2.75rem;
+    padding-bottom: 0.4rem;
+    display: inline-block;
+    border-bottom: 3px solid transparent;
+    border-image: linear-gradient(90deg, var(--aw-color-primary), var(--aw-color-accent)) 1;
+  }
+
+  .profile-prose :global(h3) {
+    color: var(--aw-color-primary);
+    font-weight: 700;
+    margin-top: 1.75rem;
+  }
+
+  /* The "Technology changes rapidly" feature quote */
+  .profile-prose :global(blockquote) {
+    border-left: 5px solid var(--aw-color-accent);
+    background: linear-gradient(90deg, rgb(74 107 60 / 8%), transparent);
+    border-radius: 0 0.75rem 0.75rem 0;
+    padding: 1.1rem 1.4rem;
+    font-style: normal;
+    font-family: var(--aw-font-heading);
+    font-weight: 600;
+    font-size: 1.25rem;
+    color: var(--aw-color-text-heading);
+  }
+  :global(.dark) .profile-prose :global(blockquote) {
+    background: linear-gradient(90deg, rgb(110 150 88 / 12%), transparent);
+  }
+  .profile-prose :global(blockquote p) {
+    margin: 0;
+  }
+
+  /* Accent list markers */
+  .profile-prose :global(ul > li)::marker {
+    color: var(--aw-color-accent);
+  }
+  .profile-prose :global(strong) {
+    color: var(--aw-color-secondary);
+  }
+  :global(.dark) .profile-prose :global(strong) {
+    color: var(--aw-color-primary);
+  }
+
+  /* Gradient divider */
+  .profile-prose :global(hr) {
+    border: 0;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, var(--aw-color-gold), transparent);
+    margin: 2.5rem 0;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .animate-fade {
+      animation: none;
+    }
+  }
+</style>

@@ -1,0 +1,141 @@
+---
+export interface TimelineItem {
+  phase?: string;
+  title: string;
+  years?: string;
+  summary?: string;
+  lesson?: string;
+}
+
+interface Props {
+  items: TimelineItem[];
+}
+
+const { items } = Astro.props;
+---
+
+<ol class="village-timeline" role="list">
+  {
+    items.map((item) => (
+      <li class="village-timeline__item">
+        <span class="village-timeline__dot" aria-hidden="true" />
+        <div class="village-timeline__body">
+          <div class="village-timeline__meta">
+            {item.phase && <span class="village-timeline__phase">{item.phase}</span>}
+            {item.years && <span class="village-timeline__years">{item.years}</span>}
+          </div>
+          <h3 class="village-timeline__title">{item.title}</h3>
+          {item.summary && <p class="village-timeline__summary">{item.summary}</p>}
+          {item.lesson && (
+            <p class="village-timeline__lesson">
+              <span class="village-timeline__lesson-label">Lesson</span>
+              {item.lesson}
+            </p>
+          )}
+        </div>
+      </li>
+    ))
+  }
+</ol>
+
+<style>
+  .village-timeline {
+    list-style: none;
+    margin: 1.5rem 0 0;
+    padding: 0;
+    position: relative;
+  }
+
+  /* the vertical spine */
+  .village-timeline::before {
+    content: '';
+    position: absolute;
+    left: 9px;
+    top: 6px;
+    bottom: 6px;
+    width: 2px;
+    background: linear-gradient(180deg, var(--aw-color-primary), var(--aw-color-gold), var(--aw-color-accent));
+    border-radius: 2px;
+  }
+
+  .village-timeline__item {
+    position: relative;
+    padding-left: 2.5rem;
+    padding-bottom: 2rem;
+    margin: 0;
+  }
+  .village-timeline__item:last-child {
+    padding-bottom: 0;
+  }
+
+  .village-timeline__dot {
+    position: absolute;
+    left: 0;
+    top: 4px;
+    width: 20px;
+    height: 20px;
+    border-radius: 9999px;
+    background: linear-gradient(135deg, var(--aw-color-primary), var(--aw-color-accent));
+    box-shadow: 0 0 0 4px var(--aw-color-bg-page), 0 0 0 6px rgb(74 107 60 / 25%);
+  }
+
+  .village-timeline__meta {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 0.6rem;
+    margin-bottom: 0.15rem;
+  }
+  .village-timeline__phase {
+    font-family: var(--aw-font-mono);
+    font-size: 0.95rem;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--aw-color-accent);
+    font-weight: 700;
+  }
+  .village-timeline__years {
+    font-family: var(--aw-font-mono);
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: var(--aw-color-text-default);
+  }
+
+  .village-timeline__title {
+    font-family: var(--aw-font-heading);
+    font-weight: 700;
+    font-size: 1.3rem;
+    line-height: 1.2;
+    margin: 0 0 0.4rem;
+    color: var(--aw-color-text-heading);
+  }
+
+  .village-timeline__summary {
+    margin: 0 0 0.6rem;
+    color: var(--aw-color-text-default);
+    font-weight: 400;
+    line-height: 1.6;
+  }
+
+  .village-timeline__lesson {
+    margin: 0;
+    font-size: 0.95rem;
+    font-weight: 400;
+    line-height: 1.5;
+    color: var(--aw-color-text-default);
+    background: linear-gradient(90deg, rgb(190 145 20 / 12%), transparent);
+    border-left: 3px solid var(--aw-color-gold);
+    border-radius: 0 0.5rem 0.5rem 0;
+    padding: 0.5rem 0.85rem;
+  }
+  .village-timeline__lesson-label {
+    display: inline-block;
+    font-family: var(--aw-font-mono);
+    font-size: 0.65rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    font-weight: 700;
+    color: var(--aw-color-gold);
+    margin-right: 0.55rem;
+  }
+</style>
