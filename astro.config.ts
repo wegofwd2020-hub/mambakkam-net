@@ -24,6 +24,11 @@ const whenExternalScripts = (items: (() => AstroIntegration) | (() => AstroInteg
 export default defineConfig({
   output: 'static',
 
+  redirects: {
+    // StudyBuddy Q was rebranded and spun out as Mentible (2026-06).
+    '/work/studybuddy-q': '/work/mentible',
+  },
+
   integrations: [
     tailwind({
       applyBaseStyles: false,
