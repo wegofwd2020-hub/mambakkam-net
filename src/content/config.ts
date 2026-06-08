@@ -171,7 +171,7 @@ const workCollection = defineCollection({
 
     featured: z.boolean().default(false),
     comingSoon: z.boolean().default(false),
-    listed: z.boolean().default(true), // set false to keep the detail page but hide it from the /work index
+    listed: z.boolean().default(true), // set false to keep the detail page but hide it from work listings (/work + per-person)
     publishDate: z.date().optional(),
     draft: z.boolean().optional(),
 
