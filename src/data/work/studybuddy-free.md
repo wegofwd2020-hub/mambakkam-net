@@ -13,6 +13,7 @@ tags:
   - Education
   - Claude
 featured: false
+listed: false
 publishDate: 2026-04-28
 draft: false
 ---

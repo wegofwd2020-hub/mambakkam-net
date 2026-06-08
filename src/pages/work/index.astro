@@ -3,7 +3,14 @@ import { getCollection } from 'astro:content';
 import Layout from '~/layouts/PageLayout.astro';
 import Hero from '~/components/widgets/Hero.astro';
 
-const allWork = await getCollection('work', ({ data }) => !data.draft);
+// This page is Siva Mambakkam's work. When another person is added to /people,
+// give them their own work page rather than listing everyone here.
+const SITE_OWNER = 'siva-m';
+
+const allWork = await getCollection(
+  'work',
+  ({ data }) => !data.draft && data.listed !== false && data.author === SITE_OWNER
+);
 const allPeople = await getCollection('people', ({ data }) => !data.draft);
 
 const peopleMap = Object.fromEntries(allPeople.map((p) => [p.id, p.data]));
