@@ -93,6 +93,7 @@ Within each table, rows are ordered roughly architecture-ref → plan → runboo
 
 | Doc                                                                                                           | Purpose                                                                                 |
 | ------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------- |
+| [DESIGN_people_work_pages](docs/DESIGN_people_work_pages.md)                                                  | mambakkam-net site: people/work content model, owner-scoped `/work`, per-person work pages, adding a person |
 | [ARCHITECTURE](../studybuddy-docs/ARCHITECTURE.md)                                                            | Top-level StudyBuddy architecture: services, data flow, boundaries                      |
 | [BACKEND_ARCHITECTURE](../studybuddy-docs/BACKEND_ARCHITECTURE.md)                                            | FastAPI + Celery + Postgres + Redis backend design                                      |
 | [AI_ARCHITECTURE](../studybuddy-docs/docs/AI_ARCHITECTURE.md)                                                 | AI/LLM integration architecture for the StudyBuddy platform                             |
