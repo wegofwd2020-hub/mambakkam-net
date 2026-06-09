@@ -4,6 +4,7 @@ excerpt: A production-grade enterprise AI tutoring system — combining LLMs, Re
 author: siva-m
 type: research
 status: in-progress
+image: ~/assets/images/work/ai-learning-platform-logo.svg
 tags:
   - Python
   - FastAPI

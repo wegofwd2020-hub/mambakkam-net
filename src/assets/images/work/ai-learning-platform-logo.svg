@@ -1,0 +1,32 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" role="img" aria-label="AI Learning Platform — knowledge graph">
+  <defs>
+    <linearGradient id="ai" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#4f46e5"/>
+      <stop offset="1" stop-color="#9333ea"/>
+    </linearGradient>
+  </defs>
+  <rect x="16" y="16" width="168" height="168" rx="40" fill="url(#ai)"/>
+  <g stroke="#ffffff" stroke-width="3.4" stroke-opacity="0.78" fill="none" stroke-linecap="round">
+    <!-- edges from hub to satellites -->
+    <path d="M100 98 L62 62"/>
+    <path d="M100 98 L138 62"/>
+    <path d="M100 98 L54 132"/>
+    <path d="M100 98 L146 132"/>
+    <path d="M100 98 L100 152"/>
+    <!-- a couple of inter-node edges (graph feel) -->
+    <path d="M62 62 L138 62"/>
+    <path d="M54 132 L100 152"/>
+    <path d="M146 132 L100 152"/>
+  </g>
+  <g fill="#ffffff">
+    <!-- satellite nodes -->
+    <circle cx="62" cy="62" r="8"/>
+    <circle cx="138" cy="62" r="8"/>
+    <circle cx="54" cy="132" r="7"/>
+    <circle cx="146" cy="132" r="7"/>
+    <circle cx="100" cy="152" r="7"/>
+    <!-- hub (insight) node with gradient core -->
+    <circle cx="100" cy="98" r="15"/>
+  </g>
+  <circle cx="100" cy="98" r="7.5" fill="url(#ai)"/>
+</svg>
