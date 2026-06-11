@@ -4,9 +4,10 @@ Portable status note so this work can be picked up on another machine. The techn
 detail lives in [`DEMO_mentible_lite.md`](./DEMO_mentible_lite.md); this file is the
 "where are we / what's next" snapshot.
 
-**Last updated:** 2026-06-11. **Status:** ✅ **go-live gate PASSED** (keyed end-to-end
-smoke test green); backend validated locally; **still NOT deployed to the VPS; not
-announced.**
+**Last updated:** 2026-06-11. **Status:** ✅ **DEPLOYED to the VPS** — backend live at
+`mambakkam.net/mentible-api/` (`/readyz` green through Cloudflare); frontend export
+published to `mambakkam.net/demos/mentible/` (`noindex`). **Reachable by link; NOT yet
+announced; noindex still on (flip to indexable when launching).**
 
 ## Goal
 
@@ -23,10 +24,10 @@ Path-on-apex (not a subdomain) was chosen deliberately to avoid an Origin Cert r
 
 ## PR status
 
-| Repo                   | PR  | Branch                               | Status                                                                                                      |
-| ---------------------- | --- | ------------------------------------ | ----------------------------------------------------------------------------------------------------------- |
-| mambakkam-net          | #39 | `feat/mentible-lite-demo-slot`       | ✅ **MERGED** 2026-06-11 — frontend slot + SPA fallback + host-nginx route + runbook                        |
-| StudyBuddy_SelfLearner | #88 | `feat/mentible-demo-backend-compose` | ⏳ **OPEN** — `docker-compose.demo.yml` (prod backend stack); now also carries the git Dockerfile fix below |
+| Repo                   | PR  | Branch                               | Status                                                                                                               |
+| ---------------------- | --- | ------------------------------------ | -------------------------------------------------------------------------------------------------------------------- |
+| mambakkam-net          | #39 | `feat/mentible-lite-demo-slot`       | ✅ **MERGED** 2026-06-11 — frontend slot + SPA fallback + host-nginx route + runbook                                 |
+| StudyBuddy_SelfLearner | #88 | `feat/mentible-demo-backend-compose` | ✅ **MERGED** 2026-06-11 — `docker-compose.demo.yml` (prod backend stack); also carries the git Dockerfile fix below |
 
 ## ✅ Go-live GATE — PASSED 2026-06-11
 
@@ -51,10 +52,19 @@ Without it the VPS `docker compose … up --build` in §Deploy fails identically
 ## Next steps (in order)
 
 1. ~~Smoke test (the gate).~~ ✅ done.
-2. **Merge PR #88** (includes the git Dockerfile fix — required for the build).
-3. VPS backend, host-nginx reload, frontend export, deploy — full commands in
-   `DEMO_mentible_lite.md` (§Deploy).
-4. Decide `noindex` → indexable, confirm live end-to-end on the VPS, **then** announce.
+2. ~~Merge PR #88 (includes the git Dockerfile fix — required for the build).~~ ✅ merged 2026-06-11.
+3. ~~VPS backend, host-nginx reload, frontend export, deploy.~~ ✅ done 2026-06-11.
+   Backend: source rsynced to `/opt/mentible` (private repo, no box GitHub creds — so
+   rsync, not `git clone`), fresh `BYOK_MASTER_KEY` in `/opt/mentible/.env.demo`,
+   `docker compose -f docker-compose.demo.yml up -d --build` → `mentible-api` +
+   `mentible-redis` healthy on `127.0.0.1:8092`. Host nginx: repo conf copied to
+   `/etc/nginx/sites-available/mambakkam.net.conf` (backup taken), `nginx -t` + reload.
+   Frontend: `expo export` (baseUrl `/demos/mentible`, `EXPO_PUBLIC_API_BASE_URL=
+https://mambakkam.net/mentible-api`) → published to the slot with `noindex` injected.
+4. **Decide `noindex` → indexable, confirm live end-to-end on the VPS, then announce.** ← **next**
+   `noindex` is currently ON. To make it indexable: remove the
+   `<meta name="robots" content="noindex">` from `public/demos/mentible/index.html`
+   (re-inject on every re-export) and redeploy.
 
 ## Cross-machine notes
 
