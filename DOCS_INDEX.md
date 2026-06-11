@@ -78,6 +78,7 @@ Within each table, rows are ordered roughly architecture-ref → plan → runboo
 | [DEMO_EMAIL_INVENTORY](../StudyBuddy_OnDemand/docs/DEMO_EMAIL_INVENTORY.md)  | StudyBuddy demo email-address inventory + routing                                                              |
 | [OPERATIONS](../studybuddy-docs/OPERATIONS.md)                               | StudyBuddy steady-state operations guide                                                                       |
 | [school-onboarding](../studybuddy-docs/docs/operations/school-onboarding.md) | Migration runbook: demo → production for a new school                                                          |
+| [SCHOOL_ONBOARDING_TEMPLATE](../StudyBuddy_OnDemand/onboarding_template/SCHOOL_ONBOARDING_TEMPLATE.md) | Intake form template for provisioning a new school's teacher and student accounts before go-live |
 
 ### 5. DNS, Email, Edge & Security
 
@@ -103,6 +104,11 @@ Within each table, rows are ordered roughly architecture-ref → plan → runboo
 | [WEB_FRONTEND_PLAN](../studybuddy-docs/WEB_FRONTEND_PLAN.md)                                                  | Next.js web app architecture + UI plan                                                  |
 | [mobile/ARCHITECTURE](../StudyBuddy_OnDemand/mobile/ARCHITECTURE.md)                                          | Mobile app architecture                                                                 |
 | [ADR_001](../StudyBuddy_OnDemand/docs/ADR_001_tenancy_and_subscription_model.md)                              | Architecture Decision Record #1 — tenancy + subscription model                          |
+| [ADR_004](../StudyBuddy_OnDemand/docs/ADR_004_authoring_studio_home_repo.md)                                  | Architecture Decision Record #4 — home repo for standalone authoring + reader (→ StudyBuddy Q, not OnDemand) |
+| [ADR_005](../StudyBuddy_OnDemand/docs/ADR_005_school_roles_and_uniqueness.md)                                  | Architecture Decision Record #5 — school_admin as teacher superset, email-only uniqueness, soft-delete + archive |
+| [ADR_006](../StudyBuddy_OnDemand/docs/ADR_006_multi_provider_llm.md)                                          | Architecture Decision Record #6 — multi-provider LLM pipeline design (formalises Epic 1, migration 0043) |
+| [CURRICULUM_ONBOARDING_FLOW](../StudyBuddy_OnDemand/docs/CURRICULUM_ONBOARDING_FLOW.md)                        | State-transition flow map for curriculum approval: who may push each step from "nothing" to student-visible |
+| [SCHOOL_USER_MANAGEMENT](../StudyBuddy_OnDemand/docs/SCHOOL_USER_MANAGEMENT.md)                                | Functional spec for school-tenant user lifecycle (Type-1 self-managed onboarding) + Administration menu IA |
 | [DESIGN_pipeline_classification](../StudyBuddy_OnDemand/docs/DESIGN_pipeline_classification.md)               | Why `pipeline/build_unit.py` is a structured LLM workflow, not an agent — framing guide |
 | [DESIGN_EXPLORATION_MULTI_PROVIDER_LLM](../StudyBuddy_OnDemand/docs/DESIGN_EXPLORATION_MULTI_PROVIDER_LLM.md) | Design exploration for multi-provider LLM (Anthropic + OpenAI + others)                 |
 | [DESIGN_HELP_SYSTEM](../StudyBuddy_OnDemand/docs/DESIGN_HELP_SYSTEM.md)                                       | In-app help system design                                                               |
@@ -110,6 +116,8 @@ Within each table, rows are ordered roughly architecture-ref → plan → runboo
 | [DESIGN_content_versioning_lifecycle](../StudyBuddy_OnDemand/docs/DESIGN_content_versioning_lifecycle.md)     | Content versioning lifecycle design                                                     |
 | [DESIGN_demo_request_access](../StudyBuddy_OnDemand/docs/DESIGN_demo_request_access.md)                       | Self-service request-access flow design (draft, not implemented)                        |
 | [DESIGN_demo_videos](../StudyBuddy_OnDemand/docs/DESIGN_demo_videos.md)                                       | Feature-videos design for demo site (draft, not implemented)                            |
+| [DESIGN_curriculum_mgmt_capability](../StudyBuddy_OnDemand/docs/DESIGN_curriculum_mgmt_capability.md)         | Design for the additive curriculum_mgmt capability (migration 0059, issue #358) — grant model + Administration menu |
+| [SPEC_curriculum_mgmt_capability](../StudyBuddy_OnDemand/docs/SPEC_curriculum_mgmt_capability.md)             | Implementation spec for curriculum_mgmt capability — endpoint contracts, guard helpers, test cases |
 
 ### 7. API & Services
 
@@ -140,6 +148,7 @@ Within each table, rows are ordered roughly architecture-ref → plan → runboo
 | [LOCAL_TESTING_GUIDE](../StudyBuddy_OnDemand/LOCAL_TESTING_GUIDE.md) | Local end-to-end testing guide                                                                                               |
 | [TESTING_VISUALS](../StudyBuddy_OnDemand/docs/TESTING_VISUALS.md)    | Visual-content testing approach                                                                                              |
 | [web/TEST_CASES](../StudyBuddy_OnDemand/web/docs/TEST_CASES.md)      | Web test-case catalog: 56 routes × 99 unit + 34 E2E tests across Public/Student/School/Admin portals (TC-ID table per route) |
+| [VISUAL_VALIDATION_GUIDE](../StudyBuddy_OnDemand/docs/feedback/VISUAL_VALIDATION_GUIDE.md) | Step-by-step visual confirmation checklist for the 2026-05-24 feedback-fix PRs (#372–#378) |
 
 ### 10. Content, Visuals & Curriculum Authoring
 
@@ -169,6 +178,7 @@ Within each table, rows are ordered roughly architecture-ref → plan → runboo
 | [BRANDING_I18N_DRAFT](../StudyBuddy_OnDemand/docs/BRANDING_I18N_DRAFT.md)                   | Branding + internationalization draft notes                         |
 | [BRANDING_TAGLINE_OPTIONS](../StudyBuddy_OnDemand/docs/BRANDING_TAGLINE_OPTIONS.md)         | Tagline option exploration (see Overlaps §3)                        |
 | [TaglineOptions (promos)](../studybuddy-docs/docs/promos/TaglineOptions.md)                 | Tagline options as presented to outside audiences (see Overlaps §3) |
+| [RESPONSIVE_TARGET](../StudyBuddy_OnDemand/docs/RESPONSIVE_TARGET.md)                       | Device and viewport targets for each StudyBuddy surface — prevents demo audiences testing on the wrong device |
 
 ### 12. Epics (status-driven, large work units)
 
@@ -209,6 +219,8 @@ Within each table, rows are ordered roughly architecture-ref → plan → runboo
 | [authentication_flows](../studybuddy-docs/market_research/authentication_flows.md)                         | Auth-flow patterns research                                                          |
 | [demo_feedback](../studybuddy-docs/market_research/demo_feedback.md)                                       | **Canonical** verbatim quotes + test cases from K-12 demo reviewers (see Overlap §4) |
 | [going_public_infrastructure_plan](../studybuddy-docs/market_research/going_public_infrastructure_plan.md) | Infrastructure plan for going-public scale                                           |
+| [FEEDBACK_TRACKER](../StudyBuddy_OnDemand/docs/feedback/FEEDBACK_TRACKER.md)               | Running log of external-reviewer and prospective-user feedback with grounded analysis and action items |
+| [STRATEGIC_FEEDBACK](../StudyBuddy_OnDemand/docs/feedback/STRATEGIC_FEEDBACK.md)           | Strategic market-direction feedback: product wedges, competitive positioning, and partnership leads |
 
 ### 14. Sales, Demo & Promo Material
 
@@ -227,6 +239,9 @@ Within each table, rows are ordered roughly architecture-ref → plan → runboo
 | [USER_STORY_PRODUCTION_GUIDE](../studybuddy-docs/docs/promos/USER_STORY_PRODUCTION_GUIDE.md)   | Production guide for user-story video content                                                                                             |
 | [USER_STORY_STORYBOARD](../studybuddy-docs/docs/promos/USER_STORY_STORYBOARD.md)               | User-story storyboard                                                                                                                     |
 | [ashish-larivee-meeting-prep](../studybuddy-docs/docs/promos/ashish-larivee-meeting-prep.md)   | Meeting-prep notes for Ashish Larivee                                                                                                     |
+| [PROMO_CANONICAL_OVERVIEW (StudyBuddy)](../StudyBuddy_OnDemand/docs/PROMO_CANONICAL_OVERVIEW.md) | Canonical StudyBuddy one-pager for pasting into promo drafting sessions (teacher emails, investor blurbs, landing copy) |
+| [PROMO_CANONICAL_OVERVIEW (mambakkam-net)](PROMO_CANONICAL_OVERVIEW.md)                         | Canonical mambakkam.net one-pager for diaspora outreach, visitor posts, and professional-services intro emails |
+| [WHATSAPP_DEMO_INVITE](../StudyBuddy_OnDemand/docs/outreach/WHATSAPP_DEMO_INVITE.md)           | Reusable WhatsApp demo invite template with WhatsApp-markdown formatting |
 
 ### 15. Reference
 
@@ -246,6 +261,7 @@ Within each table, rows are ordered roughly architecture-ref → plan → runboo
 | [README (studybuddy-docs)](../studybuddy-docs/README.md)           | studybuddy-docs intro                                 |
 | [README (StudyBuddy_OnDemand)](../StudyBuddy_OnDemand/README.md)   | StudyBuddy_OnDemand intro                             |
 | [README (web)](../StudyBuddy_OnDemand/web/README.md)               | Web sub-tree intro                                    |
+| [RESUME](../StudyBuddy_OnDemand/docs/RESUME.md)                    | Git-tracked work-resumption checkpoint — branch, last commit, open threads, next steps |
 
 ---
 
@@ -386,3 +402,4 @@ cron. Detail in the same README.
 | 2026-05-17 | 1.1     | Overlap cleanup pass: (§1) CX22→CX23 + studybuddy.app→usestudybuddy.com sweep applied to `StudyBuddy_OnDemand/docs/DEMO_LAUNCH_PLAN.md` so both launch-plan files are consistent; (§2) added "Owns / Adjacent in this hosting cluster" headers to 7 hosting docs across all 3 repos so each doc's scope is explicit at first read; (§4) reciprocal cross-link headers added to the two `DEMO_FEEDBACK` files marking `market_research/demo_feedback.md` as canonical for verbatim quotes. §3/§5/§6 left as-is (intentional splits, not duplications). |
 | 2026-05-18 | 1.2     | Cleared the 18 untracked-on-disk entries flagged by the 2026-05-17 drift run: added all 17 `docs/epics/EPIC_NN_*.md` files to §12 (one row per epic mirroring the `epics/INDEX.md` status board, EPIC_14 number unused) + added `web/docs/TEST_CASES.md` to §9. Indexed total: 111 → 129; drift report should now show 0 untracked.                                                                                                                                                                                                                   |
 | 2026-05-18 | 1.3     | Added `Plans/HOSTING_ACTIVITY_LOG.md` to §4 — new chronological log of operator actions on live infra (provisioning, deploys, incidents). First entry covers the 2026-05-18 cold-start launch including the §A Origin Cert mismatch and §B Universal SSL disable incidents. Will be appended to over time.                                                                                                                                                                                                                                            |
+| 2026-06-11 | 1.4     | Nightly drift sweep: +16 rows (§4: +1 SCHOOL_ONBOARDING_TEMPLATE; §6: +7 ADR_004/005/006 + CURRICULUM_ONBOARDING_FLOW + SCHOOL_USER_MANAGEMENT + DESIGN/SPEC_curriculum_mgmt_capability; §9: +1 VISUAL_VALIDATION_GUIDE; §11: +1 RESPONSIVE_TARGET; §13: +2 FEEDBACK_TRACKER + STRATEGIC_FEEDBACK; §14: +3 PROMO_CANONICAL_OVERVIEW ×2 + WHATSAPP_DEMO_INVITE; §15: +1 RESUME), -0 rows.                                                                                                                                                             |
