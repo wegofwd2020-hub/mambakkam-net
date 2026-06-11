@@ -212,11 +212,7 @@ const linkedinUrl = links?.linkedin;
                       class="inline-flex items-center gap-1.5 text-[0.7rem] font-mono font-semibold uppercase tracking-wider rounded-full px-2.5 py-1"
                       style={`color:${badge.token};background:color-mix(in srgb, ${badge.token} 14%, transparent);`}
                     >
-                      <span
-                        class="w-1.5 h-1.5 rounded-full"
-                        style={`background:${badge.token};`}
-                        aria-hidden="true"
-                      />
+                      <span class="w-1.5 h-1.5 rounded-full" style={`background:${badge.token};`} aria-hidden="true" />
                       {badge.label}
                     </span>
                   </div>
@@ -254,7 +250,9 @@ const linkedinUrl = links?.linkedin;
           <div class="rounded-2xl bg-page p-6 flex flex-col sm:flex-row items-center justify-between gap-4">
             <div>
               <p class="font-heading font-semibold text-gray-900 dark:text-white">Let’s build something that lasts.</p>
-              <p class="text-sm text-muted">Architecture, platform engineering, modernization, AI — or just trading ideas.</p>
+              <p class="text-sm text-muted">
+                Architecture, platform engineering, modernization, AI — or just trading ideas.
+              </p>
             </div>
             <div class="flex gap-3 shrink-0">
               {linkedinUrl && (

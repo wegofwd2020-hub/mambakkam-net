@@ -91,25 +91,25 @@ Within each table, rows are ordered roughly architecture-ref → plan → runboo
 
 ### 6. Architecture
 
-| Doc                                                                                                           | Purpose                                                                                 |
-| ------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------- |
+| Doc                                                                                                           | Purpose                                                                                                     |
+| ------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------- |
 | [DESIGN_people_work_pages](docs/DESIGN_people_work_pages.md)                                                  | mambakkam-net site: people/work content model, owner-scoped `/work`, per-person work pages, adding a person |
-| [ARCHITECTURE](../studybuddy-docs/ARCHITECTURE.md)                                                            | Top-level StudyBuddy architecture: services, data flow, boundaries                      |
-| [BACKEND_ARCHITECTURE](../studybuddy-docs/BACKEND_ARCHITECTURE.md)                                            | FastAPI + Celery + Postgres + Redis backend design                                      |
-| [AI_ARCHITECTURE](../studybuddy-docs/docs/AI_ARCHITECTURE.md)                                                 | AI/LLM integration architecture for the StudyBuddy platform                             |
-| [DOMAIN_MODEL](../studybuddy-docs/docs/DOMAIN_MODEL.md)                                                       | Core domain entities and their relationships                                            |
-| [EVENT_SCHEMAS](../studybuddy-docs/docs/EVENT_SCHEMAS.md)                                                     | Pub/sub event payload schemas                                                           |
-| [SERVICE_DEPENDENCIES](../studybuddy-docs/docs/SERVICE_DEPENDENCIES.md)                                       | Inter-service dependency map (what calls what)                                          |
-| [WEB_FRONTEND_PLAN](../studybuddy-docs/WEB_FRONTEND_PLAN.md)                                                  | Next.js web app architecture + UI plan                                                  |
-| [mobile/ARCHITECTURE](../StudyBuddy_OnDemand/mobile/ARCHITECTURE.md)                                          | Mobile app architecture                                                                 |
-| [ADR_001](../StudyBuddy_OnDemand/docs/ADR_001_tenancy_and_subscription_model.md)                              | Architecture Decision Record #1 — tenancy + subscription model                          |
-| [DESIGN_pipeline_classification](../StudyBuddy_OnDemand/docs/DESIGN_pipeline_classification.md)               | Why `pipeline/build_unit.py` is a structured LLM workflow, not an agent — framing guide |
-| [DESIGN_EXPLORATION_MULTI_PROVIDER_LLM](../StudyBuddy_OnDemand/docs/DESIGN_EXPLORATION_MULTI_PROVIDER_LLM.md) | Design exploration for multi-provider LLM (Anthropic + OpenAI + others)                 |
-| [DESIGN_HELP_SYSTEM](../StudyBuddy_OnDemand/docs/DESIGN_HELP_SYSTEM.md)                                       | In-app help system design                                                               |
-| [DESIGN_lesson_retention_service](../StudyBuddy_OnDemand/docs/DESIGN_lesson_retention_service.md)             | Lesson-retention service design                                                         |
-| [DESIGN_content_versioning_lifecycle](../StudyBuddy_OnDemand/docs/DESIGN_content_versioning_lifecycle.md)     | Content versioning lifecycle design                                                     |
-| [DESIGN_demo_request_access](../StudyBuddy_OnDemand/docs/DESIGN_demo_request_access.md)                       | Self-service request-access flow design (draft, not implemented)                        |
-| [DESIGN_demo_videos](../StudyBuddy_OnDemand/docs/DESIGN_demo_videos.md)                                       | Feature-videos design for demo site (draft, not implemented)                            |
+| [ARCHITECTURE](../studybuddy-docs/ARCHITECTURE.md)                                                            | Top-level StudyBuddy architecture: services, data flow, boundaries                                          |
+| [BACKEND_ARCHITECTURE](../studybuddy-docs/BACKEND_ARCHITECTURE.md)                                            | FastAPI + Celery + Postgres + Redis backend design                                                          |
+| [AI_ARCHITECTURE](../studybuddy-docs/docs/AI_ARCHITECTURE.md)                                                 | AI/LLM integration architecture for the StudyBuddy platform                                                 |
+| [DOMAIN_MODEL](../studybuddy-docs/docs/DOMAIN_MODEL.md)                                                       | Core domain entities and their relationships                                                                |
+| [EVENT_SCHEMAS](../studybuddy-docs/docs/EVENT_SCHEMAS.md)                                                     | Pub/sub event payload schemas                                                                               |
+| [SERVICE_DEPENDENCIES](../studybuddy-docs/docs/SERVICE_DEPENDENCIES.md)                                       | Inter-service dependency map (what calls what)                                                              |
+| [WEB_FRONTEND_PLAN](../studybuddy-docs/WEB_FRONTEND_PLAN.md)                                                  | Next.js web app architecture + UI plan                                                                      |
+| [mobile/ARCHITECTURE](../StudyBuddy_OnDemand/mobile/ARCHITECTURE.md)                                          | Mobile app architecture                                                                                     |
+| [ADR_001](../StudyBuddy_OnDemand/docs/ADR_001_tenancy_and_subscription_model.md)                              | Architecture Decision Record #1 — tenancy + subscription model                                              |
+| [DESIGN_pipeline_classification](../StudyBuddy_OnDemand/docs/DESIGN_pipeline_classification.md)               | Why `pipeline/build_unit.py` is a structured LLM workflow, not an agent — framing guide                     |
+| [DESIGN_EXPLORATION_MULTI_PROVIDER_LLM](../StudyBuddy_OnDemand/docs/DESIGN_EXPLORATION_MULTI_PROVIDER_LLM.md) | Design exploration for multi-provider LLM (Anthropic + OpenAI + others)                                     |
+| [DESIGN_HELP_SYSTEM](../StudyBuddy_OnDemand/docs/DESIGN_HELP_SYSTEM.md)                                       | In-app help system design                                                                                   |
+| [DESIGN_lesson_retention_service](../StudyBuddy_OnDemand/docs/DESIGN_lesson_retention_service.md)             | Lesson-retention service design                                                                             |
+| [DESIGN_content_versioning_lifecycle](../StudyBuddy_OnDemand/docs/DESIGN_content_versioning_lifecycle.md)     | Content versioning lifecycle design                                                                         |
+| [DESIGN_demo_request_access](../StudyBuddy_OnDemand/docs/DESIGN_demo_request_access.md)                       | Self-service request-access flow design (draft, not implemented)                                            |
+| [DESIGN_demo_videos](../StudyBuddy_OnDemand/docs/DESIGN_demo_videos.md)                                       | Feature-videos design for demo site (draft, not implemented)                                                |
 
 ### 7. API & Services
 
