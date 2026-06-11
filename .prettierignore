@@ -2,3 +2,7 @@ dist
 node_modules
 .github
 .changeset
+
+# Dropped-in product demo builds (e.g. Mentible Expo-web export) are bundled,
+# minified artifacts — never hand-format them. See docs/DEMO_mentible_lite.md.
+public/demos
