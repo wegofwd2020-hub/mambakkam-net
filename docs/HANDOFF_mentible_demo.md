@@ -23,9 +23,9 @@ Path-on-apex (not a subdomain) was chosen deliberately to avoid an Origin Cert r
 
 ## PR status
 
-| Repo                   | PR  | Branch                               | Status                                                                   |
-| ---------------------- | --- | ------------------------------------ | ------------------------------------------------------------------------ |
-| mambakkam-net          | #39 | `feat/mentible-lite-demo-slot`       | ✅ **MERGED** 2026-06-11 — frontend slot + SPA fallback + host-nginx route + runbook |
+| Repo                   | PR  | Branch                               | Status                                                                                                      |
+| ---------------------- | --- | ------------------------------------ | ----------------------------------------------------------------------------------------------------------- |
+| mambakkam-net          | #39 | `feat/mentible-lite-demo-slot`       | ✅ **MERGED** 2026-06-11 — frontend slot + SPA fallback + host-nginx route + runbook                        |
 | StudyBuddy_SelfLearner | #88 | `feat/mentible-demo-backend-compose` | ⏳ **OPEN** — `docker-compose.demo.yml` (prod backend stack); now also carries the git Dockerfile fix below |
 
 ## ✅ Go-live GATE — PASSED 2026-06-11
