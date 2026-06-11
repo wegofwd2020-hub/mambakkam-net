@@ -37,17 +37,17 @@ session #2 built on top.
 
 **Bugs found + fixed today (chronological, all committed + auto-deployed):**
 
-| # | Symptom | Root cause | Fix |
-| - | ------- | ---------- | --- |
-| 1 | Catalog page blank for new teachers | `school_adopted_curricula` had no rows | `7b579ec` — auto-adopt G11 Science in `verify_test_run` |
-| 2 | "Failed to load units" on a clicked curriculum | `curriculum_units.title` was NULL for 6 of 7 platform curricula (yesterday's `recover_curriculum` workaround never populated titles) | One-shot backfill from `data/grade*.json` → 108 titles |
-| 3 | Curriculum Catalog → has_content cell crashed Pydantic | SQL returned NULL when no `content_subject_versions` row existed | `COALESCE(... > 0, false)` |
-| 4 | Curriculum Content page empty for the demo teacher | `c.is_default = false` on every platform curriculum | one-shot UPDATE + safeguard in `preimport_demo_units.py` |
-| 5 | Sign Out → "Not Found" | nginx routed `/api/auth/logout` to FastAPI which only has `/api/v1/auth/logout` | `71f96d6` — split nginx into `/api/v1/` (backend) and `/api/` (Next.js) |
-| 6 | Sign Out → redirect to `http://localhost:3000/` | `NEXT_PUBLIC_APP_URL` unset on the web container | `02b25ec` — set to `https://demo.usestudybuddy.com` |
-| 7 | Subjects page → "Could not load curriculum" (intermittent) | Demo student JWT TTL = 15 min (too short for a demo walkthrough) | `1d986fc` — bump to 240 min in `.env.demo` |
-| 8 | Subjects page → 404 (persistent) | `curriculum_units` rows only exist on the OOB curriculum, but resolver returned the school's fork | `d93e9ee` — follow `source_curriculum_id` for the units lookup |
-| 9 | Biology lessons → "Could not load lessons" (other subjects worked) | Manual `json.dumps(body)` paired with the asyncpg codec's own `json.dumps` → bodies stored as jsonb _string_ instead of _object_ | `7dec328` — drop manual `json.dumps` at all 7 jsonb write sites; one-shot UPDATE to repair 18 already-bad rows |
+| #   | Symptom                                                            | Root cause                                                                                                                           | Fix                                                                                                            |
+| --- | ------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------ | -------------------------------------------------------------------------------------------------------------- |
+| 1   | Catalog page blank for new teachers                                | `school_adopted_curricula` had no rows                                                                                               | `7b579ec` — auto-adopt G11 Science in `verify_test_run`                                                        |
+| 2   | "Failed to load units" on a clicked curriculum                     | `curriculum_units.title` was NULL for 6 of 7 platform curricula (yesterday's `recover_curriculum` workaround never populated titles) | One-shot backfill from `data/grade*.json` → 108 titles                                                         |
+| 3   | Curriculum Catalog → has_content cell crashed Pydantic             | SQL returned NULL when no `content_subject_versions` row existed                                                                     | `COALESCE(... > 0, false)`                                                                                     |
+| 4   | Curriculum Content page empty for the demo teacher                 | `c.is_default = false` on every platform curriculum                                                                                  | one-shot UPDATE + safeguard in `preimport_demo_units.py`                                                       |
+| 5   | Sign Out → "Not Found"                                             | nginx routed `/api/auth/logout` to FastAPI which only has `/api/v1/auth/logout`                                                      | `71f96d6` — split nginx into `/api/v1/` (backend) and `/api/` (Next.js)                                        |
+| 6   | Sign Out → redirect to `http://localhost:3000/`                    | `NEXT_PUBLIC_APP_URL` unset on the web container                                                                                     | `02b25ec` — set to `https://demo.usestudybuddy.com`                                                            |
+| 7   | Subjects page → "Could not load curriculum" (intermittent)         | Demo student JWT TTL = 15 min (too short for a demo walkthrough)                                                                     | `1d986fc` — bump to 240 min in `.env.demo`                                                                     |
+| 8   | Subjects page → 404 (persistent)                                   | `curriculum_units` rows only exist on the OOB curriculum, but resolver returned the school's fork                                    | `d93e9ee` — follow `source_curriculum_id` for the units lookup                                                 |
+| 9   | Biology lessons → "Could not load lessons" (other subjects worked) | Manual `json.dumps(body)` paired with the asyncpg codec's own `json.dumps` → bodies stored as jsonb _string_ instead of _object_     | `7dec328` — drop manual `json.dumps` at all 7 jsonb write sites; one-shot UPDATE to repair 18 already-bad rows |
 
 **Other ground-clearing landed today:**
 
@@ -61,7 +61,7 @@ session #2 built on top.
 **Account state at end of session:**
 
 - 2 active demo accounts (1 walked the full demo: `callmds+student@gmail.com`
-  + `callmds+teacher@gmail.com`).
+  - `callmds+teacher@gmail.com`).
 - All 29 G11 Science units imported, approved, published.
 - 18 previously double-encoded `unit_content_overrides` body rows repaired.
 
@@ -214,14 +214,12 @@ Commit: `9faedcc` → rebased onto remote nightly bot → `63f7bdd` pushed.
 
 - The §10 "G8 catalog works as a reference" workaround note is now known
   to have been inaccurate — that endpoint was equally broken at the
-  serialization layer. Yesterday's fixes A-D (symlink, seed_content_db,
+  serialization layer. Yesterday's fixes A-D (symlink, seed*content_db,
   recover_curriculum sed-patch, status=published UPDATE) were still all
-  real and necessary to make the _data_ correct; they just couldn't fix
+  real and necessary to make the \_data* correct; they just couldn't fix
   the symptom because the symptom is purely a serialization bug.
 
 ---
-
-
 
 **Operator:** Siva Mambakkam
 **Duration:** ~4h (12:00 – 16:20 EDT / 16:00 – 20:20 UTC)

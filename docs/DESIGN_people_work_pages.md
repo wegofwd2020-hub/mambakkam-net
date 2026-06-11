@@ -2,7 +2,7 @@
 
 > **Repo:** `mambakkam-net` · **Status:** implemented (2026-06-08) · **Owner:** Siva Mambakkam
 >
-> How the site models *people* and their *work*, why `/work` is owner-scoped,
+> How the site models _people_ and their _work_, why `/work` is owner-scoped,
 > and how to add a second person with **zero code changes**. Captures the
 > changes shipped 2026-06-08 and the one open proposal still on the table.
 
@@ -15,7 +15,7 @@
 
 1. Show **only the owner's curated projects** on the flagship `/work` page —
    not every project in the repo, and not (yet) other people's work.
-2. Give **each person** on `/people` their own profile *and* a dedicated work
+2. Give **each person** on `/people` their own profile _and_ a dedicated work
    listing, so adding a second maker never pollutes the owner's page or
    produces broken cross-links.
 
@@ -31,11 +31,13 @@ Two Astro content collections drive everything (schemas in
 `src/content/config.ts`):
 
 ### `people` — `src/data/people/*.mdx`
+
 One file per person. The **filename is the slug** (`siva-m.mdx` → `siva-m`).
 Key fields: `name`, `nameTamil?`, `role`, `bio`, `image?`, `stats?`, `links?`,
 `featured`, `draft?`. Body (MDX) renders as the profile prose.
 
 ### `work` — `src/data/work/*.md`
+
 One file per project. The **filename is the slug** (`mentible.md` → `mentible`).
 Relevant fields:
 
@@ -46,7 +48,7 @@ Relevant fields:
 | `status`     | `live` \| `in-progress` \| `archived`                                                     |
 | `featured`   | Sorts to the front of listings.                                                           |
 | `comingSoon` | Renders a "Coming soon" card with **no detail-page link** (and no detail page is built).  |
-| `listed`     | **Defaults `true`.** Set `false` to hide from *all work listings* while keeping its page. |
+| `listed`     | **Defaults `true`.** Set `false` to hide from _all work listings_ while keeping its page. |
 | `draft`      | Excludes the project entirely (no listing, no page).                                      |
 
 **The `listed` flag** is the curation lever. `listed: false` removes a project
@@ -60,13 +62,13 @@ directly linkable (`/work/[slug].astro`'s `getStaticPaths` does not filter on
 
 ## 3. Route map
 
-| Route                   | Source                          | Shows                                                                       |
-| ----------------------- | ------------------------------- | -------------------------------------------------------------------------- |
-| `/work`                 | `pages/work/index.astro`        | **Owner-scoped** product showcase — `author === SITE_OWNER` + `listed`.    |
-| `/work/[slug]`          | `pages/work/[slug].astro`       | A single project's detail page. Built for all non-draft, non-comingSoon.   |
-| `/people`               | `pages/people/index.astro`      | All non-draft people.                                                       |
-| `/people/[slug]`        | `pages/people/[slug].astro`     | A person's profile + an **embedded** Work section (their listed work).      |
-| `/people/[slug]/work`   | `pages/people/[slug]/work.astro`| A person's **dedicated** work listing — `author === slug` + `listed`.       |
+| Route                 | Source                           | Shows                                                                    |
+| --------------------- | -------------------------------- | ------------------------------------------------------------------------ |
+| `/work`               | `pages/work/index.astro`         | **Owner-scoped** product showcase — `author === SITE_OWNER` + `listed`.  |
+| `/work/[slug]`        | `pages/work/[slug].astro`        | A single project's detail page. Built for all non-draft, non-comingSoon. |
+| `/people`             | `pages/people/index.astro`       | All non-draft people.                                                    |
+| `/people/[slug]`      | `pages/people/[slug].astro`      | A person's profile + an **embedded** Work section (their listed work).   |
+| `/people/[slug]/work` | `pages/people/[slug]/work.astro` | A person's **dedicated** work listing — `author === slug` + `listed`.    |
 
 `SITE_OWNER` is a constant (`'siva-m'`) in `pages/work/index.astro`. That is the
 single line that makes `/work` the owner's page rather than everyone's.
@@ -107,6 +109,7 @@ Three commits on `main`, all deployed and smoke-tested live:
 2. Add their projects under `src/data/work/` with `author: <their-slug>`.
 
 They automatically get:
+
 - a profile at `/people/<their-slug>`,
 - a dedicated work page at `/people/<their-slug>/work`,
 - correct scoping everywhere (their work never appears on `/work`, the owner's
@@ -120,7 +123,7 @@ No edits to routes, schemas, or `SITE_OWNER` required.
 
 **Decision deferred.** Today `/work` (the top-nav "Products" page) is
 intentionally owner-only via `SITE_OWNER`. Once a second maker exists, the owner
-may instead want `/work` to be a *village-wide* product showcase aggregating
+may instead want `/work` to be a _village-wide_ product showcase aggregating
 every maker, with per-person pages (`/people/[slug]/work`) remaining the
 individual views.
 

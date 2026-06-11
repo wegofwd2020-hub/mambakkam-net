@@ -10,8 +10,8 @@
 >
 > **How to use.** Open a Claude.ai Project (or a new conversation),
 > paste this whole doc as the first message, then say what you want:
-> *"Draft a 200-word LinkedIn post inviting diaspora to visit the village
-> the next time they're in Tamil Nadu."* Iterate from there. Update this
+> _"Draft a 200-word LinkedIn post inviting diaspora to visit the village
+> the next time they're in Tamil Nadu."_ Iterate from there. Update this
 > doc — not your individual chats — when the village or the site
 > evolves.
 >
@@ -23,11 +23,11 @@
 
 > **A farming village in Tamil Nadu — and its corner of the web.**
 
-*Site tagline (live on the homepage):* Mambakkam · Tamil Nadu · India
+_Site tagline (live on the homepage):_ Mambakkam · Tamil Nadu · India
 
-*Homepage Tamil headline:* மாம்பாக்கம்
+_Homepage Tamil headline:_ மாம்பாக்கம்
 
-*Homepage subtitle:* A farming village in Kalavai Taluk, near the Palar river — rooted in paddy fields, groundnut, and sugarcane, and home to its temples, its land, and its people.
+_Homepage subtitle:_ A farming village in Kalavai Taluk, near the Palar river — rooted in paddy fields, groundnut, and sugarcane, and home to its temples, its land, and its people.
 
 ---
 
@@ -35,7 +35,7 @@
 
 mambakkam.net is the web presence of **Mambakkam village** (Tamil: மாம்பாக்கம்) — a farming community in Kalavai Taluk, Ranipet District, Tamil Nadu, India. The site is village-first: it celebrates the village's land, temples, people, and history; only one chapter is dedicated to the professional work of one person from the village.
 
-The site is a personal labour by Sivakumar Mambakkam (Enterprise Architect, distributed-systems / cloud-platforms) to give the village a place on the internet that is **theirs** — not an aggregator listing, not a Wikipedia stub, not a tourism portal. A space the diaspora can point at and say *"this is where we are from."*
+The site is a personal labour by Sivakumar Mambakkam (Enterprise Architect, distributed-systems / cloud-platforms) to give the village a place on the internet that is **theirs** — not an aggregator listing, not a Wikipedia stub, not a tourism portal. A space the diaspora can point at and say _"this is where we are from."_
 
 It is not a business. It does not collect emails, sell subscriptions, or run ads. It exists because village identity is worth preserving in writing while there are still people who remember.
 
@@ -45,15 +45,15 @@ It is not a business. It does not collect emails, sell subscriptions, or run ads
 
 This is the load-bearing decision and it shapes every page.
 
-| What it is | What it is NOT |
-|---|---|
-| A community website for Mambakkam village | A personal portfolio site with "village" as a flavour |
-| Village identity (land, temples, people, history) leads | Software products + enterprise architecture lead |
-| The Work / Services chapter is small and downstream | The Work / Services chapter is the homepage |
-| Tamil + English mixed where the village name appears | English-only with optional translation |
-| Diaspora and community first; clients distant second | Clients first; community as proof-of-authenticity |
+| What it is                                              | What it is NOT                                        |
+| ------------------------------------------------------- | ----------------------------------------------------- |
+| A community website for Mambakkam village               | A personal portfolio site with "village" as a flavour |
+| Village identity (land, temples, people, history) leads | Software products + enterprise architecture lead      |
+| The Work / Services chapter is small and downstream     | The Work / Services chapter is the homepage           |
+| Tamil + English mixed where the village name appears    | English-only with optional translation                |
+| Diaspora and community first; clients distant second    | Clients first; community as proof-of-authenticity     |
 
-If someone visits the homepage and walks away thinking *"this is a village"* — the framing works. If they walk away thinking *"this is a software engineer with a village hobby"* — the framing has slipped. The hero image (a village photo, not a Siva headshot), the Tamil headline, the temple-shrine landmarks at the top of the menu, all reinforce the village-first frame.
+If someone visits the homepage and walks away thinking _"this is a village"_ — the framing works. If they walk away thinking _"this is a software engineer with a village hobby"_ — the framing has slipped. The hero image (a village photo, not a Siva headshot), the Tamil headline, the temple-shrine landmarks at the top of the menu, all reinforce the village-first frame.
 
 ---
 
@@ -88,23 +88,23 @@ If someone visits the homepage and walks away thinking *"this is a village"* —
 
 ## Verified village facts (use these EXACTLY — they were triple-checked 2026-05-08)
 
-| Field | Value |
-|---|---|
-| Village name | Mambakkam (மாம்பாக்கம்) |
-| Pincode | 632318 |
-| Taluk | **Kalavai Taluk** (not Walajah — older sources are wrong) |
-| District | Ranipet (carved from Vellore District in 2019) |
-| State | Tamil Nadu, India |
-| Postal head office | Valapandal |
-| Approximate coordinates | 12.6779°N, 79.3964°E |
-| Distance from Vellore | ~45 km east |
-| Local body | Mambakkam Gram Panchayat |
-| Population (2009 census-era — stale) | ~2,561 |
-| Households (2009 census-era) | ~638 |
-| Area | ~566 hectares |
-| Primary crops | paddy (rice), groundnut, sugarcane |
-| Nearby river | Palar |
-| Nearest larger town | Kalavai |
+| Field                                | Value                                                     |
+| ------------------------------------ | --------------------------------------------------------- |
+| Village name                         | Mambakkam (மாம்பாக்கம்)                                   |
+| Pincode                              | 632318                                                    |
+| Taluk                                | **Kalavai Taluk** (not Walajah — older sources are wrong) |
+| District                             | Ranipet (carved from Vellore District in 2019)            |
+| State                                | Tamil Nadu, India                                         |
+| Postal head office                   | Valapandal                                                |
+| Approximate coordinates              | 12.6779°N, 79.3964°E                                      |
+| Distance from Vellore                | ~45 km east                                               |
+| Local body                           | Mambakkam Gram Panchayat                                  |
+| Population (2009 census-era — stale) | ~2,561                                                    |
+| Households (2009 census-era)         | ~638                                                      |
+| Area                                 | ~566 hectares                                             |
+| Primary crops                        | paddy (rice), groundnut, sugarcane                        |
+| Nearby river                         | Palar                                                     |
+| Nearest larger town                  | Kalavai                                                   |
 
 If a draft references something not in this table (a population number, a specific temple festival date, a school count), **double-check the underlying source before publishing.** The web is full of stale data about small villages; treat anything outside this table as unverified.
 
@@ -165,19 +165,19 @@ If a piece can't honour the village-first framing (e.g. a corporate RFP response
 
 Different audiences need different framings of the same site. When asking Claude.ai for promo material, **always specify the audience**:
 
-| Audience | Lead with | Bury / drop |
-|---|---|---|
-| Diaspora | "Your village now has a corner of the web" | Engineering bio, service offerings |
-| Heritage / cultural visitor | "Four temples, the Palar river basin, ~45 km east of Vellore" | The Work / Services chapter entirely |
-| Community member / future contributor | "Send us photos; we'll add them to the People collection" | Anything sounding commercial |
-| Tamil-language press | Tamil headline lead, then English context | Western tech-stack name-drops |
-| Indian English-language press | Village heritage angle + the "village-first not personal-portfolio" framing | Tone-down the engineer chapter — it dilutes the heritage story |
-| Recruiter / hiring manager | Enterprise Architect with X years on distributed systems, link to `/services` | Long village pages — point at LinkedIn instead |
-| Potential professional client | Specific service (Enterprise Architecture / Distributed Systems / Cloud Platforms), link to `/services` then the homepage as proof of depth | Long village pages unless they ask |
+| Audience                              | Lead with                                                                                                                                   | Bury / drop                                                    |
+| ------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------- |
+| Diaspora                              | "Your village now has a corner of the web"                                                                                                  | Engineering bio, service offerings                             |
+| Heritage / cultural visitor           | "Four temples, the Palar river basin, ~45 km east of Vellore"                                                                               | The Work / Services chapter entirely                           |
+| Community member / future contributor | "Send us photos; we'll add them to the People collection"                                                                                   | Anything sounding commercial                                   |
+| Tamil-language press                  | Tamil headline lead, then English context                                                                                                   | Western tech-stack name-drops                                  |
+| Indian English-language press         | Village heritage angle + the "village-first not personal-portfolio" framing                                                                 | Tone-down the engineer chapter — it dilutes the heritage story |
+| Recruiter / hiring manager            | Enterprise Architect with X years on distributed systems, link to `/services`                                                               | Long village pages — point at LinkedIn instead                 |
+| Potential professional client         | Specific service (Enterprise Architecture / Distributed Systems / Cloud Platforms), link to `/services` then the homepage as proof of depth | Long village pages unless they ask                             |
 
 ---
 
-*This doc is updated as the village or the site evolves. If you find
+_This doc is updated as the village or the site evolves. If you find
 yourself correcting Claude.ai with the same fact twice across different
 chats, that fact belongs here. The next promo-prompt iteration should
-be one step shorter, not one fact longer.*
+be one step shorter, not one fact longer._
