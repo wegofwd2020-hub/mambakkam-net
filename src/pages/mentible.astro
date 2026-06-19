@@ -122,8 +122,9 @@ const icon = (name: string) =>
             <span>AI Book Authoring</span>
             <span>For Self-Learners</span>
           </p>
-          <p class="mtb-name">Mentible</p>
         </div>
+
+        <p class="mtb-name">Mentible</p>
 
         <h1 class="mtb-title">
           Author <span class="mtb-grad">Yourself.</span>
@@ -376,9 +377,9 @@ const icon = (name: string) =>
     }
   }
 
-  /* centered brand lockup: logo · name · tagline */
+  /* logo + tagline as a left-aligned lockup at the top-left of the hero */
   .mtb-brand {
-    text-align: center;
+    text-align: left;
   }
   .mtb-logo-float {
     display: block;
@@ -423,7 +424,7 @@ const icon = (name: string) =>
   }
 
   .mtb-name {
-    margin: 0.55rem 0 0;
+    margin: 1.1rem 0 0;
     font-family: var(--aw-font-sans, sans-serif);
     font-weight: 800;
     letter-spacing: -0.01em;
