@@ -1,0 +1,774 @@
+---
+import PageLayout from '~/layouts/PageLayout.astro';
+import Image from '~/components/common/Image.astro';
+import mentibleLogo from '~/assets/images/work/mentible-logo.png';
+
+const metadata = {
+  title: 'Mentible — Author Yourself',
+  description:
+    'Mentible turns what you want to learn into a real, polished book — outline it, generate it chapter by chapter, and compile a beautiful EPUB or PDF. Try the live demo or download the Android app.',
+};
+
+const DEMO_URL = '/demos/mentible/';
+const APK_URL =
+  'https://github.com/wegofwd2020-hub/mambakkam-net/releases/download/mentible-demo-2026.06/Mentible-DEMO.apk';
+
+const steps = [
+  {
+    n: '01',
+    title: 'Outline',
+    body: 'Describe a subject and Mentible structures it into a real table of contents — parts, chapters, topics. Reshape it until it is exactly your book.',
+  },
+  {
+    n: '02',
+    title: 'Generate',
+    body: 'Fill it in topic by topic. Each chapter comes back richly written, with math, diagrams and worked examples — scoped to your level and goals.',
+  },
+  {
+    n: '03',
+    title: 'Compile',
+    body: 'Press publish and Mentible compiles a polished EPUB3 / PDF with a real cover and theme. The finished book is yours — read it offline, keep it, share it.',
+  },
+];
+
+const features = [
+  {
+    title: 'Books, not chat',
+    body: 'No endless chatbot, no catalogue of canned courses. One focused loop: outline → generate → compile a real artifact.',
+    icon: 'book',
+  },
+  {
+    title: 'Provider-agnostic',
+    body: 'Works across Anthropic and the OpenAI-compatible providers — OpenAI, DeepSeek, Qwen and more. The model is the commodity; the scoping is the craft.',
+    icon: 'switch',
+  },
+  {
+    title: 'Your keys, your way',
+    body: 'A managed subscription so you just start writing, or bring your own API key and pay the provider directly. Hybrid by design.',
+    icon: 'key',
+  },
+  {
+    title: 'Real artifacts',
+    body: 'Every book compiles to EPUB3 and PDF with covers, a theme system and a draft → published lifecycle. The book is the product.',
+    icon: 'sparkles',
+  },
+  {
+    title: 'Beautiful by default',
+    body: 'KaTeX math, Mermaid diagrams, tables and accessible typesetting render automatically — no formatting busywork.',
+    icon: 'wand',
+  },
+  {
+    title: 'Built for adults',
+    body: 'Self-paced learning for working professionals and the endlessly curious. Go deep, on your own terms — no fluff, no school.',
+    icon: 'compass',
+  },
+];
+
+const demoBooks = [
+  {
+    title: 'Claude Certified Architect',
+    sub: 'Foundations · 30 lessons',
+    from: '#6366f1',
+    to: '#a855f7',
+  },
+  {
+    title: 'Product Sense & AI',
+    sub: 'Editorial · 15 lessons',
+    from: '#f59e0b',
+    to: '#ec4899',
+  },
+];
+
+// Inline line-icon set (currentColor, no external icon dependency).
+const ICONS: Record<string, string> = {
+  book: '<path d="M4 5a2 2 0 0 1 2-2h13v16H6a2 2 0 0 0-2 2z"/><path d="M19 17H6a2 2 0 0 0-2 2"/>',
+  switch: '<path d="M3 8h13l-3-3m3 3-3 3"/><path d="M21 16H8l3-3m-3 3 3 3"/>',
+  key: '<circle cx="8" cy="8" r="4"/><path d="m11 11 9 9"/><path d="m16 16 2-2"/><path d="m19 19 2-2"/>',
+  sparkles:
+    '<path d="M12 3l1.8 4.6L18 9.4l-4.2 1.8L12 16l-1.8-4.8L6 9.4l4.2-1.8z"/><path d="M19 14l.9 2.1L22 17l-2.1.9L19 20l-.9-2.1L16 17l2.1-.9z"/>',
+  wand: '<path d="M15 4V2M15 10V8M11 6H9M21 6h-2"/><path d="m13 8 8 8-2 2-8-8z"/><path d="M3 21l7-7"/>',
+  compass: '<circle cx="12" cy="12" r="9"/><path d="m16 8-2.5 5.5L8 16l2.5-5.5z"/>',
+};
+
+const icon = (name: string) =>
+  `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${ICONS[name] ?? ''}</svg>`;
+---
+
+<PageLayout metadata={metadata}>
+  <div class="mtb">
+    <!-- ============================ HERO ============================ -->
+    <section class="mtb-hero">
+      <div class="mtb-aurora" aria-hidden="true">
+        <span class="blob b1"></span>
+        <span class="blob b2"></span>
+        <span class="blob b3"></span>
+      </div>
+
+      <div class="mtb-wrap mtb-hero-inner">
+        <div class="mtb-logo-float">
+          <Image src={mentibleLogo} alt="Mentible logo" width={96} height={96} class="mtb-logo" loading="eager" />
+        </div>
+
+        <span class="mtb-eyebrow">✦ AI book authoring · for self-learners</span>
+
+        <h1 class="mtb-title">
+          Author <span class="mtb-grad">Yourself.</span>
+        </h1>
+
+        <p class="mtb-lede">
+          Mentible turns what you want to learn into a <strong>real, polished book</strong>. Outline it, generate it
+          chapter by chapter, and compile a beautiful EPUB or PDF — yours to keep, read offline, and share.
+        </p>
+
+        <div class="mtb-cta-row">
+          <a class="mtb-btn mtb-btn-primary" href={DEMO_URL}>
+            Try the live demo
+            <svg
+              viewBox="0 0 24 24"
+              width="20"
+              height="20"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2.2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"></path></svg
+            >
+          </a>
+          <a class="mtb-btn mtb-btn-ghost" href={APK_URL}>
+            <svg
+              viewBox="0 0 24 24"
+              width="20"
+              height="20"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2.2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              aria-hidden="true"><path d="M12 3v12m0 0l-4-4m4 4l4-4M5 21h14"></path></svg
+            >
+            Download Android app
+          </a>
+        </div>
+
+        <p class="mtb-trust">Free to explore · No sign-up · Two complete books inside the app</p>
+      </div>
+    </section>
+
+    <!-- ========================= HOW IT WORKS ========================= -->
+    <section class="mtb-section">
+      <div class="mtb-wrap">
+        <p class="mtb-kicker">How it works</p>
+        <h2 class="mtb-h2">From a spark of curiosity to a finished book</h2>
+        <p class="mtb-sub">Three deliberate steps — that's the whole product.</p>
+
+        <div class="mtb-steps">
+          {
+            steps.map((s) => (
+              <article class="mtb-step">
+                <span class="mtb-step-n">{s.n}</span>
+                <h3 class="mtb-step-t">{s.title}</h3>
+                <p class="mtb-step-b">{s.body}</p>
+              </article>
+            ))
+          }
+        </div>
+      </div>
+    </section>
+
+    <!-- =========================== FEATURES =========================== -->
+    <section class="mtb-section mtb-section-tint">
+      <div class="mtb-wrap">
+        <p class="mtb-kicker">Why Mentible</p>
+        <h2 class="mtb-h2">Opinionated, on purpose</h2>
+        <p class="mtb-sub">The opinion is the product. Here's what that buys you.</p>
+
+        <div class="mtb-grid">
+          {
+            features.map((f) => (
+              <article class="mtb-card">
+                <span class="mtb-ico" set:html={icon(f.icon)} />
+                <h3 class="mtb-card-t">{f.title}</h3>
+                <p class="mtb-card-b">{f.body}</p>
+              </article>
+            ))
+          }
+        </div>
+      </div>
+    </section>
+
+    <!-- ======================= WHAT'S IN THE DEMO ======================= -->
+    <section class="mtb-section">
+      <div class="mtb-wrap">
+        <p class="mtb-kicker">Inside the demo</p>
+        <h2 class="mtb-h2">Two complete books, ready to read</h2>
+        <p class="mtb-sub">
+          The demo build is reading-first and fully offline — explore the experience before you author your own.
+        </p>
+
+        <div class="mtb-books">
+          {
+            demoBooks.map((b) => (
+              <div class="mtb-book" style={`--c1:${b.from};--c2:${b.to}`}>
+                <div class="mtb-book-spine" />
+                <div class="mtb-book-face">
+                  <span class="mtb-book-mark">M</span>
+                  <span class="mtb-book-title">{b.title}</span>
+                  <span class="mtb-book-sub">{b.sub}</span>
+                </div>
+              </div>
+            ))
+          }
+        </div>
+
+        <ul class="mtb-pills">
+          <li>📐 KaTeX math</li>
+          <li>🔗 Mermaid diagrams</li>
+          <li>🎨 Real covers &amp; themes</li>
+          <li>📶 Works fully offline</li>
+          <li>♿ Accessibility options</li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- ============================= CTA ============================= -->
+    <section class="mtb-cta">
+      <div class="mtb-aurora" aria-hidden="true">
+        <span class="blob b1"></span>
+        <span class="blob b2"></span>
+      </div>
+      <div class="mtb-wrap mtb-cta-inner">
+        <h2 class="mtb-cta-h">Start exploring now</h2>
+        <p class="mtb-cta-p">
+          Open the live demo in your browser, or sideload the Android app and read on your phone. It takes about a
+          minute.
+        </p>
+        <div class="mtb-cta-row">
+          <a class="mtb-btn mtb-btn-primary" href={DEMO_URL}>
+            Try the live demo
+            <svg
+              viewBox="0 0 24 24"
+              width="20"
+              height="20"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2.2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"></path></svg
+            >
+          </a>
+          <a class="mtb-btn mtb-btn-ghost" href={APK_URL}>
+            <svg
+              viewBox="0 0 24 24"
+              width="20"
+              height="20"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2.2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              aria-hidden="true"><path d="M12 3v12m0 0l-4-4m4 4l4-4M5 21h14"></path></svg
+            >
+            Download Android app
+          </a>
+        </div>
+        <p class="mtb-note">
+          Mentible is in active development — the demo is a reading-first preview; the full authoring app (generation,
+          accounts, managed keys) is on the way. Formerly StudyBuddy Q; name pending final clearance.
+        </p>
+      </div>
+    </section>
+  </div>
+</PageLayout>
+
+<style>
+  /* ---------- palette (scoped to this page) ---------- */
+  .mtb {
+    --i1: #6366f1; /* indigo  */
+    --i2: #8b5cf6; /* violet  */
+    --i3: #d946ef; /* fuchsia */
+    --i4: #f59e0b; /* gold    */
+    --i5: #14b8a6; /* teal    */
+    --ink: #0e0b1f; /* deep panel */
+    --grad: linear-gradient(100deg, var(--i1), var(--i2) 38%, var(--i3) 70%, var(--i4));
+  }
+
+  .mtb-wrap {
+    max-width: 64rem;
+    margin: 0 auto;
+    padding: 0 1.25rem;
+  }
+
+  /* ---------- HERO ---------- */
+  .mtb-hero {
+    position: relative;
+    overflow: hidden;
+    background: radial-gradient(120% 120% at 50% -10%, #1b1340 0%, var(--ink) 55%, #07050f 100%);
+    color: #fff;
+    text-align: center;
+    padding: 5.5rem 0 4.5rem;
+    isolation: isolate;
+  }
+  .mtb-hero-inner {
+    position: relative;
+    z-index: 2;
+  }
+
+  .mtb-aurora {
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+  }
+  .mtb-aurora .blob {
+    position: absolute;
+    border-radius: 50%;
+    filter: blur(70px);
+    opacity: 0.55;
+    will-change: transform;
+  }
+  .mtb-aurora .b1 {
+    width: 30rem;
+    height: 30rem;
+    left: -6rem;
+    top: -8rem;
+    background: var(--i1);
+    animation: drift 18s ease-in-out infinite;
+  }
+  .mtb-aurora .b2 {
+    width: 26rem;
+    height: 26rem;
+    right: -6rem;
+    top: -4rem;
+    background: var(--i3);
+    animation: drift 22s ease-in-out infinite reverse;
+  }
+  .mtb-aurora .b3 {
+    width: 24rem;
+    height: 24rem;
+    left: 40%;
+    bottom: -10rem;
+    background: var(--i5);
+    animation: drift 26s ease-in-out infinite;
+  }
+
+  @keyframes drift {
+    0%,
+    100% {
+      transform: translate(0, 0) scale(1);
+    }
+    50% {
+      transform: translate(2.5rem, 1.5rem) scale(1.12);
+    }
+  }
+
+  .mtb-logo-float {
+    display: inline-block;
+    animation: bob 6s ease-in-out infinite;
+  }
+  .mtb-logo {
+    width: 84px;
+    height: 84px;
+    border-radius: 22px;
+    box-shadow:
+      0 18px 50px rgb(139 92 246 / 55%),
+      0 0 0 1px rgb(255 255 255 / 12%) inset;
+  }
+  @keyframes bob {
+    0%,
+    100% {
+      transform: translateY(0);
+    }
+    50% {
+      transform: translateY(-9px);
+    }
+  }
+
+  .mtb-eyebrow {
+    display: inline-block;
+    margin: 1.5rem 0 0.9rem;
+    padding: 0.35rem 0.9rem;
+    font-family: var(--aw-font-sans, sans-serif);
+    font-size: 0.8rem;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    color: #e9d8ff;
+    background: rgb(255 255 255 / 8%);
+    border: 1px solid rgb(255 255 255 / 16%);
+    border-radius: 999px;
+    backdrop-filter: blur(4px);
+  }
+
+  .mtb-title {
+    font-family: var(--aw-font-sans, sans-serif);
+    font-weight: 800;
+    letter-spacing: -0.03em;
+    line-height: 1.02;
+    font-size: clamp(2.8rem, 8vw, 5.25rem);
+    margin: 0.4rem 0 0;
+  }
+  .mtb-grad {
+    background: linear-gradient(100deg, #c4b5fd, #f0abfc 45%, #fcd34d);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+
+  .mtb-lede {
+    max-width: 40rem;
+    margin: 1.4rem auto 0;
+    font-size: clamp(1.05rem, 2.4vw, 1.3rem);
+    line-height: 1.6;
+    color: rgb(237 233 254 / 90%);
+  }
+  .mtb-lede strong {
+    color: #fff;
+    font-weight: 600;
+  }
+
+  .mtb-cta-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.85rem;
+    justify-content: center;
+    margin-top: 2.1rem;
+  }
+
+  .mtb-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.55rem;
+    font-family: var(--aw-font-sans, sans-serif);
+    font-weight: 700;
+    font-size: 1.02rem;
+    padding: 0.95rem 1.6rem;
+    border-radius: 999px;
+    transition:
+      transform 0.18s ease,
+      box-shadow 0.18s ease,
+      filter 0.18s ease;
+    text-decoration: none;
+  }
+  .mtb-btn:hover {
+    transform: translateY(-2px);
+  }
+
+  .mtb-btn-primary {
+    color: #fff;
+    background: var(--grad);
+    background-size: 180% 180%;
+    box-shadow: 0 12px 34px rgb(139 92 246 / 45%);
+    animation: shimmer 7s ease infinite;
+  }
+  .mtb-btn-primary:hover {
+    filter: brightness(1.07);
+    box-shadow: 0 16px 44px rgb(217 70 239 / 50%);
+  }
+  @keyframes shimmer {
+    0%,
+    100% {
+      background-position: 0% 50%;
+    }
+    50% {
+      background-position: 100% 50%;
+    }
+  }
+
+  .mtb-btn-ghost {
+    color: #fff;
+    background: rgb(255 255 255 / 8%);
+    border: 1.5px solid rgb(255 255 255 / 28%);
+    backdrop-filter: blur(4px);
+  }
+  .mtb-btn-ghost:hover {
+    background: rgb(255 255 255 / 16%);
+    border-color: rgb(255 255 255 / 50%);
+  }
+
+  .mtb-trust {
+    margin-top: 1.35rem;
+    font-size: 0.9rem;
+    color: rgb(216 211 245 / 70%);
+  }
+
+  /* ---------- generic section ---------- */
+  .mtb-section {
+    padding: 4.5rem 0;
+  }
+  .mtb-section-tint {
+    background: radial-gradient(90% 60% at 50% 0%, rgb(139 92 246 / 7%), transparent 60%), var(--aw-color-bg-page);
+  }
+  .mtb-kicker {
+    text-align: center;
+    font-family: var(--aw-font-sans, sans-serif);
+    font-weight: 700;
+    font-size: 0.85rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    background: var(--grad);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    margin: 0;
+  }
+  .mtb-h2 {
+    text-align: center;
+    font-family: var(--aw-font-sans, sans-serif);
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    font-size: clamp(1.8rem, 4.5vw, 2.7rem);
+    margin: 0.5rem auto 0;
+    color: var(--aw-color-text-page, #2d2418);
+    max-width: 36rem;
+  }
+  .mtb-sub {
+    text-align: center;
+    margin: 0.7rem auto 0;
+    max-width: 34rem;
+    color: var(--aw-color-text-muted);
+    font-size: 1.05rem;
+  }
+
+  /* ---------- steps ---------- */
+  .mtb-steps {
+    display: grid;
+    gap: 1.25rem;
+    grid-template-columns: repeat(3, 1fr);
+    margin-top: 2.75rem;
+  }
+  .mtb-step {
+    position: relative;
+    padding: 2rem 1.5rem 1.6rem;
+    border-radius: 1.1rem;
+    background: var(--aw-color-bg-page);
+    border: 1px solid rgb(139 92 246 / 18%);
+    box-shadow: 0 10px 30px rgb(99 102 241 / 8%);
+    transition:
+      transform 0.2s ease,
+      box-shadow 0.2s ease;
+  }
+  .mtb-step:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 18px 44px rgb(139 92 246 / 16%);
+  }
+  .mtb-step-n {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 3rem;
+    height: 3rem;
+    border-radius: 0.9rem;
+    font-family: var(--aw-font-sans, sans-serif);
+    font-weight: 800;
+    font-size: 1.1rem;
+    color: #fff;
+    background: var(--grad);
+    box-shadow: 0 8px 20px rgb(139 92 246 / 35%);
+  }
+  .mtb-step-t {
+    font-family: var(--aw-font-sans, sans-serif);
+    font-weight: 700;
+    font-size: 1.3rem;
+    margin: 1rem 0 0.4rem;
+    color: var(--aw-color-text-page, #2d2418);
+  }
+  .mtb-step-b {
+    color: var(--aw-color-text-muted);
+    line-height: 1.6;
+    margin: 0;
+  }
+
+  /* ---------- feature grid ---------- */
+  .mtb-grid {
+    display: grid;
+    gap: 1.1rem;
+    grid-template-columns: repeat(3, 1fr);
+    margin-top: 2.75rem;
+  }
+  .mtb-card {
+    padding: 1.6rem 1.4rem;
+    border-radius: 1.1rem;
+    background: var(--aw-color-bg-page);
+    border: 1px solid rgb(0 0 0 / 7%);
+    box-shadow: 0 8px 26px rgb(15 11 31 / 6%);
+    transition:
+      transform 0.2s ease,
+      box-shadow 0.2s ease,
+      border-color 0.2s ease;
+  }
+  .mtb-card:hover {
+    transform: translateY(-4px);
+    border-color: rgb(139 92 246 / 35%);
+    box-shadow: 0 18px 40px rgb(139 92 246 / 14%);
+  }
+  .mtb-ico {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 3rem;
+    height: 3rem;
+    border-radius: 0.85rem;
+    color: #fff;
+    background: var(--grad);
+    box-shadow: 0 8px 18px rgb(139 92 246 / 30%);
+  }
+  .mtb-ico :global(svg) {
+    width: 1.5rem;
+    height: 1.5rem;
+  }
+  .mtb-card-t {
+    font-family: var(--aw-font-sans, sans-serif);
+    font-weight: 700;
+    font-size: 1.2rem;
+    margin: 1rem 0 0.4rem;
+    color: var(--aw-color-text-page, #2d2418);
+  }
+  .mtb-card-b {
+    color: var(--aw-color-text-muted);
+    line-height: 1.6;
+    margin: 0;
+  }
+
+  /* ---------- demo books ---------- */
+  .mtb-books {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1.5rem;
+    justify-content: center;
+    margin-top: 2.75rem;
+  }
+  .mtb-book {
+    position: relative;
+    width: 15rem;
+    height: 20rem;
+    border-radius: 0.4rem 0.7rem 0.7rem 0.4rem;
+    background: linear-gradient(150deg, var(--c1), var(--c2));
+    box-shadow: 0 22px 50px rgb(15 11 31 / 28%);
+    overflow: hidden;
+    transition: transform 0.25s ease;
+  }
+  .mtb-book:hover {
+    transform: translateY(-6px) rotate(-1deg);
+  }
+  .mtb-book-spine {
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 14px;
+    background: rgb(0 0 0 / 22%);
+  }
+  .mtb-book-face {
+    position: absolute;
+    inset: 0;
+    padding: 2rem 1.5rem 1.5rem 2rem;
+    display: flex;
+    flex-direction: column;
+    color: #fff;
+  }
+  .mtb-book-mark {
+    font-family: var(--aw-font-sans, sans-serif);
+    font-weight: 800;
+    font-size: 1.6rem;
+    line-height: 1;
+    width: 2.6rem;
+    height: 2.6rem;
+    border-radius: 0.7rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgb(255 255 255 / 22%);
+    border: 1px solid rgb(255 255 255 / 35%);
+  }
+  .mtb-book-title {
+    margin-top: auto;
+    font-family: var(--aw-font-sans, sans-serif);
+    font-weight: 800;
+    font-size: 1.5rem;
+    line-height: 1.15;
+    letter-spacing: -0.01em;
+  }
+  .mtb-book-sub {
+    margin-top: 0.5rem;
+    font-size: 0.9rem;
+    opacity: 0.85;
+  }
+
+  .mtb-pills {
+    list-style: none;
+    padding: 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.6rem;
+    justify-content: center;
+    margin: 2.5rem auto 0;
+  }
+  .mtb-pills li {
+    font-family: var(--aw-font-sans, sans-serif);
+    font-weight: 600;
+    font-size: 0.92rem;
+    padding: 0.5rem 1rem;
+    border-radius: 999px;
+    color: var(--aw-color-text-page, #2d2418);
+    background: rgb(139 92 246 / 9%);
+    border: 1px solid rgb(139 92 246 / 22%);
+  }
+
+  /* ---------- CTA ---------- */
+  .mtb-cta {
+    position: relative;
+    overflow: hidden;
+    isolation: isolate;
+    background: radial-gradient(120% 140% at 50% 120%, #2a1357 0%, var(--ink) 60%, #07050f 100%);
+    color: #fff;
+    text-align: center;
+    padding: 5rem 0;
+  }
+  .mtb-cta-inner {
+    position: relative;
+    z-index: 2;
+  }
+  .mtb-cta-h {
+    font-family: var(--aw-font-sans, sans-serif);
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    font-size: clamp(2rem, 5vw, 3rem);
+    margin: 0;
+  }
+  .mtb-cta-p {
+    max-width: 34rem;
+    margin: 1rem auto 0;
+    color: rgb(237 233 254 / 88%);
+    font-size: 1.1rem;
+    line-height: 1.6;
+  }
+  .mtb-note {
+    max-width: 38rem;
+    margin: 1.8rem auto 0;
+    font-size: 0.85rem;
+    line-height: 1.55;
+    color: rgb(216 211 245 / 62%);
+  }
+
+  /* ---------- responsive ---------- */
+  @media (max-width: 860px) {
+    .mtb-steps,
+    .mtb-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .mtb-aurora .blob,
+    .mtb-logo-float,
+    .mtb-btn-primary {
+      animation: none;
+    }
+    .mtb-btn:hover,
+    .mtb-step:hover,
+    .mtb-card:hover,
+    .mtb-book:hover {
+      transform: none;
+    }
+  }
+</style>
