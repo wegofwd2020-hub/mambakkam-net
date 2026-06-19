@@ -501,17 +501,37 @@ const icon = (name: string) =>
   .mtb-btn:hover {
     transform: translateY(-2px);
   }
+  /* press the 3D button down into its base */
+  .mtb-btn:active {
+    transform: translateY(3px);
+  }
 
+  /* primary: gradient face sitting on a solid dark-purple 3D base edge */
   .mtb-btn-primary {
     color: #fff;
     background: var(--grad);
     background-size: 180% 180%;
-    box-shadow: 0 12px 34px rgb(139 92 246 / 45%);
+    box-shadow:
+      inset 0 1px 0 rgb(255 255 255 / 40%),
+      0 5px 0 #5b21b6,
+      0 7px 0 #4c1d95,
+      0 14px 26px rgb(139 92 246 / 45%);
     animation: shimmer 7s ease infinite;
   }
   .mtb-btn-primary:hover {
     filter: brightness(1.07);
-    box-shadow: 0 16px 44px rgb(217 70 239 / 50%);
+    box-shadow:
+      inset 0 1px 0 rgb(255 255 255 / 45%),
+      0 6px 0 #5b21b6,
+      0 8px 0 #4c1d95,
+      0 18px 34px rgb(217 70 239 / 50%);
+  }
+  .mtb-btn-primary:active {
+    box-shadow:
+      inset 0 1px 0 rgb(255 255 255 / 30%),
+      0 2px 0 #5b21b6,
+      0 3px 0 #4c1d95,
+      0 8px 16px rgb(139 92 246 / 40%);
   }
   @keyframes shimmer {
     0%,
@@ -523,15 +543,30 @@ const icon = (name: string) =>
     }
   }
 
+  /* ghost: translucent face on a dark 3D base edge */
   .mtb-btn-ghost {
     color: #fff;
-    background: rgb(255 255 255 / 8%);
+    background: rgb(255 255 255 / 10%);
     border: 1.5px solid rgb(255 255 255 / 28%);
     backdrop-filter: blur(4px);
+    box-shadow:
+      inset 0 1px 0 rgb(255 255 255 / 25%),
+      0 5px 0 rgb(0 0 0 / 32%),
+      0 12px 22px rgb(0 0 0 / 38%);
   }
   .mtb-btn-ghost:hover {
-    background: rgb(255 255 255 / 16%);
+    background: rgb(255 255 255 / 18%);
     border-color: rgb(255 255 255 / 50%);
+    box-shadow:
+      inset 0 1px 0 rgb(255 255 255 / 30%),
+      0 6px 0 rgb(0 0 0 / 32%),
+      0 16px 28px rgb(0 0 0 / 42%);
+  }
+  .mtb-btn-ghost:active {
+    box-shadow:
+      inset 0 1px 0 rgb(255 255 255 / 22%),
+      0 2px 0 rgb(0 0 0 / 32%),
+      0 6px 14px rgb(0 0 0 / 35%);
   }
 
   .mtb-trust {
