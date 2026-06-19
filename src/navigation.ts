@@ -21,6 +21,7 @@ export const headerData = {
       text: 'Work',
       links: [
         { text: 'Products', href: getPermalink('/work') },
+        { text: 'Mentible', href: getPermalink('/mentible') },
         { text: 'Services', href: getPermalink('/services') },
       ],
     },
