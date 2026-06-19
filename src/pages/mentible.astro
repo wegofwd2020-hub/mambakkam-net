@@ -1,7 +1,7 @@
 ---
 import PageLayout from '~/layouts/PageLayout.astro';
 import Image from '~/components/common/Image.astro';
-import mentibleLogo from '~/assets/images/work/mentible-logo.png';
+import mentibleLogo from '~/assets/images/work/mentible-mark.png';
 
 const metadata = {
   title: 'Mentible — Author Yourself',
@@ -105,11 +105,12 @@ const icon = (name: string) =>
       </div>
 
       <div class="mtb-wrap mtb-hero-inner">
-        <div class="mtb-logo-float">
-          <Image src={mentibleLogo} alt="Mentible logo" width={216} height={216} class="mtb-logo" loading="eager" />
+        <div class="mtb-brand">
+          <div class="mtb-logo-float">
+            <Image src={mentibleLogo} alt="Mentible logo" width={240} height={240} class="mtb-logo" loading="eager" />
+          </div>
+          <span class="mtb-eyebrow">✦ AI book authoring · for self-learners</span>
         </div>
-
-        <span class="mtb-eyebrow">✦ AI book authoring · for self-learners</span>
 
         <h1 class="mtb-title">
           Author <span class="mtb-grad">Yourself.</span>
@@ -362,19 +363,20 @@ const icon = (name: string) =>
     }
   }
 
+  /* left-aligned brand lockup: logo + tagline move together */
+  .mtb-brand {
+    text-align: left;
+  }
   .mtb-logo-float {
     display: block;
-    text-align: left;
-    margin-bottom: 0.25rem;
+    line-height: 0;
     animation: bob 6s ease-in-out infinite;
   }
   .mtb-logo {
-    width: 108px;
-    height: 108px;
-    border-radius: 26px;
-    box-shadow:
-      0 18px 50px rgb(139 92 246 / 55%),
-      0 0 0 1px rgb(255 255 255 / 12%) inset;
+    width: 124px;
+    height: 124px;
+    /* transparent art — soft glow follows the shape, no card/tile */
+    filter: drop-shadow(0 12px 26px rgb(139 92 246 / 45%));
   }
   @keyframes bob {
     0%,
@@ -388,7 +390,7 @@ const icon = (name: string) =>
 
   .mtb-eyebrow {
     display: inline-block;
-    margin: 1.5rem 0 0.9rem;
+    margin: 0.85rem 0 1.4rem;
     padding: 0.35rem 0.9rem;
     font-family: var(--aw-font-sans, sans-serif);
     font-size: 0.8rem;
