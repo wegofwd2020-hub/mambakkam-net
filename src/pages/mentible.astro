@@ -1,5 +1,5 @@
 ---
-import PageLayout from '~/layouts/PageLayout.astro';
+import Layout from '~/layouts/Layout.astro';
 import Image from '~/components/common/Image.astro';
 import mentibleLogo from '~/assets/images/work/mentible-mark.png';
 import '@fontsource-variable/space-grotesk';
@@ -95,8 +95,8 @@ const icon = (name: string) =>
   `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${ICONS[name] ?? ''}</svg>`;
 ---
 
-<PageLayout metadata={metadata}>
-  <div class="mtb">
+<Layout metadata={metadata}>
+  <main class="mtb">
     <!-- ============================ HERO ============================ -->
     <section class="mtb-hero">
       <div class="mtb-aurora" aria-hidden="true">
@@ -107,16 +107,7 @@ const icon = (name: string) =>
 
       <div class="mtb-brand">
         <div class="mtb-logo-float">
-          <Image
-            src={mentibleLogo}
-            alt="Mentible logo"
-            width={300}
-            height={300}
-            layout="fixed"
-            objectFit="contain"
-            class="mtb-logo"
-            loading="eager"
-          />
+          <Image src={mentibleLogo} alt="Mentible logo" width={300} height={300} class="mtb-logo" loading="eager" />
         </div>
         <p class="mtb-eyebrow">
           <span>AI Book Authoring</span>
@@ -295,8 +286,16 @@ const icon = (name: string) =>
         </p>
       </div>
     </section>
-  </div>
-</PageLayout>
+
+    <!-- ============================ FOOTER ============================ -->
+    <footer class="mtb-foot">
+      <span class="mtb-foot-brand">Mentible</span>
+      <span class="mtb-foot-meta">
+        © {new Date().getFullYear()} · Author Yourself · <a href="https://mambakkam.net">part of mambakkam.net</a>
+      </span>
+    </footer>
+  </main>
+</Layout>
 
 <style>
   /* ---------- palette (scoped to this page) ---------- */
@@ -829,6 +828,34 @@ const icon = (name: string) =>
     font-size: 0.85rem;
     line-height: 1.55;
     color: rgb(216 211 245 / 62%);
+  }
+
+  /* ---------- slim Mentible-only footer ---------- */
+  .mtb-foot {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: center;
+    gap: 0.4rem 1rem;
+    padding: 1.6rem 1.25rem;
+    background: #07050f;
+    text-align: center;
+    font-family: var(--aw-font-sans, sans-serif);
+    font-size: 0.85rem;
+    color: rgb(216 211 245 / 55%);
+  }
+  .mtb-foot-brand {
+    font-family: 'Space Grotesk Variable', var(--aw-font-sans, sans-serif);
+    font-weight: 700;
+    letter-spacing: -0.01em;
+    color: rgb(220 214 248 / 85%);
+  }
+  .mtb-foot a {
+    color: rgb(196 181 253 / 90%);
+    text-decoration: none;
+  }
+  .mtb-foot a:hover {
+    text-decoration: underline;
   }
 
   /* ---------- responsive ---------- */
