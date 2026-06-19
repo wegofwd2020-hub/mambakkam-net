@@ -428,7 +428,9 @@ const icon = (name: string) =>
     display: block;
   }
 
-  /* product name — the hero wordmark: stylish display font, dominant size */
+  /* product name — the hero wordmark: stylish display font, dominant size.
+     3D raised look: bright gradient face + chained drop-shadows that stack
+     offset dark copies behind the letters to fake an extruded body. */
   .mtb-name {
     margin: 1.1rem 0 0;
     font-family: 'Space Grotesk Variable', var(--aw-font-sans, sans-serif);
@@ -436,10 +438,13 @@ const icon = (name: string) =>
     letter-spacing: -0.02em;
     font-size: clamp(3rem, 8.5vw, 5rem);
     line-height: 1;
-    background: linear-gradient(100deg, #c4b5fd, #f0abfc 50%, #fcd34d);
+    background: linear-gradient(180deg, #f6f2ff 0%, #f2a9f2 50%, #f8c032 100%);
     -webkit-background-clip: text;
     background-clip: text;
     color: transparent;
+    -webkit-text-fill-color: transparent;
+    filter: drop-shadow(1px 1px 0 #46327e) drop-shadow(2px 2px 0 #3c2a6c) drop-shadow(3px 3px 0 #33245b)
+      drop-shadow(4px 4px 0 #2a1d4a) drop-shadow(5px 5px 0 #221739) drop-shadow(4px 9px 11px rgba(0, 0, 0, 0.55));
   }
 
   /* "Author Yourself" — slogan, deliberately smaller than the wordmark */
