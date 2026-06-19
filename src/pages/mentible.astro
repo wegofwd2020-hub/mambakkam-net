@@ -107,7 +107,16 @@ const icon = (name: string) =>
       <div class="mtb-wrap mtb-hero-inner">
         <div class="mtb-brand">
           <div class="mtb-logo-float">
-            <Image src={mentibleLogo} alt="Mentible logo" width={300} height={300} class="mtb-logo" loading="eager" />
+            <Image
+              src={mentibleLogo}
+              alt="Mentible logo"
+              width={300}
+              height={300}
+              layout="fixed"
+              objectFit="contain"
+              class="mtb-logo"
+              loading="eager"
+            />
           </div>
           <p class="mtb-name">Mentible</p>
           <p class="mtb-eyebrow">
@@ -378,8 +387,11 @@ const icon = (name: string) =>
   }
   .mtb-logo {
     display: inline-block;
-    width: 150px;
-    height: 150px;
+    /* force a square box + contain so the square logo can never be cropped
+       (overrides the Image component's inline object-fit:cover) */
+    width: 150px !important;
+    height: 150px !important;
+    object-fit: contain !important;
     /* transparent art — soft glow follows the shape, no card/tile */
     filter: drop-shadow(0 12px 26px rgb(139 92 246 / 45%));
   }
