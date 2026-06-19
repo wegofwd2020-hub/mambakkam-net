@@ -107,9 +107,13 @@ const icon = (name: string) =>
       <div class="mtb-wrap mtb-hero-inner">
         <div class="mtb-brand">
           <div class="mtb-logo-float">
-            <Image src={mentibleLogo} alt="Mentible logo" width={240} height={240} class="mtb-logo" loading="eager" />
+            <Image src={mentibleLogo} alt="Mentible logo" width={300} height={300} class="mtb-logo" loading="eager" />
           </div>
-          <span class="mtb-eyebrow">✦ AI book authoring · for self-learners</span>
+          <p class="mtb-name">Mentible</p>
+          <p class="mtb-eyebrow">
+            <span>✦ AI book authoring</span>
+            <span>for self-learners</span>
+          </p>
         </div>
 
         <h1 class="mtb-title">
@@ -363,9 +367,9 @@ const icon = (name: string) =>
     }
   }
 
-  /* left-aligned brand lockup: logo + tagline move together */
+  /* centered brand lockup: logo · name · tagline */
   .mtb-brand {
-    text-align: left;
+    text-align: center;
   }
   .mtb-logo-float {
     display: block;
@@ -373,8 +377,9 @@ const icon = (name: string) =>
     animation: bob 6s ease-in-out infinite;
   }
   .mtb-logo {
-    width: 124px;
-    height: 124px;
+    display: inline-block;
+    width: 150px;
+    height: 150px;
     /* transparent art — soft glow follows the shape, no card/tile */
     filter: drop-shadow(0 12px 26px rgb(139 92 246 / 45%));
   }
@@ -388,19 +393,32 @@ const icon = (name: string) =>
     }
   }
 
-  .mtb-eyebrow {
-    display: inline-block;
-    margin: 0.85rem 0 1.4rem;
-    padding: 0.35rem 0.9rem;
+  .mtb-name {
+    margin: 0.6rem 0 0;
     font-family: var(--aw-font-sans, sans-serif);
-    font-size: 0.8rem;
+    font-weight: 800;
+    letter-spacing: -0.01em;
+    font-size: clamp(1.9rem, 5vw, 2.6rem);
+    line-height: 1;
+    background: linear-gradient(100deg, #c4b5fd, #f0abfc 50%, #fcd34d);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+
+  .mtb-eyebrow {
+    display: block;
+    margin: 0.7rem 0 1.5rem;
+    font-family: var(--aw-font-sans, sans-serif);
+    font-size: 0.82rem;
     font-weight: 600;
-    letter-spacing: 0.02em;
-    color: #e9d8ff;
-    background: rgb(255 255 255 / 8%);
-    border: 1px solid rgb(255 255 255 / 16%);
-    border-radius: 999px;
-    backdrop-filter: blur(4px);
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: rgb(216 211 245 / 78%);
+    line-height: 1.55;
+  }
+  .mtb-eyebrow span {
+    display: block;
   }
 
   .mtb-title {
