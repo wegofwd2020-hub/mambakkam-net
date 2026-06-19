@@ -683,22 +683,35 @@ const icon = (name: string) =>
   .mtb-books {
     display: flex;
     flex-wrap: wrap;
-    gap: 1.5rem;
+    gap: 2.75rem;
     justify-content: center;
     margin-top: 2.75rem;
+    perspective: 1600px;
   }
+  /* 3D raised book: page-stack thickness on the right + layered lift shadow */
   .mtb-book {
     position: relative;
     width: 15rem;
     height: 20rem;
-    border-radius: 0.4rem 0.7rem 0.7rem 0.4rem;
+    border-radius: 0.35rem 0.6rem 0.6rem 0.35rem;
     background: linear-gradient(150deg, var(--c1), var(--c2));
-    box-shadow: 0 22px 50px rgb(15 11 31 / 28%);
+    transform: rotateX(5deg) rotateY(-3deg);
+    box-shadow:
+      3px 0 0 rgba(247, 244, 250, 0.7),
+      6px 0 0 rgba(235, 230, 242, 0.85),
+      9px 0 0 #ddd6e6,
+      12px 1px 0 #cec6dc,
+      15px 2px 0 #beb5d0,
+      20px 24px 38px rgba(15, 11, 31, 0.45),
+      8px 12px 18px rgba(15, 11, 31, 0.3),
+      inset 0 2px 0 rgba(255, 255, 255, 0.25);
     overflow: hidden;
-    transition: transform 0.25s ease;
+    transition:
+      transform 0.3s ease,
+      box-shadow 0.3s ease;
   }
   .mtb-book:hover {
-    transform: translateY(-6px) rotate(-1deg);
+    transform: rotateX(2deg) rotateY(-2deg) translateY(-8px);
   }
   .mtb-book-spine {
     position: absolute;
