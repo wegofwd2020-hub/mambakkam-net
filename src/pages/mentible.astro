@@ -104,26 +104,26 @@ const icon = (name: string) =>
         <span class="blob b3"></span>
       </div>
 
-      <div class="mtb-wrap mtb-hero-inner">
-        <div class="mtb-brand">
-          <div class="mtb-logo-float">
-            <Image
-              src={mentibleLogo}
-              alt="Mentible logo"
-              width={300}
-              height={300}
-              layout="fixed"
-              objectFit="contain"
-              class="mtb-logo"
-              loading="eager"
-            />
-          </div>
-          <p class="mtb-eyebrow">
-            <span>AI Book Authoring</span>
-            <span>For Self-Learners</span>
-          </p>
+      <div class="mtb-brand">
+        <div class="mtb-logo-float">
+          <Image
+            src={mentibleLogo}
+            alt="Mentible logo"
+            width={300}
+            height={300}
+            layout="fixed"
+            objectFit="contain"
+            class="mtb-logo"
+            loading="eager"
+          />
         </div>
+        <p class="mtb-eyebrow">
+          <span>AI Book Authoring</span>
+          <span>For Self-Learners</span>
+        </p>
+      </div>
 
+      <div class="mtb-wrap mtb-hero-inner">
         <p class="mtb-name">Mentible</p>
 
         <h1 class="mtb-title">
@@ -377,8 +377,12 @@ const icon = (name: string) =>
     }
   }
 
-  /* logo + tagline as a left-aligned lockup at the top-left of the hero */
+  /* logo + tagline pinned to the hero's top-left corner */
   .mtb-brand {
+    position: absolute;
+    top: 1.5rem;
+    left: 1.75rem;
+    z-index: 3;
     text-align: left;
   }
   .mtb-logo-float {
@@ -792,6 +796,12 @@ const icon = (name: string) =>
     .mtb-steps,
     .mtb-grid {
       grid-template-columns: 1fr;
+    }
+    /* on small screens, drop the corner pin back into the centered flow */
+    .mtb-brand {
+      position: static;
+      text-align: center;
+      margin-bottom: 0.5rem;
     }
   }
 
