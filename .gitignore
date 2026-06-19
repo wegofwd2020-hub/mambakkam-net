@@ -5,6 +5,12 @@ dist/
 # dependencies
 node_modules/
 
+# ...but the Mentible web demo export bundles fonts under an
+# assets/node_modules/ path; those are real artifacts that must be committed
+# and served (otherwise the app hangs loading fonts). Re-include them.
+!public/demos/mentible/assets/node_modules/
+!public/demos/mentible/assets/node_modules/**
+
 # logs
 npm-debug.log*
 yarn-debug.log*
