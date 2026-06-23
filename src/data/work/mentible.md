@@ -1,9 +1,10 @@
 ---
 title: Mentible
-excerpt: An AI book-authoring app for adult self-learners. Structure a topic, generate it chapter by chapter, and compile a polished EPUB3/PDF book — provider-agnostic, with managed keys or your own. Formerly StudyBuddy Q.
+excerpt: An AI book-authoring app for adult self-learners. Structure a topic, generate it chapter by chapter, and compile a polished EPUB3/PDF book — provider-agnostic, with managed keys or your own.
 author: siva-m
 type: product
 status: in-progress
+url: https://mambakkam.net/demos/mentible/
 image: ~/assets/images/work/mentible-logo.png
 tags:
   - React Native
@@ -17,7 +18,7 @@ tags:
   - Mobile
 featured: false
 publishDate: 2026-04-28
-updateDate: 2026-06-07
+updateDate: 2026-06-23
 draft: false
 ---
 
@@ -32,15 +33,18 @@ share.
 The tagline says it best: **_Author Yourself._** — author the material, and author
 who you become.
 
-> Mentible began life as **StudyBuddy Q**. It has since been rebranded and spun out
-> as an independent product, distinct from the StudyBuddy school platform.
-
 ## Books, not chat
 
-Mentible is deliberately **books-only**. An earlier one-off "Query" mode (generate a
-single throwaway lesson) was removed once the centre of gravity became authoring a
-real artifact. There is no open-ended chatbot and no catalogue of pre-built courses —
-just the focused loop of outline → generate → compile.
+Mentible is deliberately **books-only**. There is no one-off "throwaway lesson" mode,
+no open-ended chatbot, and no catalogue of pre-built courses — just the focused loop of
+outline → generate → compile a real artifact.
+
+## Try it
+
+There's a **public web demo** running at
+[mambakkam.net/demos/mentible](https://mambakkam.net/demos/mentible/) — a
+reading-first preview you can open straight in the browser, no install. The
+[full product page](/mentible) has the same demo plus an Android build to sideload.
 
 ## Provider-agnostic, your choice of keys
 
@@ -68,10 +72,11 @@ subject at their own pace. It is a standalone tool with no school compliance
 
 ## Status
 
-Actively in development. The mobile authoring app (library, real EPUB covers, book
+Actively in development, with a **public web demo live** (a reading-first preview —
+see [Try it](#try-it) above). The mobile authoring app (library, real EPUB covers, book
 import/export) and the compiler (theming, covers, watermarking) are taking shape;
-accounts, metering, and the managed-key path are the MVP focus. The **Mentible** name
-is the chosen brand, pending final trademark and domain clearance.
+accounts, metering, and the managed-key path are the MVP focus. **Mentible** is the
+chosen brand, pending final trademark and domain clearance.
 
 ## Relationship to StudyBuddy OnDemand
 
