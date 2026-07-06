@@ -1,0 +1,15 @@
+# starter manifest — owners: refine feature list + statuses
+project: mambakkam.net
+stage: live
+owners: [siva]
+features:
+  - name: Homepage + village pages (About, Land & Agriculture)
+    status: done
+  - name: Landmarks section (4 temple/shrine pages)
+    status: done
+  - name: People collection (1 profile live, more planned)
+    status: in-progress
+  - name: Work chapter — product + services pages
+    status: done
+  - name: News / blog section
+    status: done
