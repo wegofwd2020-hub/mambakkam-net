@@ -22,6 +22,8 @@ export const headerData = {
       links: [
         { text: 'Products', href: getPermalink('/work') },
         { text: 'Mentible', href: getPermalink('/mentible') },
+        { text: 'Thittam', href: getPermalink('/thittam') },
+        { text: 'Kathai Chithiram', href: getPermalink('/kathai-chithiram') },
         { text: 'Services', href: getPermalink('/services') },
       ],
     },
