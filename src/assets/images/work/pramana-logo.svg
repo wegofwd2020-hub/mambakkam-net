@@ -1,22 +1,24 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" role="img" aria-label="Pramana — proof seal">
-  <defs>
-    <linearGradient id="seal" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0" stop-color="#10897a"/>
-      <stop offset="1" stop-color="#2f7d3f"/>
-    </linearGradient>
-    <linearGradient id="sealDark" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0" stop-color="#0b6256"/>
-      <stop offset="1" stop-color="#256432"/>
-    </linearGradient>
-  </defs>
-  <!-- scalloped notary seal -->
-  <path d="M 100.00 16.00 A 20.32 20.32 0 0 1 132.15 22.39 A 20.32 20.32 0 0 1 159.40 40.60 A 20.32 20.32 0 0 1 177.61 67.85 A 20.32 20.32 0 0 1 184.00 100.00 A 20.32 20.32 0 0 1 177.61 132.15 A 20.32 20.32 0 0 1 159.40 159.40 A 20.32 20.32 0 0 1 132.15 177.61 A 20.32 20.32 0 0 1 100.00 184.00 A 20.32 20.32 0 0 1 67.85 177.61 A 20.32 20.32 0 0 1 40.60 159.40 A 20.32 20.32 0 0 1 22.39 132.15 A 20.32 20.32 0 0 1 16.00 100.00 A 20.32 20.32 0 0 1 22.39 67.85 A 20.32 20.32 0 0 1 40.60 40.60 A 20.32 20.32 0 0 1 67.85 22.39 A 20.32 20.32 0 0 1 100.00 16.00 Z" fill="url(#seal)"/>
-  <!-- inner disk -->
-  <circle cx="100" cy="100" r="66" fill="url(#sealDark)"/>
-  <!-- double-ring detail -->
-  <circle cx="100" cy="100" r="70" fill="none" stroke="#ffffff" stroke-opacity="0.35" stroke-width="1.5"/>
-  <circle cx="100" cy="100" r="58" fill="none" stroke="#ffffff" stroke-opacity="0.45" stroke-width="2"/>
-  <!-- checkmark = proof -->
-  <path d="M74 101 L92 119 L128 81" fill="none" stroke="#ffffff" stroke-width="11"
-        stroke-linecap="round" stroke-linejoin="round"/>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 96 96" role="img" aria-label="Pramana — scales of justice on a column">
+  <rect x="0" y="0" width="96" height="96" rx="20" fill="#0B3D5C"/>
+  <g transform="translate(9.6 9.6) scale(0.8)">
+    <g stroke="#FFFFFF" stroke-width="5" stroke-linecap="round" stroke-linejoin="round" fill="none">
+      <path d="M18 30 L78 30"/>
+      <path d="M18 30 L8 52 M18 30 L28 52"/>
+      <path d="M78 30 L68 52 M78 30 L88 52"/>
+    </g>
+    <path d="M6 52 A13 9 0 0 0 30 52" fill="none" stroke="#3FD79E" stroke-width="5" stroke-linecap="round"/>
+    <path d="M66 52 A13 9 0 0 0 90 52" fill="none" stroke="#3FD79E" stroke-width="5" stroke-linecap="round"/>
+    <g fill="#FFFFFF">
+      <rect x="39" y="40" width="18" height="5" rx="1.5"/>
+      <rect x="37" y="75" width="22" height="4" rx="1.5"/>
+      <rect x="34" y="79" width="28" height="5" rx="2"/>
+    </g>
+    <g stroke="#FFFFFF" stroke-width="3.5" stroke-linecap="round">
+      <path d="M44 46 L44 74"/>
+      <path d="M48 46 L48 74"/>
+      <path d="M52 46 L52 74"/>
+    </g>
+    <circle cx="48" cy="33" r="7.5" fill="#3FD79E"/>
+    <path d="M44.5 33 L47 35.6 L51.5 29.8" fill="none" stroke="#0B3D5C" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/>
+  </g>
 </svg>
