@@ -1,0 +1,504 @@
+---
+import Layout from '~/layouts/Layout.astro';
+import '@fontsource-variable/space-grotesk';
+import thittamLogo from '~/assets/images/work/thittam-logo.svg?url';
+
+const metadata = {
+  title: 'Thittam — one plan, every vertical',
+  description:
+    'Thittam is a multi-tenant SaaS platform for production management. One codebase speaks every industry — film, construction, software, live events — through a declarative vertical config. Nine Go microservices, tenant-per-schema isolation.',
+};
+
+const REPO = 'https://github.com/wegofwd2020-hub/thittam';
+const DOCS = 'https://github.com/wegofwd2020-hub/thittam_docs';
+
+const steps = [
+  {
+    n: '01',
+    title: 'Declare the vertical',
+    body: 'An industry is a YAML file — its entity names, phase graphs, budget categories and workflows. That config is the whole definition of a vertical.',
+  },
+  {
+    n: '02',
+    title: 'Services adapt at request time',
+    body: 'The same API endpoint behaves differently for a film tenant than a construction firm, because the vertical config tells it how. A new industry is a config change, not a code change.',
+  },
+  {
+    n: '03',
+    title: 'One system, many tenants',
+    body: 'Each tenant’s data lives in its own PostgreSQL schema. A pooled connection routes every request to the right schema — no cross-tenant leakage, by design.',
+  },
+];
+
+const verticals = ['🎬 Film production', '🏗 Construction', '💻 Software delivery', '🎪 Live events'];
+
+const features = [
+  {
+    t: 'Vertical plugin system',
+    b: 'Add an industry with a configuration file, not a fork. One codebase adapts its language, phases, and budgets to each tenant.',
+  },
+  {
+    t: 'Nine Go microservices',
+    b: 'Project, budget, expense, ledger, inventory, reporting, IAM, notifications, document — synchronous over gRPC, asynchronous over NATS JetStream.',
+  },
+  {
+    t: 'Tenant-per-schema isolation',
+    b: 'Every tenant gets a dedicated tenant_<uuid> schema. SET search_path on the pooled connection keeps data separate with no application-layer joins across tenants.',
+  },
+  {
+    t: 'Real double-entry accounting',
+    b: 'A general ledger, purchase orders, receipts, petty cash, and budget versions with approvals — production finance, not a spreadsheet.',
+  },
+  {
+    t: 'Gateway + event backbone',
+    b: 'Kong fronts REST/JSON for consumers; gRPC connects services directly; NATS JetStream carries the events between them.',
+  },
+  {
+    t: 'Docs as a first-class artifact',
+    b: 'Eleven standard architecture diagrams and the ADRs live alongside the code in a companion docs repo — the design is versioned with the system.',
+  },
+];
+---
+
+<Layout metadata={metadata}>
+  <main class="thit">
+    <!-- ============================ HERO ============================ -->
+    <section class="thit-hero">
+      <div class="thit-grid-bg" aria-hidden="true"></div>
+
+      <div class="thit-wrap thit-hero-inner">
+        <div class="thit-brand">
+          <img src={thittamLogo} alt="Thittam logo" width="76" height="76" class="thit-logo" loading="eager" />
+          <p class="thit-eyebrow">Multi-tenant SaaS · Production Management</p>
+        </div>
+
+        <h1 class="thit-title">One plan.<br /><span class="thit-grad">Every vertical.</span></h1>
+        <p class="thit-name">Thittam · திட்டம்</p>
+
+        <p class="thit-lede">
+          Thittam is one production-management platform that speaks your industry’s language. Film, construction,
+          software, live events — each tenant gets its own entities, phases, budgets and workflows from a single
+          declarative config. <strong>One codebase. Many verticals.</strong>
+        </p>
+
+        <div class="thit-cta-row">
+          <a class="thit-btn thit-btn-primary" href={DOCS} target="_blank" rel="noopener noreferrer">
+            Explore the architecture
+          </a>
+          <a class="thit-btn thit-btn-ghost" href={REPO} target="_blank" rel="noopener noreferrer"> View on GitHub </a>
+        </div>
+
+        <p class="thit-trust">In active development · two demo verticals seeded — film (INR) &amp; construction (USD)</p>
+
+        <ul class="thit-verticals">
+          {verticals.map((v) => <li>{v}</li>)}
+        </ul>
+      </div>
+    </section>
+
+    <!-- ========================= HOW IT WORKS ========================= -->
+    <section class="thit-section">
+      <div class="thit-wrap">
+        <p class="thit-kicker">How it works</p>
+        <h2 class="thit-h2">A vertical is a config file, not a codebase</h2>
+        <p class="thit-sub">The engineering differentiator: the industry lives in configuration, read at request time.</p>
+
+        <div class="thit-steps">
+          {
+            steps.map((s) => (
+              <article class="thit-step">
+                <span class="thit-step-n">{s.n}</span>
+                <h3 class="thit-step-t">{s.title}</h3>
+                <p class="thit-step-b">{s.body}</p>
+              </article>
+            ))
+          }
+        </div>
+      </div>
+    </section>
+
+    <!-- =========================== FEATURES =========================== -->
+    <section class="thit-section thit-section-tint">
+      <div class="thit-wrap">
+        <p class="thit-kicker">Under the hood</p>
+        <h2 class="thit-h2">Built like infrastructure</h2>
+        <p class="thit-sub">Nine services, one event backbone, strict tenant isolation.</p>
+
+        <div class="thit-cards">
+          {
+            features.map((f) => (
+              <article class="thit-card">
+                <h3 class="thit-card-t">{f.t}</h3>
+                <p class="thit-card-b">{f.b}</p>
+              </article>
+            ))
+          }
+        </div>
+      </div>
+    </section>
+
+    <!-- ============================= CTA ============================= -->
+    <section class="thit-cta">
+      <div class="thit-grid-bg" aria-hidden="true"></div>
+      <div class="thit-wrap thit-cta-inner">
+        <h2 class="thit-cta-h">Production management, in any industry.</h2>
+        <p class="thit-cta-p">
+          Thittam is in active build. The architecture, ADRs, and API specs are open to read — the platform speaks film
+          and construction today, with more verticals arriving as configuration.
+        </p>
+        <div class="thit-cta-row">
+          <a class="thit-btn thit-btn-primary" href={DOCS} target="_blank" rel="noopener noreferrer">
+            Read the architecture
+          </a>
+          <a class="thit-btn thit-btn-ghost" href={REPO} target="_blank" rel="noopener noreferrer"> View on GitHub </a>
+        </div>
+      </div>
+    </section>
+
+    <footer class="thit-foot">
+      <span class="thit-foot-brand">Thittam</span>
+      <span class="thit-foot-meta">
+        © {new Date().getFullYear()} · A WeGoFwd2020 platform · <a href="https://mambakkam.net">part of mambakkam.net</a>
+      </span>
+    </footer>
+  </main>
+</Layout>
+
+<style>
+  .thit {
+    --ink: #0b1626;
+    --blue: #3b82f6;
+    --cyan: #22d3ee;
+    --amber: #f59e0b;
+    --slate: #64748b;
+    --grad: linear-gradient(100deg, var(--blue), var(--cyan));
+  }
+  .thit-wrap {
+    max-width: 66rem;
+    margin: 0 auto;
+    padding: 0 1.25rem;
+  }
+
+  /* blueprint grid backdrop */
+  .thit-grid-bg {
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    background-image:
+      linear-gradient(rgb(255 255 255 / 6%) 1px, transparent 1px),
+      linear-gradient(90deg, rgb(255 255 255 / 6%) 1px, transparent 1px);
+    background-size: 46px 46px;
+    mask-image: radial-gradient(120% 90% at 50% 0%, #000 40%, transparent 85%);
+  }
+
+  /* ---------- HERO ---------- */
+  .thit-hero {
+    position: relative;
+    overflow: hidden;
+    isolation: isolate;
+    color: #eaf1fb;
+    text-align: center;
+    padding: 5rem 0 4rem;
+    background:
+      radial-gradient(90% 70% at 70% -10%, rgb(34 211 238 / 18%), transparent 55%),
+      radial-gradient(70% 60% at 10% 10%, rgb(59 130 246 / 22%), transparent 55%),
+      linear-gradient(160deg, #10203a 0%, var(--ink) 60%, #060c17 100%);
+  }
+  .thit-hero-inner {
+    position: relative;
+    z-index: 2;
+  }
+  .thit-brand {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.7rem;
+  }
+  .thit-logo {
+    width: 76px;
+    height: 76px;
+    filter: drop-shadow(0 10px 22px rgb(34 211 238 / 30%));
+  }
+  .thit-eyebrow {
+    font-family: 'Space Grotesk Variable', var(--aw-font-sans, sans-serif);
+    font-size: 0.8rem;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: rgb(148 197 245 / 90%);
+    margin: 0;
+  }
+  .thit-title {
+    font-family: 'Space Grotesk Variable', var(--aw-font-sans, sans-serif);
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    line-height: 1.02;
+    font-size: clamp(2.6rem, 8vw, 4.75rem);
+    margin: 1.5rem 0 0;
+  }
+  .thit-grad {
+    background: var(--grad);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+  .thit-name {
+    font-family: 'Space Grotesk Variable', var(--aw-font-sans, sans-serif);
+    font-size: 1rem;
+    letter-spacing: 0.02em;
+    color: rgb(148 197 245 / 85%);
+    margin: 0.9rem 0 0;
+  }
+  .thit-lede {
+    max-width: 42rem;
+    margin: 1.3rem auto 0;
+    font-size: clamp(1.02rem, 2.3vw, 1.24rem);
+    line-height: 1.6;
+    color: rgb(226 236 250 / 92%);
+  }
+  .thit-lede strong {
+    color: #fff;
+    font-weight: 700;
+  }
+
+  .thit-cta-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.8rem;
+    justify-content: center;
+    margin-top: 2rem;
+  }
+  .thit-btn {
+    font-family: 'Space Grotesk Variable', var(--aw-font-sans, sans-serif);
+    font-weight: 600;
+    font-size: 1rem;
+    padding: 0.85rem 1.5rem;
+    border-radius: 0.7rem;
+    text-decoration: none;
+    transition:
+      transform 0.16s ease,
+      box-shadow 0.16s ease,
+      filter 0.16s ease;
+  }
+  .thit-btn:hover {
+    transform: translateY(-2px);
+  }
+  .thit-btn-primary {
+    color: #06121f;
+    background: var(--grad);
+    box-shadow: 0 8px 22px rgb(34 211 238 / 30%);
+  }
+  .thit-btn-primary:hover {
+    filter: brightness(1.06);
+  }
+  .thit-btn-ghost {
+    color: #eaf1fb;
+    background: rgb(255 255 255 / 7%);
+    border: 1.5px solid rgb(148 197 245 / 35%);
+  }
+  .thit-btn-ghost:hover {
+    background: rgb(255 255 255 / 13%);
+    border-color: rgb(148 197 245 / 60%);
+  }
+  .thit-trust {
+    margin-top: 1.2rem;
+    font-size: 0.9rem;
+    color: rgb(148 197 245 / 85%);
+  }
+  .thit-verticals {
+    list-style: none;
+    padding: 0;
+    margin: 2rem auto 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.6rem;
+    justify-content: center;
+  }
+  .thit-verticals li {
+    font-family: 'Space Grotesk Variable', var(--aw-font-sans, sans-serif);
+    font-size: 0.88rem;
+    font-weight: 500;
+    padding: 0.5rem 1rem;
+    border-radius: 999px;
+    color: #dbe9fb;
+    background: rgb(255 255 255 / 6%);
+    border: 1px solid rgb(148 197 245 / 22%);
+  }
+
+  /* ---------- sections ---------- */
+  .thit-section {
+    padding: 4.5rem 0;
+  }
+  .thit-section-tint {
+    background: radial-gradient(90% 60% at 50% 0%, rgb(59 130 246 / 6%), transparent 60%), var(--aw-color-bg-page);
+  }
+  .thit-kicker {
+    text-align: center;
+    font-family: 'Space Grotesk Variable', var(--aw-font-sans, sans-serif);
+    font-weight: 700;
+    font-size: 0.82rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    background: var(--grad);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    margin: 0;
+  }
+  .thit-h2 {
+    text-align: center;
+    font-family: 'Space Grotesk Variable', var(--aw-font-sans, sans-serif);
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    font-size: clamp(1.7rem, 4.2vw, 2.5rem);
+    margin: 0.5rem auto 0;
+    color: var(--aw-color-text-page, #16202e);
+    max-width: 34rem;
+  }
+  .thit-sub {
+    text-align: center;
+    margin: 0.7rem auto 0;
+    max-width: 36rem;
+    color: var(--aw-color-text-muted);
+    font-size: 1.02rem;
+  }
+
+  .thit-steps {
+    display: grid;
+    gap: 1.1rem;
+    grid-template-columns: repeat(3, 1fr);
+    margin-top: 2.6rem;
+  }
+  .thit-step {
+    padding: 1.8rem 1.4rem;
+    border-radius: 1rem;
+    background: var(--aw-color-bg-page);
+    border: 1px solid rgb(59 130 246 / 18%);
+    box-shadow: 0 12px 28px rgb(11 22 38 / 8%);
+  }
+  .thit-step-n {
+    font-family: 'Space Grotesk Variable', var(--aw-font-sans, sans-serif);
+    font-weight: 700;
+    font-size: 0.95rem;
+    color: #fff;
+    background: var(--grad);
+    padding: 0.3rem 0.7rem;
+    border-radius: 0.5rem;
+  }
+  .thit-step-t {
+    font-family: 'Space Grotesk Variable', var(--aw-font-sans, sans-serif);
+    font-weight: 700;
+    font-size: 1.2rem;
+    margin: 0.9rem 0 0.4rem;
+    color: var(--aw-color-text-page, #16202e);
+  }
+  .thit-step-b {
+    color: var(--aw-color-text-muted);
+    line-height: 1.6;
+    margin: 0;
+  }
+
+  .thit-cards {
+    display: grid;
+    gap: 1rem;
+    grid-template-columns: repeat(3, 1fr);
+    margin-top: 2.6rem;
+  }
+  .thit-card {
+    padding: 1.5rem 1.4rem;
+    border-radius: 1rem;
+    background: var(--aw-color-bg-page);
+    border: 1px solid rgb(0 0 0 / 7%);
+    border-top: 3px solid transparent;
+    border-image: linear-gradient(90deg, var(--blue), var(--cyan)) 1;
+    box-shadow: 0 10px 24px rgb(11 22 38 / 7%);
+    transition:
+      transform 0.18s ease,
+      box-shadow 0.18s ease;
+  }
+  .thit-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 18px 36px rgb(34 211 238 / 16%);
+  }
+  .thit-card-t {
+    font-family: 'Space Grotesk Variable', var(--aw-font-sans, sans-serif);
+    font-weight: 700;
+    font-size: 1.1rem;
+    margin: 0 0 0.4rem;
+    color: var(--aw-color-text-page, #16202e);
+  }
+  .thit-card-b {
+    color: var(--aw-color-text-muted);
+    line-height: 1.55;
+    margin: 0;
+    font-size: 0.96rem;
+  }
+
+  /* ---------- CTA ---------- */
+  .thit-cta {
+    position: relative;
+    overflow: hidden;
+    isolation: isolate;
+    color: #eaf1fb;
+    text-align: center;
+    padding: 4.5rem 0;
+    background:
+      radial-gradient(90% 120% at 50% 120%, #123a5c 0%, var(--ink) 60%, #060c17 100%);
+  }
+  .thit-cta-inner {
+    position: relative;
+    z-index: 2;
+  }
+  .thit-cta-h {
+    font-family: 'Space Grotesk Variable', var(--aw-font-sans, sans-serif);
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    font-size: clamp(1.7rem, 4.5vw, 2.6rem);
+    margin: 0;
+  }
+  .thit-cta-p {
+    max-width: 38rem;
+    margin: 1rem auto 0;
+    color: rgb(211 227 246 / 88%);
+    font-size: 1.05rem;
+    line-height: 1.6;
+  }
+
+  .thit-foot {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: center;
+    gap: 0.4rem 1rem;
+    padding: 1.6rem 1.25rem;
+    background: #060c17;
+    text-align: center;
+    font-family: 'Space Grotesk Variable', var(--aw-font-sans, sans-serif);
+    font-size: 0.85rem;
+    color: rgb(148 197 245 / 60%);
+  }
+  .thit-foot-brand {
+    font-weight: 700;
+    color: rgb(200 224 250 / 90%);
+  }
+  .thit-foot a {
+    color: rgb(120 200 240 / 90%);
+    text-decoration: none;
+  }
+  .thit-foot a:hover {
+    text-decoration: underline;
+  }
+
+  @media (max-width: 860px) {
+    .thit-steps,
+    .thit-cards {
+      grid-template-columns: 1fr;
+    }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .thit-btn:hover,
+    .thit-card:hover {
+      transform: none;
+    }
+  }
+</style>

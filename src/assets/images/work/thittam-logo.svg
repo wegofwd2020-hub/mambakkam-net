@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 96 96" role="img" aria-label="Thittam — a plan across many verticals">
+  <rect x="0" y="0" width="96" height="96" rx="20" fill="#0F1E33"/>
+  <!-- timeline spine -->
+  <path d="M22 24 L22 74" stroke="#FFFFFF" stroke-opacity="0.55" stroke-width="2.5" stroke-linecap="round"/>
+  <!-- "now" marker -->
+  <path d="M58 22 L58 76" stroke="#FFFFFF" stroke-opacity="0.18" stroke-width="2" stroke-dasharray="3 4" stroke-linecap="round"/>
+  <!-- staggered plan bars = one plan, many verticals -->
+  <rect x="22" y="27" width="42" height="8.5" rx="4.25" fill="#3B82F6"/>
+  <rect x="22" y="44" width="30" height="8.5" rx="4.25" fill="#22D3EE"/>
+  <rect x="22" y="61" width="50" height="8.5" rx="4.25" fill="#F59E0B"/>
+  <!-- milestone dots -->
+  <circle cx="64" cy="31.25" r="3.4" fill="#FFFFFF"/>
+  <circle cx="52" cy="48.25" r="3.4" fill="#FFFFFF"/>
+  <circle cx="72" cy="65.25" r="3.4" fill="#FFFFFF"/>
+</svg>

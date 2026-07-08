@@ -4,6 +4,8 @@ excerpt: A multi-tenant SaaS platform for production management — one codebase
 author: siva-m
 type: product
 status: in-progress
+image: ~/assets/images/work/thittam-logo.svg
+landingUrl: /thittam
 tags:
   - Go
   - gRPC

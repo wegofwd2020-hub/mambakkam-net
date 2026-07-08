@@ -1,0 +1,494 @@
+---
+import Layout from '~/layouts/Layout.astro';
+import kolamLogo from '~/assets/images/work/kathai-chithiram-logo.svg?url';
+
+const metadata = {
+  title: 'Kathai Chithiram — a story your child can understand',
+  description:
+    'Kathai Chithiram turns a parent’s own story into a calm, captioned animation designed for a child with special needs — the social-stories principle, made personal and on-demand. Private by design, with a human review gate.',
+};
+
+const REPO = 'https://github.com/wegofwd2020-hub/kathai-chithiram';
+
+const steps = [
+  {
+    n: '01',
+    title: 'Write the story',
+    body: 'In your own words, describe your child’s moment — “Silas is scared of brushing his teeth.” A guided intake walks you through consent, the story, and a review-gated draft.',
+  },
+  {
+    n: '02',
+    title: 'It becomes a scene script',
+    body: 'Your story is turned into a structured, child-appropriate script — short sentences, clear steps, a predictable rhythm. An offline mode does this on your machine, no key, no network.',
+  },
+  {
+    n: '03',
+    title: 'Watch the animation',
+    body: 'The script renders into a gentle, captioned video — content-aware scenes and soft transitions, under seizure/flash and gentle-audio safety guards.',
+  },
+];
+
+const features = [
+  {
+    t: 'Built on social stories',
+    b: 'The proven principle behind visual schedules — a calm, predictable, visual narrative helps a child comprehend a situation far better than words alone.',
+  },
+  {
+    t: 'Personal, not generic',
+    b: 'Your child’s name, your situation, your words — not a stock clip. The story is theirs, generated on demand.',
+  },
+  {
+    t: 'Private by design',
+    b: 'The name is stripped before any model sees the text; scene scripts hold only a token; consent is the lawful basis; right-to-erasure cascades to every story.',
+  },
+  {
+    t: 'A human review gate',
+    b: 'Every draft is held for a parent — or an assigned therapist — to approve before a child ever sees it. The gate is enforced in code, not by policy.',
+  },
+  {
+    t: 'Safety at render time',
+    b: 'Seizure and flash guards, plus gentle-audio limits, are applied automatically as the animation is rendered.',
+  },
+  {
+    t: 'Therapist-ready',
+    b: 'Roles for therapists, programs and goals, and progress tracked against a policy — so a story fits into a plan of care.',
+  },
+];
+---
+
+<Layout metadata={metadata}>
+  <main class="kc">
+    <!-- ============================ HERO ============================ -->
+    <section class="kc-hero">
+      <div class="kc-brand">
+        <img src={kolamLogo} alt="Kathai Chithiram kolam mark" width="88" height="88" class="kc-logo" loading="eager" />
+      </div>
+
+      <div class="kc-wrap kc-hero-inner">
+        <p class="kc-eyebrow">Personal social stories · for children with special needs</p>
+
+        <p class="kc-tamil">கதை சித்திரம்</p>
+        <h1 class="kc-title">Kathai Chithiram</h1>
+        <p class="kc-slogan"><span class="kc-grad">Story</span> to <span class="kc-grad">picture.</span></p>
+
+        <p class="kc-lede">
+          Kathai Chithiram turns <strong>a parent’s own story</strong> into a calm, captioned animation a child can
+          actually understand. You describe the moment in your words; it becomes a gentle, paced, predictable visual
+          narrative — made for your child, on demand.
+        </p>
+
+        <div class="kc-cta-row">
+          <a class="kc-btn kc-btn-primary" href="#how">See how it works</a>
+          <a class="kc-btn kc-btn-ghost" href={REPO} target="_blank" rel="noopener noreferrer">View on GitHub</a>
+        </div>
+
+        <p class="kc-trust">Private by design · a human reviews every draft · works fully offline, no key</p>
+      </div>
+    </section>
+
+    <!-- ========================= HOW IT WORKS ========================= -->
+    <section class="kc-section" id="how">
+      <div class="kc-wrap">
+        <p class="kc-kicker">How it works</p>
+        <h2 class="kc-h2">From your words to a story your child can hold onto</h2>
+        <p class="kc-sub">Three gentle steps — a parent never touches code.</p>
+
+        <div class="kc-steps">
+          {
+            steps.map((s) => (
+              <article class="kc-step">
+                <span class="kc-step-n">{s.n}</span>
+                <h3 class="kc-step-t">{s.title}</h3>
+                <p class="kc-step-b">{s.body}</p>
+              </article>
+            ))
+          }
+        </div>
+
+        <p class="kc-example">
+          The first hand-built story, <em>“Silas Shines His Smile,”</em> is an 11-scene tooth-brushing routine — the kind
+          of everyday moment that becomes so much calmer when a child can watch it first.
+        </p>
+      </div>
+    </section>
+
+    <!-- =========================== FEATURES =========================== -->
+    <section class="kc-section kc-section-tint">
+      <div class="kc-wrap">
+        <p class="kc-kicker">Why it’s built this way</p>
+        <h2 class="kc-h2">Gentle for the child. Safe for the family.</h2>
+
+        <div class="kc-cards">
+          {
+            features.map((f) => (
+              <article class="kc-card">
+                <h3 class="kc-card-t">{f.t}</h3>
+                <p class="kc-card-b">{f.b}</p>
+              </article>
+            ))
+          }
+        </div>
+      </div>
+    </section>
+
+    <!-- ============================= CTA ============================= -->
+    <section class="kc-cta">
+      <div class="kc-wrap kc-cta-inner">
+        <h2 class="kc-cta-h">Turn your story into something your child can understand.</h2>
+        <p class="kc-cta-p">
+          Kathai Chithiram is an early, single-operator prototype — the full pipeline, from a parent’s story to a
+          captioned draft, is built and working. The code, the safety model, and the story schema are open to read.
+        </p>
+        <div class="kc-cta-row">
+          <a class="kc-btn kc-btn-primary" href={REPO} target="_blank" rel="noopener noreferrer">View on GitHub</a>
+        </div>
+      </div>
+    </section>
+
+    <footer class="kc-foot">
+      <span class="kc-foot-brand">Kathai Chithiram</span>
+      <span class="kc-foot-meta">
+        © {new Date().getFullYear()} · A WeGoFwd2020 project · <a href="https://mambakkam.net">part of mambakkam.net</a>
+      </span>
+    </footer>
+  </main>
+</Layout>
+
+<style>
+  .kc {
+    --blue: #4a90d9;
+    --blue-deep: #2f6fb0;
+    --gold: #f2c14e;
+    --coral: #ef8f7e;
+    --cream: #fbf6ec;
+    --ink: #2b2b33;
+    --grad: linear-gradient(100deg, var(--blue), var(--gold));
+  }
+  .kc-wrap {
+    max-width: 62rem;
+    margin: 0 auto;
+    padding: 0 1.25rem;
+  }
+
+  /* ---------- HERO ---------- */
+  .kc-hero {
+    position: relative;
+    overflow: hidden;
+    text-align: center;
+    padding: 4rem 0 4.5rem;
+    color: var(--ink);
+    background:
+      radial-gradient(70% 55% at 15% 0%, rgb(74 144 217 / 16%), transparent 60%),
+      radial-gradient(60% 55% at 90% 15%, rgb(242 193 78 / 22%), transparent 60%),
+      var(--cream);
+  }
+  .kc-brand {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 0.4rem;
+  }
+  .kc-logo {
+    width: 88px;
+    height: 88px;
+    animation: kc-bob 6s ease-in-out infinite;
+  }
+  @keyframes kc-bob {
+    0%,
+    100% {
+      transform: translateY(0);
+    }
+    50% {
+      transform: translateY(-8px);
+    }
+  }
+  .kc-eyebrow {
+    font-family: var(--aw-font-sans, sans-serif);
+    font-size: 0.9rem;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    color: var(--blue-deep);
+    margin: 0.4rem 0 0;
+  }
+  .kc-tamil {
+    font-size: clamp(1.6rem, 5vw, 2.4rem);
+    color: var(--blue-deep);
+    margin: 1.1rem 0 0;
+    line-height: 1;
+  }
+  .kc-title {
+    font-family: var(--aw-font-serif, Georgia, serif);
+    font-weight: 700;
+    letter-spacing: -0.01em;
+    font-size: clamp(2.4rem, 7vw, 4rem);
+    line-height: 1.04;
+    margin: 0.4rem 0 0;
+    color: var(--ink);
+  }
+  .kc-slogan {
+    font-family: var(--aw-font-serif, Georgia, serif);
+    font-style: italic;
+    font-size: clamp(1.3rem, 3.4vw, 2rem);
+    margin: 0.5rem 0 0;
+    color: var(--blue-deep);
+  }
+  .kc-grad {
+    background: var(--grad);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    font-style: normal;
+    font-weight: 700;
+  }
+  .kc-lede {
+    max-width: 40rem;
+    margin: 1.4rem auto 0;
+    font-size: clamp(1.05rem, 2.3vw, 1.28rem);
+    line-height: 1.65;
+    color: #45454f;
+  }
+  .kc-lede strong {
+    color: var(--ink);
+    font-weight: 700;
+  }
+
+  .kc-cta-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.8rem;
+    justify-content: center;
+    margin-top: 2rem;
+  }
+  .kc-btn {
+    font-family: var(--aw-font-sans, sans-serif);
+    font-weight: 700;
+    font-size: 1rem;
+    padding: 0.9rem 1.6rem;
+    border-radius: 999px;
+    text-decoration: none;
+    transition:
+      transform 0.16s ease,
+      box-shadow 0.16s ease,
+      filter 0.16s ease;
+  }
+  .kc-btn:hover {
+    transform: translateY(-2px);
+  }
+  .kc-btn-primary {
+    color: #fff;
+    background: var(--grad);
+    box-shadow: 0 8px 20px rgb(74 144 217 / 32%);
+  }
+  .kc-btn-primary:hover {
+    filter: brightness(1.05);
+  }
+  .kc-btn-ghost {
+    color: var(--blue-deep);
+    background: #fff;
+    border: 1.5px solid rgb(74 144 217 / 35%);
+  }
+  .kc-btn-ghost:hover {
+    border-color: var(--blue);
+    background: rgb(74 144 217 / 6%);
+  }
+  .kc-trust {
+    margin-top: 1.2rem;
+    font-size: 0.92rem;
+    font-weight: 500;
+    color: var(--blue-deep);
+  }
+
+  /* ---------- sections ---------- */
+  .kc-section {
+    padding: 4.5rem 0;
+  }
+  .kc-section-tint {
+    background: radial-gradient(90% 60% at 50% 0%, rgb(242 193 78 / 10%), transparent 60%), var(--aw-color-bg-page);
+  }
+  .kc-kicker {
+    text-align: center;
+    font-family: var(--aw-font-sans, sans-serif);
+    font-weight: 700;
+    font-size: 0.82rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--blue);
+    margin: 0;
+  }
+  .kc-h2 {
+    text-align: center;
+    font-family: var(--aw-font-serif, Georgia, serif);
+    font-weight: 700;
+    letter-spacing: -0.01em;
+    font-size: clamp(1.7rem, 4.2vw, 2.5rem);
+    margin: 0.5rem auto 0;
+    color: var(--aw-color-text-page, #2b2b33);
+    max-width: 34rem;
+  }
+  .kc-sub {
+    text-align: center;
+    margin: 0.7rem auto 0;
+    max-width: 34rem;
+    color: var(--aw-color-text-muted);
+    font-size: 1.02rem;
+  }
+
+  .kc-steps {
+    display: grid;
+    gap: 1.1rem;
+    grid-template-columns: repeat(3, 1fr);
+    margin-top: 2.6rem;
+  }
+  .kc-step {
+    padding: 1.9rem 1.5rem;
+    border-radius: 1.4rem;
+    background: var(--aw-color-bg-page);
+    border: 1px solid rgb(74 144 217 / 16%);
+    box-shadow: 0 12px 26px rgb(47 111 176 / 8%);
+  }
+  .kc-step-n {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 2.7rem;
+    height: 2.7rem;
+    border-radius: 50%;
+    font-family: var(--aw-font-sans, sans-serif);
+    font-weight: 800;
+    color: #fff;
+    background: var(--grad);
+    box-shadow: 0 4px 12px rgb(74 144 217 / 35%);
+  }
+  .kc-step-t {
+    font-family: var(--aw-font-serif, Georgia, serif);
+    font-weight: 700;
+    font-size: 1.25rem;
+    margin: 1rem 0 0.4rem;
+    color: var(--aw-color-text-page, #2b2b33);
+  }
+  .kc-step-b {
+    color: var(--aw-color-text-muted);
+    line-height: 1.65;
+    margin: 0;
+  }
+  .kc-example {
+    max-width: 40rem;
+    margin: 2.4rem auto 0;
+    text-align: center;
+    font-size: 1.02rem;
+    line-height: 1.6;
+    color: var(--aw-color-text-muted);
+    padding: 1.2rem 1.5rem;
+    border-radius: 1.2rem;
+    background: rgb(242 193 78 / 12%);
+    border: 1px solid rgb(242 193 78 / 30%);
+  }
+  .kc-example em {
+    color: var(--blue-deep);
+    font-weight: 600;
+  }
+
+  .kc-cards {
+    display: grid;
+    gap: 1rem;
+    grid-template-columns: repeat(3, 1fr);
+    margin-top: 2.6rem;
+  }
+  .kc-card {
+    padding: 1.6rem 1.4rem;
+    border-radius: 1.2rem;
+    background: var(--aw-color-bg-page);
+    border: 1px solid rgb(0 0 0 / 6%);
+    box-shadow: 0 10px 22px rgb(47 111 176 / 7%);
+    transition:
+      transform 0.18s ease,
+      box-shadow 0.18s ease;
+  }
+  .kc-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 18px 34px rgb(74 144 217 / 16%);
+  }
+  .kc-card-t {
+    font-family: var(--aw-font-serif, Georgia, serif);
+    font-weight: 700;
+    font-size: 1.15rem;
+    margin: 0 0 0.4rem;
+    color: var(--aw-color-text-page, #2b2b33);
+  }
+  .kc-card-b {
+    color: var(--aw-color-text-muted);
+    line-height: 1.6;
+    margin: 0;
+    font-size: 0.96rem;
+  }
+
+  /* ---------- CTA ---------- */
+  .kc-cta {
+    text-align: center;
+    padding: 4.5rem 0;
+    color: #fff;
+    background: linear-gradient(120deg, var(--blue-deep), var(--blue) 55%, #6aa9e0);
+  }
+  .kc-cta-h {
+    font-family: var(--aw-font-serif, Georgia, serif);
+    font-weight: 700;
+    letter-spacing: -0.01em;
+    font-size: clamp(1.7rem, 4.5vw, 2.5rem);
+    margin: 0 auto;
+    max-width: 30rem;
+    line-height: 1.15;
+  }
+  .kc-cta-p {
+    max-width: 38rem;
+    margin: 1.1rem auto 0;
+    color: rgb(255 255 255 / 90%);
+    font-size: 1.05rem;
+    line-height: 1.6;
+  }
+  .kc-cta .kc-btn-primary {
+    color: var(--blue-deep);
+    background: #fff;
+    box-shadow: 0 8px 20px rgb(0 0 0 / 18%);
+  }
+
+  .kc-foot {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: center;
+    gap: 0.4rem 1rem;
+    padding: 1.6rem 1.25rem;
+    background: #24303f;
+    text-align: center;
+    font-family: var(--aw-font-sans, sans-serif);
+    font-size: 0.85rem;
+    color: rgb(220 226 235 / 60%);
+  }
+  .kc-foot-brand {
+    font-family: var(--aw-font-serif, Georgia, serif);
+    font-weight: 700;
+    color: rgb(230 236 245 / 90%);
+  }
+  .kc-foot a {
+    color: rgb(150 195 235 / 95%);
+    text-decoration: none;
+  }
+  .kc-foot a:hover {
+    text-decoration: underline;
+  }
+
+  @media (max-width: 860px) {
+    .kc-steps,
+    .kc-cards {
+      grid-template-columns: 1fr;
+    }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .kc-logo {
+      animation: none;
+    }
+    .kc-btn:hover,
+    .kc-card:hover {
+      transform: none;
+    }
+  }
+</style>
