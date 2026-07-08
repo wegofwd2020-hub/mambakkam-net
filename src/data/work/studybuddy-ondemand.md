@@ -4,6 +4,7 @@ excerpt: An on-demand K-12 education platform connecting students with tutors an
 author: siva-m
 type: product
 status: in-progress
+url: https://demo.usestudybuddy.com/
 image: ~/assets/images/work/studybuddy-ondemand-logo.png
 tags:
   - Python
