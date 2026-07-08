@@ -165,6 +165,7 @@ const workCollection = defineCollection({
     status: z.enum(['live', 'in-progress', 'archived']).default('live'),
 
     url: z.string().url().optional(),
+    landingUrl: z.string().optional(), // internal one-pager route (e.g. /thittam) — cards link here when set
 
     image: z.string().optional(),
     tags: z.array(z.string()).optional(),

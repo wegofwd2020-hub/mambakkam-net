@@ -54,16 +54,17 @@ const metadata = { title: 'Work from Mambakkam' };
         <div class="grid gap-6 sm:grid-cols-2">
           {ordered.map((item) => {
             const comingSoon = item.data.comingSoon;
-            const Tag = comingSoon ? 'div' : 'a';
-            const tagProps = comingSoon
+            const href = item.data.landingUrl ?? (comingSoon ? undefined : `/work/${item.id}`);
+            const Tag = href ? 'a' : 'div';
+            const tagProps = href
               ? {
-                  class:
-                    'block rounded-2xl border border-gray-200 dark:border-gray-700 p-6 bg-white dark:bg-gray-900 opacity-90',
-                }
-              : {
-                  href: `/work/${item.id}`,
+                  href,
                   class:
                     'group block rounded-2xl border border-gray-200 dark:border-gray-700 p-6 hover:border-primary hover:shadow-md transition-all duration-200 bg-white dark:bg-gray-900',
+                }
+              : {
+                  class:
+                    'block rounded-2xl border border-gray-200 dark:border-gray-700 p-6 bg-white dark:bg-gray-900 opacity-90',
                 };
             return (
               <Tag {...tagProps}>
@@ -86,7 +87,7 @@ const metadata = { title: 'Work from Mambakkam' };
                 </div>
 
                 <h2
-                  class={`text-xl font-heading font-bold text-gray-900 dark:text-white mb-2 ${comingSoon ? '' : 'group-hover:text-primary transition-colors'}`}
+                  class={`text-xl font-heading font-bold text-gray-900 dark:text-white mb-2 ${href ? 'group-hover:text-primary transition-colors' : ''}`}
                 >
                   {item.data.title}
                 </h2>
