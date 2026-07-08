@@ -1,6 +1,6 @@
 ---
 title: Mentible
-excerpt: An AI book-authoring app for adult self-learners. Structure a topic, generate it chapter by chapter, and compile a polished EPUB3/PDF book — provider-agnostic, with managed keys or your own.
+excerpt: An AI book-authoring tool for adult self-learners. The model is the commodity — you set the scope and boundaries, and Mentible compiles a polished EPUB3/PDF book that's exactly what you decided. Provider-agnostic, with managed keys or your own.
 author: siva-m
 type: product
 status: in-progress
@@ -24,7 +24,7 @@ draft: false
 
 ## What is Mentible?
 
-Mentible is an AI **authoring** app for adults who learn on their own terms. You
+Mentible is an AI **authoring** tool for adults who learn on their own terms — the model supplies the content; **you** supply the scope, the boundaries, and the shape. You
 describe what you want to understand, structure it as a multi-chapter book, generate
 the content topic by topic, and **compile it into a polished EPUB3 / PDF book** —
 cover and all. The finished book is the product: yours to keep, read offline, and
