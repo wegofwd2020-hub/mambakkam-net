@@ -3,7 +3,7 @@ title: Pramana
 excerpt: A compliance-training tracking platform that produces auditable proof of completion. Named for प्रमाण ("valid means of knowledge"), v1 is SOX-scoped with an append-only, tamper-evident audit trail.
 author: siva-m
 type: product
-status: in-progress
+status: in-client-deployment
 image: ~/assets/images/work/pramana-logo.svg
 tags:
   - Python

@@ -29,6 +29,8 @@ const statusBadge = (item: (typeof work)[number]) => {
   switch (item.data.status) {
     case 'live':
       return { label: 'Live', token: 'var(--status-live)' };
+    case 'in-client-deployment':
+      return { label: 'In client deployment', token: 'var(--status-live)' };
     case 'archived':
       return { label: 'Archived', token: 'var(--status-archived)' };
     default:

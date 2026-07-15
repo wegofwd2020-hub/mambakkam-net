@@ -1,6 +1,6 @@
 ---
 title: StudyBuddy OnDemand
-excerpt: An on-demand K-12 education platform connecting students with tutors and learning resources — built for scale, designed for access.
+excerpt: Grade-aware STEM tutoring for K-12 institutions — pre-generated AI content, instant delivery, offline-capable, with teacher and parent visibility.
 author: siva-m
 type: product
 status: in-progress

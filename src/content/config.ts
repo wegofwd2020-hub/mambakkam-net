@@ -162,7 +162,7 @@ const workCollection = defineCollection({
     author: z.string(), // matches person file slug e.g. 'siva-m'
 
     type: z.enum(['product', 'project', 'open-source', 'research']),
-    status: z.enum(['live', 'in-progress', 'archived']).default('live'),
+    status: z.enum(['live', 'in-progress', 'in-client-deployment', 'archived']).default('live'),
 
     url: z.string().url().optional(),
     landingUrl: z.string().optional(), // internal one-pager route (e.g. /thittam) — cards link here when set
