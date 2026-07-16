@@ -58,7 +58,15 @@ narrow to ship a correct, defensible SOX workflow first.
 
 ## Status
 
-Early build. The requirements and locked design decisions are complete, and the
-foundation is going in: the OpenAPI 3.1 specification, the SQLAlchemy data model with
-an Alembic baseline, repository scaffolding, and the assignment state machine as a
-pure domain layer. The v1 service implementation is the next milestone.
+Deployed as the client's SOX compliance-training platform. Delivery ran in four
+governed phases — scaffolding, API specification, state machine, data model — using an
+AI-assisted workflow operating under version-controlled conventions, with every change
+ticketed and reviewed.
+
+## Case study
+
+The architecture decisions behind Pramana — immutability enforced at the database
+level, the assignment lifecycle proven with property-based tests, and a spec-first API
+contract — are written up in a
+[public case study](https://github.com/wegofwd2020-hub/pramana-case-study). Source code
+is private under the client engagement.
