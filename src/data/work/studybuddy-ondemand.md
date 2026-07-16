@@ -9,7 +9,7 @@ image: ~/assets/images/work/studybuddy-ondemand-logo.png
 tags:
   - Python
   - FastAPI
-  - K-12
+  - Grades 5–12
   - Education
   - PostgreSQL
   - Redis
