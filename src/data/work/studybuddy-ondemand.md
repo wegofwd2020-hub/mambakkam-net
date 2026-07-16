@@ -1,6 +1,6 @@
 ---
 title: StudyBuddy OnDemand
-excerpt: Grade-aware STEM tutoring for K-12 institutions — pre-generated AI content, instant delivery, offline-capable, with teacher and parent visibility.
+excerpt: Grade-aware STEM learning for Grades 5–12 — AI-generated content built ahead of time and served instantly, offline-capable, with teacher and school visibility.
 author: siva-m
 type: product
 status: in-progress
@@ -21,23 +21,23 @@ draft: false
 
 ## What is StudyBuddy OnDemand?
 
-StudyBuddy OnDemand is a K-12 education platform built to make quality tutoring and learning resources available on demand — to any student, at any time.
+StudyBuddy OnDemand is a backend-powered STEM learning platform for Grades 5–12. Lessons, quizzes, and audio are generated ahead of time by an LLM content pipeline and cached — so a student gets material the instant they ask for it, rather than waiting on a live model call.
 
-The platform connects students with tutors, delivers structured learning content, and tracks progress across subjects — built with a multi-tenant architecture that supports schools, districts, and independent learners within a single system.
+The platform delivers that structured content, grades quizzes server-side, and tracks progress across subjects — on a multi-tenant architecture where every school is an isolated tenant. Independent teachers and home schoolers register as their own single-school tenant.
 
 ## The Problem It Solves
 
-Access to quality tutoring has always been uneven. Students in under-resourced schools or remote communities rarely get the same quality of academic support as those in urban or well-funded environments.
+Access to quality academic support has always been uneven. Students in under-resourced schools or remote communities rarely get the same depth of support as those in urban or well-funded environments.
 
-StudyBuddy OnDemand is built on the premise that the logistics of connecting a student with the right support should not be the bottleneck. The platform handles scheduling, matching, delivery, and progress tracking — so educators and tutors can focus on the student.
+StudyBuddy OnDemand is built on the premise that generation cost and connectivity should not be the bottleneck. Content is built once per grade, subject, and unit, then served from cache to every student who needs it — and once downloaded, it works with no connection at all, queueing progress on the device until the network returns.
 
 ## Architecture
 
 The platform is built on a modern async Python stack designed for reliability and scale:
 
 - **API layer** — FastAPI with async handlers for high-concurrency request handling
-- **Database** — PostgreSQL with asyncpg, multi-tenant schema isolation
-- **Task processing** — Celery with Redis for background jobs: session scheduling, notifications, progress aggregation
+- **Database** — PostgreSQL with asyncpg, tenant isolation enforced by row-level security
+- **Task processing** — Celery with Redis for background jobs: content-pipeline runs, notifications, progress persistence, and scheduled digests
 - **Validation** — Pydantic models throughout, with strict boundary validation
 - **Observability** — Structured JSON logging via structlog, Prometheus metrics, health and readiness endpoints
 
@@ -45,16 +45,16 @@ The platform is built on a modern async Python stack designed for reliability an
 
 **Async-first.** Every database call, external integration, and background task is async — the platform is built to handle concurrent load without blocking.
 
-**Multi-tenant from day one.** Schools and districts are first-class tenants. Data isolation, role separation, and tenant-specific configuration are built into the core, not added later.
+**Multi-tenant from day one.** The school is the primary tenant — no user exists outside a school context, so even an independent teacher is a school of one. Isolation, role separation, and tenant-specific configuration are built into the core, not added later.
 
-**Background tasks for everything non-critical.** Session confirmations, progress snapshots, and analytics events are processed asynchronously — the student-facing request path stays fast.
+**Background tasks for everything non-critical.** Progress writes, streak updates, and notification sends are processed asynchronously — the student-facing request path stays fast.
 
-**No floats for anything important.** Session pricing and credits use `Decimal` throughout, stored as `NUMERIC(14,2)` in PostgreSQL.
+**No floats for money.** Subscription pricing, build credits, and per-generation AI cost use `Decimal` throughout, stored as fixed-precision `NUMERIC` columns in PostgreSQL.
 
 ## Status
 
-Active development. Core tutoring and session management flows are implemented. Work is ongoing on the student progress dashboard, tutor matching algorithms, and the content delivery layer.
+Late build. The content pipeline, curriculum lifecycle and governance, teacher authoring studio, server-side quiz grading, progress tracking, and subscription billing are implemented, alongside a self-serve demo. Platform hardening is in progress; launch readiness, onboarding, and accessibility are the next milestones. The student mobile client runs today as a Kivy app, with a React Native rewrite decided but not yet started.
 
 ## Documentation
 
-Platform architecture, API specifications, and developer guides are maintained in the [StudyBuddy Docs](https://github.com/wegofwd2020-hub/studybuddy-docs) repository.
+Architecture notes, API specifications, and developer guides live alongside the code in the [StudyBuddy OnDemand repository](https://github.com/wegofwd2020-hub/StudyBuddy_OnDemand#readme).
