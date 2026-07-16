@@ -362,6 +362,17 @@ const linkedinUrl = links?.linkedin;
     opacity: 0.8;
   }
 
+  /* Tamil script has no glyphs in the Inter/Merriweather stack and falls back to
+     a system face, which renders optically smaller than Latin at the same size.
+     Size it up so the couplet reads as the closing inscription it is — same
+     compensation as .kc-tamil on the Kathai Chithiram page. */
+  .profile-prose :global(.kural-tamil) {
+    font-family: var(--aw-font-serif), Georgia, serif;
+    font-size: 1.45rem;
+    line-height: 1.75;
+    margin-bottom: 0.75rem;
+  }
+
   /* Section heading with gradient underline (matches prose h2) */
   .section-heading {
     color: var(--aw-color-text-heading);
