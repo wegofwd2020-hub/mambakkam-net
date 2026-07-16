@@ -1,0 +1,54 @@
+---
+/**
+ * A Thirukkural couplet (or any Tamil verse) with an English rendering beneath it.
+ *
+ * Deliberately not a <blockquote>: the prose styling wraps a single pair of quotes
+ * around a blockquote's whole contents, which would present the English rendering as
+ * part of the original couplet. The verse and the translation have different authors.
+ *
+ * Takes the verse as props rather than children so the MDX call site stays
+ * self-closing — Prettier expands any JSX element with text children onto separate
+ * lines, and MDX then re-parses the indented contents as markdown, nesting <p> inside
+ * <p> and stripping the class off the text.
+ */
+interface Props {
+  /** The verse, one array entry per line. */
+  lines: string[];
+  /** English rendering, shown beneath the verse. */
+  rendering: string;
+  /** BCP-47 tag for the verse. */
+  lang?: string;
+}
+
+const { lines, rendering, lang = 'ta' } = Astro.props;
+---
+
+<div class="kural">
+  {
+    lines.map((line) => (
+      <p class="kural__line" lang={lang}>
+        {line}
+      </p>
+    ))
+  }
+  <p class="kural__rendering"><em>{rendering}</em></p>
+</div>
+
+<style>
+  /* Tamil has no glyphs in the Inter/Merriweather stack and falls back to a system
+     face, which renders optically smaller than Latin at the same nominal size. Size
+     it up so the couplet reads as the inscription it is — the same compensation
+     .kc-tamil makes on the Kathai Chithiram page and nameTamil makes in the hero. */
+  .kural__line {
+    font-family: var(--aw-font-serif), Georgia, serif;
+    font-size: 1.45rem;
+    line-height: 1.75;
+    color: var(--aw-color-text-default);
+    margin: 0;
+  }
+
+  .kural__rendering {
+    margin: 1rem 0 0;
+    color: var(--aw-color-text-default);
+  }
+</style>
