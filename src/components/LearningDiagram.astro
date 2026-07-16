@@ -1,0 +1,187 @@
+---
+/**
+ * Pipeline-vs-agent diagram for the "What I'm Learning Now" section.
+ *
+ * The SVG is inlined rather than loaded through <img> so its dark-mode rules can key
+ * off the site's `.dark` class. The source file used @media (prefers-color-scheme:
+ * dark), which follows the OS and cannot see the site's theme toggle — anyone whose
+ * toggle disagreed with their OS would have got a light diagram on a dark page.
+ *
+ * Inlining means the SVG's own <style> would otherwise leak: its selectors are bare
+ * (`text`, `.h`, `.panel`, `.ln`), so `text{fill:#475569}` would repaint every <text>
+ * in the document. Astro scopes this block automatically, and every rule is nested
+ * under .learning-diagram as a second belt.
+ */
+---
+
+<figure class="learning-diagram">
+  <svg viewBox="0 0 680 550" role="img" xmlns="http://www.w3.org/2000/svg">
+    <title>Pipelines I control versus agents that plan — and the open governance question</title>
+    <desc>
+      Left: a content pipeline of four steps — scope, generate, review and approve, publish with manifest — with human
+      approval at every hand-off. Right: an agent loop — a goal from a human, then plan, act, observe, repeating until
+      done. Today the pipeline feeds three audiences: children with special needs, students in grades 5 to 12, and
+      compliance professionals. Beneath both, the open question: when is handing control to the agent worth it, and how
+      do you govern an agent as rigorously as a pipeline?
+    </desc>
+
+    {/* Left panel: pipeline */}
+    <rect class="panel" x="40" y="60" width="290" height="310" rx="8"></rect>
+    <text class="h" x="185" y="86" text-anchor="middle">Pipeline — what I build</text>
+    <text x="185" y="104" text-anchor="middle">I control every step</text>
+    <rect class="teal-b" x="85" y="122" width="200" height="34" rx="6"></rect>
+    <text class="node teal-t" x="185" y="144" text-anchor="middle">Scope</text>
+    <line class="ln" x1="185" y1="156" x2="185" y2="168"></line>
+    <polygon class="ah" points="185,172 181,165 189,165"></polygon>
+    <rect class="teal-b" x="85" y="172" width="200" height="34" rx="6"></rect>
+    <text class="node teal-t" x="185" y="194" text-anchor="middle">Generate</text>
+    <line class="ln" x1="185" y1="206" x2="185" y2="218"></line>
+    <polygon class="ah" points="185,222 181,215 189,215"></polygon>
+    <rect class="teal-b" x="85" y="222" width="200" height="34" rx="6"></rect>
+    <text class="node teal-t" x="185" y="244" text-anchor="middle">Review &amp; approve</text>
+    <line class="ln" x1="185" y1="256" x2="185" y2="268"></line>
+    <polygon class="ah" points="185,272 181,265 189,265"></polygon>
+    <rect class="teal-b" x="85" y="272" width="200" height="34" rx="6"></rect>
+    <text class="node teal-t" x="185" y="294" text-anchor="middle">Publish with manifest</text>
+    <text x="185" y="336" text-anchor="middle">human approval at every hand-off</text>
+
+    {/* Right panel: agent */}
+    <rect class="panel" x="350" y="60" width="290" height="310" rx="8"></rect>
+    <text class="h" x="495" y="86" text-anchor="middle">Agent — what I'm studying</text>
+    <text x="495" y="104" text-anchor="middle">it plans its own steps</text>
+    <rect class="purple-b" x="395" y="122" width="200" height="34" rx="6"></rect>
+    <text class="node purple-t" x="495" y="144" text-anchor="middle">Goal from a human</text>
+    <line class="ln" x1="495" y1="156" x2="495" y2="166"></line>
+    <polygon class="ah" points="495,170 491,163 499,163"></polygon>
+    <rect class="purple-b" x="440" y="170" width="110" height="30" rx="6"></rect>
+    <text class="purple-t" x="495" y="189" text-anchor="middle">Plan</text>
+    <rect class="purple-b" x="520" y="240" width="100" height="30" rx="6"></rect>
+    <text class="purple-t" x="570" y="259" text-anchor="middle">Act (tools)</text>
+    <rect class="purple-b" x="370" y="240" width="100" height="30" rx="6"></rect>
+    <text class="purple-t" x="420" y="259" text-anchor="middle">Observe</text>
+    <line class="ln" x1="527" y1="200" x2="558" y2="236"></line>
+    <polygon class="ah" points="560,240 552,238 558,232"></polygon>
+    <line class="ln" x1="520" y1="255" x2="476" y2="255"></line>
+    <polygon class="ah" points="472,255 479,251 479,259"></polygon>
+    <line class="ln" x1="432" y1="240" x2="461" y2="204"></line>
+    <polygon class="ah" points="463,200 464,208 456,206"></polygon>
+    <text x="495" y="300" text-anchor="middle">repeat until done</text>
+    <text x="495" y="336" text-anchor="middle">chooses its own steps and tools</text>
+
+    {/* Feed to audiences */}
+    <line class="ln" x1="185" y1="370" x2="185" y2="392"></line>
+    <polygon class="ah" points="185,396 181,389 189,389"></polygon>
+    <text x="205" y="384">today</text>
+    <rect class="amber-b" x="40" y="400" width="200" height="34" rx="17"></rect>
+    <text class="amber-t" x="140" y="421" text-anchor="middle">children with special needs</text>
+    <rect class="amber-b" x="255" y="400" width="170" height="34" rx="17"></rect>
+    <text class="amber-t" x="340" y="421" text-anchor="middle">students, grades 5–12</text>
+    <rect class="amber-b" x="440" y="400" width="200" height="34" rx="17"></rect>
+    <text class="amber-t" x="540" y="421" text-anchor="middle">compliance professionals</text>
+
+    {/* Open question */}
+    <rect class="qbox" x="40" y="458" width="600" height="70" rx="8"></rect>
+    <text class="h" x="340" y="480" text-anchor="middle">The open question</text>
+    <text x="340" y="500" text-anchor="middle">when is handing control to the agent worth it —</text>
+    <text x="340" y="516" text-anchor="middle">and how do you govern an agent as rigorously as a pipeline?</text>
+  </svg>
+</figure>
+
+<style>
+  .learning-diagram {
+    margin: 1.75rem 0 0;
+  }
+
+  .learning-diagram svg {
+    display: block;
+    width: 100%;
+    height: auto;
+    font-family: var(--aw-font-heading), ui-sans-serif, system-ui, sans-serif;
+  }
+
+  /* Every selector is nested under .learning-diagram: the source SVG's rules were
+     bare element/class selectors that would otherwise repaint the whole page. */
+  .learning-diagram text {
+    font-size: 12px;
+    fill: #475569;
+  }
+  .learning-diagram .h {
+    font-size: 14px;
+    font-weight: 600;
+    fill: #334155;
+  }
+  .learning-diagram .node {
+    font-size: 13.5px;
+    font-weight: 600;
+  }
+  .learning-diagram .teal-t {
+    fill: #115e59;
+  }
+  .learning-diagram .purple-t {
+    fill: #5b21b6;
+  }
+  .learning-diagram .amber-t {
+    fill: #92400e;
+  }
+  .learning-diagram .panel {
+    fill: #f8fafc;
+    stroke: #e2e8f0;
+  }
+  .learning-diagram .qbox {
+    fill: none;
+    stroke: #94a3b8;
+    stroke-dasharray: 5 4;
+  }
+  .learning-diagram .ln {
+    stroke: #64748b;
+    stroke-width: 1;
+    fill: none;
+  }
+  .learning-diagram .ah {
+    fill: #64748b;
+  }
+  .learning-diagram .teal-b {
+    fill: #ccfbf1;
+    stroke: #5eead4;
+  }
+  .learning-diagram .purple-b {
+    fill: #ede9fe;
+    stroke: #c4b5fd;
+  }
+  .learning-diagram .amber-b {
+    fill: #fef3c7;
+    stroke: #fcd34d;
+  }
+
+  /* Keyed to the site's `.dark` class (tailwind darkMode: 'class'), NOT to
+     prefers-color-scheme — the theme toggle must drive this, not the OS. */
+  :global(html.dark) .learning-diagram text {
+    fill: #cbd5e1;
+  }
+  :global(html.dark) .learning-diagram .h {
+    fill: #e2e8f0;
+  }
+  :global(html.dark) .learning-diagram .panel {
+    fill: rgb(148 163 184 / 7%);
+    stroke: #334155;
+  }
+  :global(html.dark) .learning-diagram .qbox {
+    stroke: #64748b;
+  }
+  /* The chips keep their light fills in dark mode, so their text must keep its dark
+     ink. Re-asserted here because `html.dark .learning-diagram text` outranks the
+     bare `.teal-t` rules above and would otherwise wash the labels out — the source
+     SVG avoided this only because its dark rule was an unqualified `text` selector,
+     which loses to a class. */
+  :global(html.dark) .learning-diagram .teal-t {
+    fill: #115e59;
+  }
+  :global(html.dark) .learning-diagram .purple-t {
+    fill: #5b21b6;
+  }
+  :global(html.dark) .learning-diagram .amber-t {
+    fill: #92400e;
+  }
+  /* The chips keep their light fills in dark mode — they carry dark text and read
+     as inks on the page rather than surfaces. */
+</style>
