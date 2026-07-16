@@ -3,7 +3,7 @@ title: Mentible
 excerpt: An AI book-authoring tool for adult self-learners. The model is the commodity — you set the scope and boundaries, and Mentible compiles a polished EPUB3/PDF book that's exactly what you decided. Provider-agnostic, with managed keys or your own.
 author: siva-m
 type: product
-status: in-progress
+status: live
 url: https://mambakkam.net/demos/mentible/
 image: ~/assets/images/work/mentible-logo.png
 tags:
