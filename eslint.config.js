@@ -58,6 +58,16 @@ export default [
     },
   },
   {
-    ignores: ['dist', 'node_modules', '.github', 'types.generated.d.ts', '.astro', 'public/demos'],
+    ignores: [
+      'dist',
+      'node_modules',
+      '.github',
+      'types.generated.d.ts',
+      '.astro',
+      // Dropped-in product builds (Mentible Expo-web export) are bundled,
+      // minified artifacts — linting them is meaningless.
+      'public/demos',
+      'public/app',
+    ],
   },
 ];
