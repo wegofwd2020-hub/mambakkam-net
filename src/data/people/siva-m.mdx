@@ -28,6 +28,7 @@ draft: false
 ---
 
 import Timeline from '~/components/Timeline.astro';
+import Kural from '~/components/Kural.astro';
 
 export const generations = [
   {
@@ -158,11 +159,14 @@ in the AI world to help people with different special needs take part in society
 
 ## What I'm Learning Now
 
-Right now I am working through agentic AI tools — where they fit in content generation,
-and how generated content can reach different kinds of audience: children with special
-needs, students across grades, corporate folks working through governance and compliance
-topics. The systems I have built so far are not that yet; they are pipelines I control
-end to end.
+Right now I am working through agentic AI — systems that plan and act on their own — and
+where that fits in content generation for very different audiences: children with special
+needs, students across grades, professionals working through governance and compliance.
+
+The systems I have built so far are deliberately not that. They are pipelines I control
+end to end, because when content reaches a child or an auditor, provenance matters more
+than autonomy. The question I keep turning over is when handing control to the agent is
+worth it — and how you would govern an agent as rigorously as I govern a pipeline today.
 
 ## Get in Touch
 
@@ -176,9 +180,9 @@ Email: [siva.mambakkam@gmail.com](mailto:siva.mambakkam@gmail.com)
 
 ---
 
-<p class="kural-tamil" lang="ta">கற்க கசடறக் கற்பவை கற்றபின்<br />நிற்க அதற்குத் தக.</p>
-
-_Learn what is taught completely and without faults, and then let your daily actions
-match what you have learned._
+<Kural
+  lines={['கற்க கசடறக் கற்பவை கற்றபின்', 'நிற்க அதற்குத் தக.']}
+  rendering="Learn what is taught completely and without faults, and then let your daily actions match what you have learned."
+/>
 
 _Thirty-Six Years. Four Generations of Computing. Still Learning._
