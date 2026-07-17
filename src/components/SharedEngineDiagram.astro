@@ -30,19 +30,21 @@
     <text class="node teal-t" x="112" y="142" text-anchor="middle">wegofwd-llm</text>
     <text class="teal-t sub" x="112" y="161" text-anchor="middle">shared content-generation engine</text>
 
-    {/* Edges: engine → products, left to right */}
-    {/* to Mentible (solid, proven) */}
-    <line class="ln" x1="200" y1="146" x2="401" y2="68"></line>
+    {/* Edges: a shared trunk out of the engine that splits into three at the bend point */}
+    {/* to Mentible (solid, proven) — elbow up */}
+    <path class="ln" d="M200 146 H300 V68 H401" fill="none"></path>
     <polygon class="ah" points="405,68 396,64 397,72"></polygon>
-    <text class="elabel" x="300" y="98" text-anchor="middle">proven</text>
-    {/* to Pramana (solid, reused) */}
-    <line class="ln" x1="200" y1="146" x2="401" y2="146"></line>
+    <text class="elabel" x="352" y="60" text-anchor="middle">proven</text>
+    {/* to Pramana (solid, reused) — straight */}
+    <path class="ln" d="M200 146 H401" fill="none"></path>
     <polygon class="ah" points="405,146 397,142 397,150"></polygon>
-    <text class="elabel" x="300" y="139" text-anchor="middle">reused</text>
-    {/* to Kathai Chithiram (dashed, planned) */}
-    <line class="ln dashed" x1="200" y1="146" x2="401" y2="224"></line>
+    <text class="elabel" x="345" y="139" text-anchor="middle">reused</text>
+    {/* to Kathai Chithiram (dashed, planned) — elbow down */}
+    <path class="ln dashed" d="M200 146 H300 V224 H401" fill="none"></path>
     <polygon class="ah-muted" points="405,224 396,220 397,228"></polygon>
-    <text class="elabel muted" x="300" y="200" text-anchor="middle">planned</text>
+    <text class="elabel muted" x="352" y="240" text-anchor="middle">planned</text>
+    {/* junction where the trunk splits */}
+    <circle class="junction" cx="300" cy="146" r="3"></circle>
 
     {/* Products (right, top→bottom = live→in build) */}
     {/* Mentible */}
@@ -141,6 +143,10 @@
   }
   .engine-diagram .ah-muted {
     fill: #94a3b8;
+  }
+  .engine-diagram .junction {
+    fill: #64748b;
+    stroke: none;
   }
   .engine-diagram .chip-live {
     fill: #d1fae5;
