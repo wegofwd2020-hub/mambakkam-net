@@ -1,9 +1,9 @@
 ---
 title: Pramana
-excerpt: A compliance-training tracking platform that produces auditable proof of completion. Named for प्रमाण ("valid means of knowledge"), v1 is SOX-scoped with an append-only, tamper-evident audit trail.
+excerpt: A compliance-training tracking platform that produces auditable proof of completion. Named for प्रमाण ("valid means of knowledge"), the first release is SOX-scoped, with a tamper-evident, hash-chained audit trail.
 author: siva-m
 type: product
-status: in-client-deployment
+status: in-progress
 image: ~/assets/images/work/pramana-logo.svg
 tags:
   - Python
@@ -38,7 +38,7 @@ log archived to immutable object storage.
 
 ## v1 scope
 
-The first release is a **single-tenant** deployment scoped to **SOX (Sarbanes-Oxley)**
+The first release is a **single-tenant** system scoped to **SOX (Sarbanes-Oxley)**
 compliance training. The architecture is framework-aware from the start — HIPAA,
 ISO/IEC 27001, GDPR, and PCI DSS are mapped on the roadmap — but v1 stays deliberately
 narrow to ship a correct, defensible SOX workflow first.
@@ -58,15 +58,16 @@ narrow to ship a correct, defensible SOX workflow first.
 
 ## Status
 
-Deployed as the client's SOX compliance-training platform. Delivery ran in four
-governed phases — scaffolding, API specification, state machine, data model — using an
+In active build — not yet deployed. The requirements and data model are locked; the
+FastAPI service layer and quiz generation are in progress. Development runs in governed
+phases — scaffolding, API specification, state machine, data model — using an
 AI-assisted workflow operating under version-controlled conventions, with every change
 ticketed and reviewed.
 
 ## Case study
 
-The architecture decisions behind Pramana — immutability enforced at the database
-level, the assignment lifecycle proven with property-based tests, and a spec-first API
-contract — are written up in a
+The architecture decisions behind Pramana — a tamper-evident, hash-chained audit log
+written to both the database and S3 Object Lock, the assignment lifecycle proven with
+property-based tests, and a spec-first API contract — are written up in a
 [public case study](https://github.com/wegofwd2020-hub/pramana-case-study). Source code
-is private under the client engagement.
+is private.

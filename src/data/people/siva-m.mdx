@@ -5,8 +5,8 @@ role: Enterprise Architect · Founder, WeGoFwd2020
 bio: >
   I've spent 36 years as an enterprise architect across financial services,
   healthcare, automotive, aerospace, retail, and software. Today I build AI
-  tools under WeGoFwd2020 — one live in production, one deployed for a
-  SOX-regulated client — on a single conviction: the model is the commodity;
+  tools under WeGoFwd2020 — one live in production, more in active build —
+  on a single conviction: the model is the commodity;
   the scarce work is shaping it. Scope, boundaries, outcome — in the user's
   hands.
 image: ~/assets/images/people/siva-m.jpg
@@ -30,6 +30,7 @@ draft: false
 import Timeline from '~/components/Timeline.astro';
 import Kural from '~/components/Kural.astro';
 import LearningDiagram from '~/components/LearningDiagram.astro';
+import SharedEngineDiagram from '~/components/SharedEngineDiagram.astro';
 
 export const generations = [
   {
@@ -144,12 +145,18 @@ Products under WeGoFwd2020 — each one puts the shaping in the user's hands, no
   authoring tool: you set the scope and boundaries, it compiles a real
   EPUB3/PDF book. Web app, Android APK, and a
   [read-only demo](https://mambakkam.net/demos/mentible). _Author Yourself._
-- **[Pramana](https://mambakkam.net/work/pramana)** — _deployed for a
-  SOX-regulated client._ Compliance training whose audit trail is enforced at
-  the database level — auditable proof, not just reports.
+- **[Pramana](https://mambakkam.net/work/pramana)** — _in build, SOX-scoped._
+  Compliance training that treats the audit trail as the product: a
+  tamper-evident, hash-chained log written to database and immutable object
+  storage — auditable proof, not just reports.
 - **[StudyBuddy OnDemand](https://mambakkam.net/work/studybuddy-ondemand)** —
   grade-aware STEM learning for Grades 5–12: content generated ahead of time,
   delivered instantly, offline-capable. [Live demo](https://demo.usestudybuddy.com).
+
+The products are not three separate builds. They share one content-generation
+engine — proven first in Mentible, then reused across the others.
+
+<SharedEngineDiagram />
 
 See the [full portfolio](/work).
 

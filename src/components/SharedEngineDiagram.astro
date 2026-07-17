@@ -1,0 +1,183 @@
+---
+/**
+ * Shared content-generation engine diagram for the "What I'm Building" section.
+ *
+ * Tells the real dependency story from the WeGoFwd2020 shared-library graph:
+ * one engine (wegofwd-llm) is proven in Mentible first, then reused across the
+ * other products. Solid edge = the dependency is wired in code today; dashed =
+ * planned. This is why Pramana reads "in build" rather than deployed — the
+ * engine it leans on is still being matured in Mentible.
+ *
+ * Same conventions as LearningDiagram.astro: the SVG is inlined so dark-mode
+ * rules key off the site's `.dark` class (not the OS), and every selector is
+ * nested under `.engine-diagram` so the SVG's bare selectors can't repaint the
+ * rest of the page. Astro also scopes the block automatically.
+ */
+---
+
+<figure class="engine-diagram">
+  <svg viewBox="0 0 680 400" role="img" xmlns="http://www.w3.org/2000/svg">
+    <title>One shared content-generation engine, proven in Mentible, then reused across the products</title>
+    <desc>
+      A single shared library, wegofwd-llm, is the content-generation engine. It is proven first in Mentible, which is
+      live in production. The same engine is wired into Pramana, which is in build, and is planned for Kathai Chithiram,
+      also in build. Solid arrows mark dependencies wired in code today; the dashed arrow marks a planned one.
+    </desc>
+
+    {/* Engine */}
+    <rect class="engine-b" x="230" y="40" width="220" height="58" rx="8"></rect>
+    <text class="node teal-t" x="340" y="64" text-anchor="middle">wegofwd-llm</text>
+    <text class="teal-t sub" x="340" y="82" text-anchor="middle">shared content-generation engine</text>
+
+    {/* Edges: engine → products */}
+    {/* to Mentible (solid) */}
+    <line class="ln" x1="300" y1="98" x2="150" y2="214"></line>
+    <polygon class="ah" points="147,218 150,209 156,214"></polygon>
+    {/* to Pramana (solid) */}
+    <line class="ln" x1="340" y1="98" x2="340" y2="214"></line>
+    <polygon class="ah" points="340,218 336,210 344,210"></polygon>
+    {/* to Kathai Chithiram (planned, dashed) */}
+    <line class="ln dashed" x1="380" y1="98" x2="530" y2="214"></line>
+    <polygon class="ah-muted" points="533,218 524,214 530,209"></polygon>
+    <text class="muted" x="470" y="150" text-anchor="middle">planned</text>
+
+    {/* Products */}
+    {/* Mentible */}
+    <rect class="prod-b" x="40" y="218" width="200" height="52" rx="8"></rect>
+    <text class="node prod-t" x="140" y="242" text-anchor="middle">Mentible</text>
+    <rect class="chip-live" x="78" y="250" width="124" height="20" rx="10"></rect>
+    <text class="chip-live-t" x="140" y="264" text-anchor="middle">live · engine proven here</text>
+
+    {/* Pramana */}
+    <rect class="prod-b" x="250" y="218" width="180" height="52" rx="8"></rect>
+    <text class="node prod-t" x="340" y="242" text-anchor="middle">Pramana</text>
+    <rect class="chip-build" x="300" y="250" width="80" height="20" rx="10"></rect>
+    <text class="chip-build-t" x="340" y="264" text-anchor="middle">in build</text>
+
+    {/* Kathai Chithiram */}
+    <rect class="prod-b" x="440" y="218" width="200" height="52" rx="8"></rect>
+    <text class="node prod-t" x="540" y="242" text-anchor="middle">Kathai Chithiram</text>
+    <rect class="chip-build" x="500" y="250" width="80" height="20" rx="10"></rect>
+    <text class="chip-build-t" x="540" y="264" text-anchor="middle">in build</text>
+
+    {/* Caption + legend */}
+    <text class="caption" x="340" y="318" text-anchor="middle"
+      >One engine, proven in Mentible first, then reused across the products.</text
+    >
+
+    <line class="ln" x1="196" y1="352" x2="236" y2="352"></line>
+    <text x="244" y="356">wired in code today</text>
+    <line class="ln dashed" x1="404" y1="352" x2="444" y2="352"></line>
+    <text x="452" y="356">planned</text>
+  </svg>
+</figure>
+
+<style>
+  .engine-diagram {
+    margin: 1.75rem 0 0;
+  }
+
+  .engine-diagram svg {
+    display: block;
+    width: 100%;
+    height: auto;
+    font-family: var(--aw-font-heading), ui-sans-serif, system-ui, sans-serif;
+  }
+
+  /* Every selector nested under .engine-diagram — the SVG's own bare selectors
+     would otherwise repaint the whole document. */
+  .engine-diagram text {
+    font-size: 12px;
+    fill: #475569;
+  }
+  .engine-diagram .node {
+    font-size: 14px;
+    font-weight: 600;
+  }
+  .engine-diagram .sub {
+    font-size: 11px;
+  }
+  .engine-diagram .caption {
+    font-size: 12.5px;
+    font-style: italic;
+    fill: #475569;
+  }
+  .engine-diagram .muted {
+    font-size: 11px;
+    fill: #94a3b8;
+  }
+  .engine-diagram .teal-t {
+    fill: #115e59;
+  }
+  .engine-diagram .prod-t {
+    fill: #334155;
+  }
+  .engine-diagram .engine-b {
+    fill: #ccfbf1;
+    stroke: #5eead4;
+  }
+  .engine-diagram .prod-b {
+    fill: #f8fafc;
+    stroke: #e2e8f0;
+  }
+  .engine-diagram .ln {
+    stroke: #64748b;
+    stroke-width: 1.25;
+    fill: none;
+  }
+  .engine-diagram .ln.dashed {
+    stroke-dasharray: 5 4;
+    stroke: #94a3b8;
+  }
+  .engine-diagram .ah {
+    fill: #64748b;
+  }
+  .engine-diagram .ah-muted {
+    fill: #94a3b8;
+  }
+  .engine-diagram .chip-live {
+    fill: #d1fae5;
+    stroke: #6ee7b7;
+  }
+  .engine-diagram .chip-live-t {
+    font-size: 11px;
+    fill: #065f46;
+  }
+  .engine-diagram .chip-build {
+    fill: #fef3c7;
+    stroke: #fcd34d;
+  }
+  .engine-diagram .chip-build-t {
+    font-size: 11px;
+    fill: #92400e;
+  }
+
+  /* Keyed to the site's `.dark` class (tailwind darkMode: 'class'), not the OS. */
+  :global(html.dark) .engine-diagram text {
+    fill: #cbd5e1;
+  }
+  :global(html.dark) .engine-diagram .caption {
+    fill: #94a3b8;
+  }
+  :global(html.dark) .engine-diagram .muted {
+    fill: #64748b;
+  }
+  :global(html.dark) .engine-diagram .prod-t {
+    fill: #e2e8f0;
+  }
+  :global(html.dark) .engine-diagram .prod-b {
+    fill: rgb(148 163 184 / 7%);
+    stroke: #334155;
+  }
+  /* Chips keep their light fills in dark mode, so their dark ink must persist —
+     the bare `html.dark ... text` rule above would otherwise wash them out. */
+  :global(html.dark) .engine-diagram .teal-t {
+    fill: #115e59;
+  }
+  :global(html.dark) .engine-diagram .chip-live-t {
+    fill: #065f46;
+  }
+  :global(html.dark) .engine-diagram .chip-build-t {
+    fill: #92400e;
+  }
+</style>
