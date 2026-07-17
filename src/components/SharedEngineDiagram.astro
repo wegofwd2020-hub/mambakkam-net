@@ -16,59 +16,58 @@
 ---
 
 <figure class="engine-diagram">
-  <svg viewBox="0 0 680 400" role="img" xmlns="http://www.w3.org/2000/svg">
+  <svg viewBox="0 0 680 300" role="img" xmlns="http://www.w3.org/2000/svg">
     <title>One shared content-generation engine, proven in Mentible, then reused across the products</title>
     <desc>
-      A single shared library, wegofwd-llm, is the content-generation engine. It is proven first in Mentible, which is
-      live in production. The same engine is wired into Pramana, which is in build, and is planned for Kathai Chithiram,
-      also in build. Solid arrows mark dependencies wired in code today; the dashed arrow marks a planned one.
+      A single shared library, wegofwd-llm, is the content-generation engine, shown on the left. It flows to three
+      products on the right in order of maturity: Mentible (live) — where the engine is proven; Pramana (in build),
+      which reuses it; and Kathai Chithiram (in build), for which it is planned. Solid arrows mark dependencies wired in
+      code today; the dashed arrow marks a planned one.
     </desc>
 
-    {/* Engine */}
-    <rect class="engine-b" x="230" y="40" width="220" height="58" rx="8"></rect>
-    <text class="node teal-t" x="340" y="64" text-anchor="middle">wegofwd-llm</text>
-    <text class="teal-t sub" x="340" y="82" text-anchor="middle">shared content-generation engine</text>
+    {/* Engine (left) */}
+    <rect class="engine-b" x="24" y="110" width="176" height="72" rx="8"></rect>
+    <text class="node teal-t" x="112" y="142" text-anchor="middle">wegofwd-llm</text>
+    <text class="teal-t sub" x="112" y="161" text-anchor="middle">shared content-generation engine</text>
 
-    {/* Edges: engine → products */}
-    {/* to Mentible (solid) */}
-    <line class="ln" x1="300" y1="98" x2="150" y2="214"></line>
-    <polygon class="ah" points="147,218 150,209 156,214"></polygon>
-    {/* to Pramana (solid) */}
-    <line class="ln" x1="340" y1="98" x2="340" y2="214"></line>
-    <polygon class="ah" points="340,218 336,210 344,210"></polygon>
-    {/* to Kathai Chithiram (planned, dashed) */}
-    <line class="ln dashed" x1="380" y1="98" x2="530" y2="214"></line>
-    <polygon class="ah-muted" points="533,218 524,214 530,209"></polygon>
-    <text class="muted" x="470" y="150" text-anchor="middle">planned</text>
+    {/* Edges: engine → products, left to right */}
+    {/* to Mentible (solid, proven) */}
+    <line class="ln" x1="200" y1="146" x2="401" y2="68"></line>
+    <polygon class="ah" points="405,68 396,64 397,72"></polygon>
+    <text class="elabel" x="300" y="98" text-anchor="middle">proven</text>
+    {/* to Pramana (solid, reused) */}
+    <line class="ln" x1="200" y1="146" x2="401" y2="146"></line>
+    <polygon class="ah" points="405,146 397,142 397,150"></polygon>
+    <text class="elabel" x="300" y="139" text-anchor="middle">reused</text>
+    {/* to Kathai Chithiram (dashed, planned) */}
+    <line class="ln dashed" x1="200" y1="146" x2="401" y2="224"></line>
+    <polygon class="ah-muted" points="405,224 396,220 397,228"></polygon>
+    <text class="elabel muted" x="300" y="200" text-anchor="middle">planned</text>
 
-    {/* Products */}
+    {/* Products (right, top→bottom = live→in build) */}
     {/* Mentible */}
-    <rect class="prod-b" x="40" y="218" width="200" height="52" rx="8"></rect>
-    <text class="node prod-t" x="140" y="242" text-anchor="middle">Mentible</text>
-    <rect class="chip-live" x="78" y="250" width="124" height="20" rx="10"></rect>
-    <text class="chip-live-t" x="140" y="264" text-anchor="middle">live · engine proven here</text>
+    <rect class="prod-b" x="405" y="40" width="250" height="56" rx="8"></rect>
+    <text class="node prod-t" x="422" y="73" text-anchor="start">Mentible</text>
+    <rect class="chip-live" x="560" y="57" width="80" height="22" rx="11"></rect>
+    <text class="chip-live-t" x="600" y="72" text-anchor="middle">live</text>
 
     {/* Pramana */}
-    <rect class="prod-b" x="250" y="218" width="180" height="52" rx="8"></rect>
-    <text class="node prod-t" x="340" y="242" text-anchor="middle">Pramana</text>
-    <rect class="chip-build" x="300" y="250" width="80" height="20" rx="10"></rect>
-    <text class="chip-build-t" x="340" y="264" text-anchor="middle">in build</text>
+    <rect class="prod-b" x="405" y="118" width="250" height="56" rx="8"></rect>
+    <text class="node prod-t" x="422" y="151" text-anchor="start">Pramana</text>
+    <rect class="chip-build" x="548" y="135" width="92" height="22" rx="11"></rect>
+    <text class="chip-build-t" x="594" y="150" text-anchor="middle">in build</text>
 
     {/* Kathai Chithiram */}
-    <rect class="prod-b" x="440" y="218" width="200" height="52" rx="8"></rect>
-    <text class="node prod-t" x="540" y="242" text-anchor="middle">Kathai Chithiram</text>
-    <rect class="chip-build" x="500" y="250" width="80" height="20" rx="10"></rect>
-    <text class="chip-build-t" x="540" y="264" text-anchor="middle">in build</text>
+    <rect class="prod-b" x="405" y="196" width="250" height="56" rx="8"></rect>
+    <text class="node prod-t sm" x="422" y="229" text-anchor="start">Kathai Chithiram</text>
+    <rect class="chip-build" x="548" y="213" width="92" height="22" rx="11"></rect>
+    <text class="chip-build-t" x="594" y="228" text-anchor="middle">in build</text>
 
-    {/* Caption + legend */}
-    <text class="caption" x="340" y="318" text-anchor="middle"
-      >One engine, proven in Mentible first, then reused across the products.</text
-    >
-
-    <line class="ln" x1="196" y1="352" x2="236" y2="352"></line>
-    <text x="244" y="356">wired in code today</text>
-    <line class="ln dashed" x1="404" y1="352" x2="444" y2="352"></line>
-    <text x="452" y="356">planned</text>
+    {/* Legend */}
+    <line class="ln" x1="196" y1="284" x2="232" y2="284"></line>
+    <text x="240" y="288">wired in code today</text>
+    <line class="ln dashed" x1="404" y1="284" x2="440" y2="284"></line>
+    <text x="448" y="288">planned</text>
   </svg>
 </figure>
 
@@ -94,8 +93,16 @@
     font-size: 14px;
     font-weight: 600;
   }
+  .engine-diagram .node.sm {
+    font-size: 13px;
+  }
   .engine-diagram .sub {
     font-size: 11px;
+  }
+  .engine-diagram .elabel {
+    font-size: 11px;
+    font-style: italic;
+    fill: #64748b;
   }
   .engine-diagram .caption {
     font-size: 12.5px;
