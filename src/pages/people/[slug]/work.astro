@@ -44,7 +44,14 @@ const statusLabel: Record<string, string> = {
   archived: 'Archived',
 };
 
-const metadata = { title: `Work by ${person.data.name}` };
+const metadata = {
+  title: `Work by ${person.data.name}`,
+  description: person.data.bio,
+  // Share the person's photo as the OG image, not the site default.
+  openGraph: {
+    images: person.data.image ? [{ url: person.data.image }] : [],
+  },
+};
 ---
 
 <Layout metadata={metadata}>
