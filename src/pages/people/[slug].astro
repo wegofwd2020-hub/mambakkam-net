@@ -45,6 +45,10 @@ const resolvedImage = imageKey && images[imageKey] ? (await images[imageKey]()).
 const metadata = {
   title: name,
   description: bio,
+  // Give link-share scrapers the profile photo instead of the site default OG image.
+  openGraph: {
+    images: image ? [{ url: image }] : [],
+  },
 };
 
 const githubUrl = links?.github;
