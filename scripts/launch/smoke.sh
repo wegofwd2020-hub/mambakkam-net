@@ -106,7 +106,7 @@ log_step "GET /"
 RESP=$(http_get "$BASE_URL/")
 STATUS=$(extract_status "$RESP")
 BODY=$(extract_body "$RESP")
-if [[ "$STATUS" == "200" ]] && echo "$BODY" | grep -qi 'mambakkam'; then
+if [[ "$STATUS" == "200" ]] && grep -qi 'mambakkam' <<<"$BODY"; then
   pass "GET / returns 200 + 'Mambakkam' in body"
 else
   fail "GET /" "status=$STATUS"
@@ -119,7 +119,7 @@ log_step "GET /sitemap-index.xml"
 RESP=$(http_get "$BASE_URL/sitemap-index.xml")
 STATUS=$(extract_status "$RESP")
 BODY=$(extract_body "$RESP")
-if [[ "$STATUS" == "200" ]] && echo "$BODY" | grep -q '<sitemapindex'; then
+if [[ "$STATUS" == "200" ]] && grep -q '<sitemapindex' <<<"$BODY"; then
   pass "GET /sitemap-index.xml returns 200 + <sitemapindex>"
 else
   fail "GET /sitemap-index.xml" "status=$STATUS"
@@ -132,7 +132,7 @@ log_step "GET /people"
 RESP=$(http_get "$BASE_URL/people")
 STATUS=$(extract_status "$RESP")
 BODY=$(extract_body "$RESP")
-if [[ "$STATUS" == "200" ]] && echo "$BODY" | grep -qi 'siva'; then
+if [[ "$STATUS" == "200" ]] && grep -qi 'siva' <<<"$BODY"; then
   pass "GET /people lists Siva"
 else
   fail "GET /people" "status=$STATUS"
@@ -142,7 +142,7 @@ log_step "GET /people/siva-m"
 RESP=$(http_get "$BASE_URL/people/siva-m")
 STATUS=$(extract_status "$RESP")
 BODY=$(extract_body "$RESP")
-if [[ "$STATUS" == "200" ]] && echo "$BODY" | grep -qi 'siva'; then
+if [[ "$STATUS" == "200" ]] && grep -qi 'siva' <<<"$BODY"; then
   pass "GET /people/siva-m returns 200 + 'Siva' in body"
 else
   fail "GET /people/siva-m" "status=$STATUS"
@@ -176,7 +176,7 @@ log_step "GET /work"
 RESP=$(http_get "$BASE_URL/work")
 STATUS=$(extract_status "$RESP")
 BODY=$(extract_body "$RESP")
-if [[ "$STATUS" == "200" ]] && echo "$BODY" | grep -qi 'studybuddy'; then
+if [[ "$STATUS" == "200" ]] && grep -qi 'studybuddy' <<<"$BODY"; then
   pass "GET /work lists StudyBuddy"
 else
   fail "GET /work" "status=$STATUS"
@@ -211,7 +211,7 @@ RESP=$(http_get "$BASE_URL/robots.txt")
 STATUS=$(extract_status "$RESP")
 BODY=$(extract_body "$RESP")
 if [[ "$STATUS" == "200" ]]; then
-  if echo "$BODY" | grep -qE '^Disallow:[[:space:]]*/[[:space:]]*$'; then
+  if grep -qE '^Disallow:[[:space:]]*/[[:space:]]*$' <<<"$BODY"; then
     fail "robots.txt" "blanket 'Disallow: /' found — would deindex the entire site"
   else
     pass "GET /robots.txt returns 200 + no blanket disallow"
