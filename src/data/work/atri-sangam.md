@@ -118,12 +118,13 @@ deterministic and runnable offline.
 - **Red-team simulator:** deterministic by seed, generating jamming, spoofing
   and drift scenarios, so thresholds can be tested against the attack they are
   meant to catch
-- **Specification:** 12 contracts with concrete numeric scenarios, mirrored by
-  the tests — 294 of them, all passing
+- **Specification:** contracts written as concrete numeric scenarios, each one
+  mirrored by a test — the design commitments are stated _and_ verified, not
+  just asserted
 
 ## Status
 
-Alpha, `v0.1.7`. The monitor runs: the daemon, the detection layers, the
+Alpha. The monitor runs: the daemon, the detection layers, the
 storage and the dashboard are built and tested, and the independent time
 channels — NTP consensus, Roughtime, WWVB — are wired in and opt-in per site.
 
