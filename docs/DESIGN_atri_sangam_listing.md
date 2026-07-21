@@ -93,8 +93,10 @@ Body sections:
 2. **Why the name** — approved copy, leading with the Atri Mandala.
 3. **The problem it solves** — a receiver cannot audit itself; a fixed site with
    a surveyed antenna makes position a known truth to check against.
-4. **The channels** — table of the six channels wired into the daemon and what
-   each one catches.
+4. **The channels** — table of the residual channels wired into the daemon and
+   what each one catches (8 rows: GPS time/position/CN₀ spread, NTP time +
+   consensus spread, Roughtime time, WWVB time, holdover residual), with the
+   Roughtime consensus-spread and verify-failure channels covered in prose.
 5. **How it decides** — step / CUSUM / staleness detector layers; alarms carry
    channel, detector, value, threshold, message.
 6. **Architecture** — stdlib-only core, injectable everything, deterministic
