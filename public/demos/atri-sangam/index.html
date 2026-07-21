@@ -1,0 +1,16 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Atri Sangam — demo</title>
+<style>body{background:#0d0d0d;color:#ffffff;
+ font-family:system-ui,sans-serif;margin:0;padding:1.5rem;max-width:900px}
+ a{color:#3987e5} li{margin:.6rem 0}
+ .banner{background:#1a1a19;border-left:4px solid #fab219;
+  padding:.6rem .9rem;margin-bottom:1rem;color:#898781}</style>
+</head><body>
+<p class="banner">This is a recorded replay of simulated data, not a live installation. Every value here comes from the red-team simulator.</p>
+<h1>Atri Sangam — GPS/PNT integrity monitor</h1>
+<p>Four replays: a healthy site, and the three shapes an attack takes.</p>
+<ul><li><a href="clean.html">Clean</a> — A healthy site. The consensus band is a hairline and GPS sits inside it — every reference telling the same story.</li><li><a href="time-walk.html">Time Walk</a> — A slow spoof. GPS drifts away from the band while the independent references hold flat. Too gradual for a threshold alone; CUSUM catches the accumulation.</li><li><a href="position-jump.html">Position Jump</a> — A crude spoof. The reported position jumps away from the surveyed antenna, and the step detector fires at once.</li><li><a href="dropout.html">Dropout</a> — An outage. The channels go silent, and the shaded gaps are the absence itself — jamming looks exactly like this.</li></ul>
+<p><a href="https://mambakkam.net/work/atri-sangam">About Atri Sangam</a></p>
+</body></html>

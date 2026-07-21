@@ -136,6 +136,15 @@ them as a place to begin tuning, not as a calibrated defence.
 
 Source code is private.
 
+## See it
+
+The [dashboard demo](/demos/atri-sangam/) replays four scenarios from the
+red-team simulator: a healthy site, a slow spoof, a position jump, and an
+outage. Each shows GPS plotted against the consensus band the independent
+references span — a hairline when everything agrees, fanning open when it stops.
+
+It is a recorded replay of simulated data, not a live installation.
+
 ## A different line of work
 
 Atri Sangam shares no code and no thesis with the other products here. There
