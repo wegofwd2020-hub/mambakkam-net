@@ -1,16 +1,95 @@
 <!doctype html>
 <html lang="en"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Atri Sangam — demo</title>
-<style>body{background:#0d0d0d;color:#ffffff;
- font-family:system-ui,sans-serif;margin:0;padding:1.5rem;max-width:900px}
- a{color:#3987e5} li{margin:.6rem 0}
+<title>Atri Sangam — GPS/PNT integrity monitor — demo</title>
+<style>
+ *,*::before,*::after{box-sizing:border-box}
+ body{background:#0d0d0d;color:#ffffff;margin:0;
+       font-family:system-ui,-apple-system,"Segoe UI",sans-serif;
+       line-height:1.6;-webkit-font-smoothing:antialiased}
+ .wrap{max-width:64rem;margin:0 auto;padding:0 1.25rem}
+ a{color:#3987e5;text-decoration:none}
+ a:hover{text-decoration:underline}
+ h1{font-size:clamp(2rem,5vw,3rem);line-height:1.1;letter-spacing:-0.02em;
+     font-weight:700;margin:0 0 .3rem}
+ h2{font-size:clamp(1.3rem,2.6vw,1.7rem);letter-spacing:-0.01em;
+     font-weight:600;margin:2.5rem 0 .6rem}
+ h3{font-size:1rem;font-weight:600;margin:1.8rem 0 .4rem}
+ p{margin:.6rem 0}
+ .lede{font-size:1.05rem;color:#898781;max-width:46rem}
  .banner{background:#1a1a19;border-left:4px solid #fab219;
-  padding:.6rem .9rem;margin-bottom:1rem;color:#898781}</style>
+          padding:.7rem 1rem;margin:0 0 1.5rem;color:#898781;
+          font-size:.92rem;border-radius:0 .4rem .4rem 0}
+ nav.scenarios{display:flex;flex-wrap:wrap;gap:.5rem;margin:1rem 0 1.5rem}
+ nav.scenarios a{background:#1a1a19;padding:.4rem .8rem;
+                  border-radius:.4rem;font-size:.9rem}
+ nav.scenarios a.here{background:#3987e5;color:#fff}
+ .hero-status{font-size:2.4rem;font-weight:700;line-height:1.1}
+ .sub{color:#898781}
+ .pills{display:flex;flex-wrap:wrap;gap:.4rem;margin:1rem 0}
+ .pill{padding:.3rem .7rem;border-radius:.5rem;font-weight:600;
+        font-size:.82rem;color:#0b0b0b}
+ .ok{background:#0ca30c;color:#fff}
+ .alarm{background:#d03b3b;color:#fff}
+ .stale{background:#fab219}
+ table{border-collapse:collapse;width:100%;margin:1rem 0;font-size:.93rem}
+ th,td{text-align:left;padding:.55rem .7rem;
+        border-bottom:1px solid #2c2c2a;vertical-align:top}
+ th{color:#898781;font-weight:600;font-size:.82rem;
+     text-transform:uppercase;letter-spacing:.04em}
+ code,.mono{font-family:ui-monospace,"SF Mono",Menlo,monospace;font-size:.88em}
+ .panel{background:#1a1a19;border:1px solid #2c2c2a;
+         border-radius:.5rem;padding:.9rem 1.1rem;margin:.2rem 0 2rem}
+ .panel dl{display:grid;grid-template-columns:7.5rem 1fr;gap:.45rem .9rem;
+            margin:0}
+ .panel dt{color:#898781;font-size:.78rem;text-transform:uppercase;
+            letter-spacing:.04em;font-weight:600;padding-top:.15rem}
+ .panel dd{margin:0}
+ .panel .formula{font-family:ui-monospace,"SF Mono",Menlo,monospace;
+                  font-size:.85rem;color:#199e70;word-break:break-word}
+ footer{margin:3rem 0 2rem;padding-top:1.2rem;
+         border-top:1px solid #2c2c2a;color:#898781;font-size:.9rem}
+ @media (max-width:36rem){.panel dl{grid-template-columns:1fr;gap:.15rem}
+   .panel dt{margin-top:.5rem}}
+
+ .front{padding:3.5rem 0 1rem}
+ .eyebrow{text-transform:uppercase;letter-spacing:.14em;font-size:.78rem;
+           color:#898781;margin:0 0 .5rem}
+ .grad{background:linear-gradient(100deg,#3987e5,#199e70 55%,
+        #fab219);-webkit-background-clip:text;
+        background-clip:text;color:transparent}
+ .cards{display:grid;gap:.9rem;grid-template-columns:repeat(auto-fit,
+         minmax(15rem,1fr));margin:1.5rem 0}
+ .card{background:#1a1a19;border:1px solid #2c2c2a;
+        border-radius:.6rem;padding:1.1rem;display:block}
+ .card:hover{border-color:#3987e5;text-decoration:none}
+ .card h3{margin:0 0 .35rem;font-size:1.02rem;color:#ffffff}
+ .card p{margin:0;color:#898781;font-size:.9rem}
+</style>
 </head><body>
-<p class="banner">This is a recorded replay of simulated data, not a live installation. Every value here comes from the red-team simulator.</p>
-<h1>Atri Sangam — GPS/PNT integrity monitor</h1>
-<p>Four replays: a healthy site, and the three shapes an attack takes.</p>
-<ul><li><a href="clean.html">Clean</a> — A healthy site. The consensus band is a hairline and GPS sits inside it — every reference telling the same story.</li><li><a href="time-walk.html">Time Walk</a> — A slow spoof. GPS drifts away from the band while the independent references hold flat. Too gradual for a threshold alone; CUSUM catches the accumulation.</li><li><a href="position-jump.html">Position Jump</a> — A crude spoof. The reported position jumps away from the surveyed antenna, and the step detector fires at once.</li><li><a href="dropout.html">Dropout</a> — An outage. The channels go silent, and the shaded gaps are the absence itself — jamming looks exactly like this.</li></ul>
-<p><a href="https://mambakkam.net/work/atri-sangam">About Atri Sangam</a></p>
+<div class="wrap front">
+  <p class="banner">This is a recorded replay of simulated data, not a live installation. Every value here comes from the red-team simulator.</p>
+  <p class="eyebrow">Fixed-site GNSS integrity monitoring</p>
+  <h1>Atri Sangam — <span class="grad">the assembly that notices
+      when the sky goes dark</span></h1>
+  <p class="lede">A GPS receiver cannot audit itself. This monitor cross-checks
+     it against references that do not come from the sky — network time,
+     cryptographically signed time, radio time, the drift of the local clock —
+     and watches for the moment they stop agreeing.</p>
+
+  <h2>Four replays</h2>
+  <p class="lede">A healthy site, and the three shapes an attack takes.</p>
+  <div class="cards"><a class="card" href="clean.html"><h3>Clean</h3><p>A healthy site. The consensus band is a hairline and GPS sits inside it — every reference telling the same story.</p></a><a class="card" href="time-walk.html"><h3>Time Walk</h3><p>A slow spoof. GPS drifts away from the band while the independent references hold flat. Too gradual for a threshold alone; CUSUM catches the accumulation.</p></a><a class="card" href="position-jump.html"><h3>Position Jump</h3><p>A crude spoof. The reported position jumps away from the surveyed antenna, and the step detector fires at once.</p></a><a class="card" href="dropout.html"><h3>Dropout</h3><p>An outage. The channels go silent, and the shaded gaps are the absence itself — jamming looks exactly like this.</p></a></div>
+
+  <h2>Terms used on these pages</h2>
+  <table>
+    <thead><tr><th>Term</th><th>Stands for</th><th>What it means here</th></tr>
+    </thead>
+    <tbody><tr><td><strong>GNSS</strong></td><td>Global Navigation Satellite System</td><td>The family of constellations — GPS, GLONASS, Galileo, BeiDou. This monitor watches whichever ones the receiver reports.</td></tr><tr><td><strong>PNT</strong></td><td>Positioning, Navigation and Timing</td><td>What a GNSS receiver provides, and what this system checks for integrity. Most infrastructure depends on the T more than the PN.</td></tr><tr><td><strong>NMEA 0183</strong></td><td>National Marine Electronics Association standard 0183</td><td>The sentence format a receiver speaks. Each line is one record with a checksum, capped at 82 characters.</td></tr><tr><td><strong>RMC / GGA / GSV</strong></td><td>Recommended Minimum / Global positioning fix / Satellites in View</td><td>The three sentence types read here: fix and time, fix quality, and per-satellite signal strength.</td></tr><tr><td><strong>C/N₀</strong></td><td>Carrier-to-Noise density ratio</td><td>Per-satellite signal strength in dB-Hz. Its spread across satellites is a spoofing tell.</td></tr><tr><td><strong>CUSUM</strong></td><td>Cumulative Sum control chart</td><td>A detector that accumulates small deviations, so a drift too gradual to trip a threshold still gets caught.</td></tr><tr><td><strong>SNTP / NTP</strong></td><td>(Simple) Network Time Protocol</td><td>Time over the network, RFC 4330. Independent of the sky, but not of the network.</td></tr><tr><td><strong>Roughtime</strong></td><td>—</td><td>Cryptographically signed time: an Ed25519 signature over a response that includes a Merkle proof for the nonce we sent.</td></tr><tr><td><strong>WWVB</strong></td><td>NIST radio station WWVB, 60 kHz</td><td>A terrestrial time broadcast. Needs no network, so it survives outages that remove every other reference.</td></tr><tr><td><strong>Holdover</strong></td><td>—</td><td>The local oscillator&#x27;s own drift model, used to predict what the clock should be doing without any external reference.</td></tr><tr><td><strong>Marzullo</strong></td><td>Marzullo&#x27;s algorithm</td><td>Picks the interval the largest number of sources agree on, so a minority of lying servers is out-voted rather than averaged in.</td></tr></tbody>
+  </table>
+
+  <footer>
+    <a href="https://mambakkam.net/work/atri-sangam">About Atri Sangam</a> · source code is private
+  </footer>
+</div>
 </body></html>
