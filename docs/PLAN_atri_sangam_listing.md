@@ -24,10 +24,10 @@
 
 ## File Structure
 
-| File | Responsibility |
-|---|---|
-| `src/data/work/atri-sangam.md` | **Create.** Frontmatter drives the `/work` card; body renders as `/work/atri-sangam`. |
-| `src/data/people/siva-m.mdx` | **Modify** lines 142–157 only. Adds the product bullet; scopes two claims that currently hard-code "three products" and "the model". |
+| File                           | Responsibility                                                                                                                       |
+| ------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------ |
+| `src/data/work/atri-sangam.md` | **Create.** Frontmatter drives the `/work` card; body renders as `/work/atri-sangam`.                                                |
+| `src/data/people/siva-m.mdx`   | **Modify** lines 142–157 only. Adds the product bullet; scopes two claims that currently hard-code "three products" and "the model". |
 
 Both tasks are independently reviewable: Task 1 can ship without Task 2 (the product is listed, the profile just doesn't mention it), and a reviewer could reject the profile copy while accepting the product page.
 
@@ -36,10 +36,12 @@ Both tasks are independently reviewable: Task 1 can ship without Task 2 (the pro
 ### Task 1: Product entry and profile page
 
 **Files:**
+
 - Create: `mambakkam-net/src/data/work/atri-sangam.md`
 - Test: no unit-test framework for content; verification is `npm run build` (Zod schema validation) plus assertions against the generated HTML in `dist/`.
 
 **Interfaces:**
+
 - Consumes: the `work` collection schema at `src/content/config.ts:154-178` — required fields are `title`, `excerpt`, `author`, `type`; `status` defaults to `live`, `featured`/`comingSoon`/`listed`/`draft` are booleans.
 - Produces: route `/work/atri-sangam` and collection id `atri-sangam`, which Task 2's profile bullet links to. The `author: siva-m` value must match the people-collection file id `siva-m`, or the card is filtered out of `/work` entirely (`src/pages/work/index.astro:13`).
 
@@ -120,16 +122,16 @@ Each channel is a residual — an observed value minus what it should be — fed
 into one engine. Only the GPS channels come from the satellite constellation;
 the rest are deliberately independent of it.
 
-| Channel | What it measures | What it catches |
-| --- | --- | --- |
-| `gps_time_offset` | GPS-reported UTC minus the local clock | Time spoofing, receiver faults |
-| `gps_position_error` | Distance of the reported fix from the surveyed site | Position spoofing, multipath |
-| `gps_cn0_spread` | Spread of per-satellite signal strength | Spoofing tell — a single transmitter collapses the spread toward zero |
-| `ntp_time_offset` | Network time minus the local clock | Independent time cross-check |
-| `ntp_consensus_spread` | Widest disagreement among several NTP servers | A minority of lying time servers |
-| `roughtime_time_offset` | Ed25519-signed time minus the local clock | Time reference an attacker cannot forge without the key |
-| `wwvb_time_offset` | WWVB 60 kHz radio time minus the local clock | Terrestrial time, no network needed |
-| `holdover_residual` | Observed offset minus the local clock's own drift model | Slow manipulation that tracks nothing real |
+| Channel                 | What it measures                                        | What it catches                                                       |
+| ----------------------- | ------------------------------------------------------- | --------------------------------------------------------------------- |
+| `gps_time_offset`       | GPS-reported UTC minus the local clock                  | Time spoofing, receiver faults                                        |
+| `gps_position_error`    | Distance of the reported fix from the surveyed site     | Position spoofing, multipath                                          |
+| `gps_cn0_spread`        | Spread of per-satellite signal strength                 | Spoofing tell — a single transmitter collapses the spread toward zero |
+| `ntp_time_offset`       | Network time minus the local clock                      | Independent time cross-check                                          |
+| `ntp_consensus_spread`  | Widest disagreement among several NTP servers           | A minority of lying time servers                                      |
+| `roughtime_time_offset` | Ed25519-signed time minus the local clock               | Time reference an attacker cannot forge without the key               |
+| `wwvb_time_offset`      | WWVB 60 kHz radio time minus the local clock            | Terrestrial time, no network needed                                   |
+| `holdover_residual`     | Observed offset minus the local clock's own drift model | Slow manipulation that tracks nothing real                            |
 
 NTP consensus uses Marzullo interval intersection, so a Byzantine minority of
 servers is both out-voted and flagged. Roughtime consensus works the same way,
@@ -268,10 +270,12 @@ visitor. No image field — no logo asset exists yet."
 ### Task 2: Profile bullet and scoped engine claim
 
 **Files:**
+
 - Modify: `mambakkam-net/src/data/people/siva-m.mdx:142-157`
 - Test: verification is `npm run build` plus assertions against `dist/people/siva-m/index.html`.
 
 **Interfaces:**
+
 - Consumes: route `/work/atri-sangam`, produced by Task 1. If Task 1 has not landed, this bullet links to a 404.
 - Produces: nothing other tasks depend on. This is the last task.
 

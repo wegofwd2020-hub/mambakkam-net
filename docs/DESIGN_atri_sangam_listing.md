@@ -19,7 +19,7 @@ shared-engine narrative that section carries.
 ## Source of truth
 
 Every factual claim on the page is derived from the **live repository at
-`ba9c697` (v0.1.7)**, verified on 2026-07-21 — *not* from
+`ba9c697` (v0.1.7)**, verified on 2026-07-21 — _not_ from
 `project-critique/atri-sangam-critique.md`, which is anchored at v0.1.0
 (2026-07-18) and is materially stale.
 
@@ -27,23 +27,23 @@ The critique's headline finding — "no runner / scheduler / daemon exists" — 
 true at v0.1.0 and is **false today**. Writing the page from the critique would
 have published an incorrect maturity claim. Facts verified directly:
 
-| Claim | How verified |
-|---|---|
-| 294 tests pass | Ran `PYTHONPATH=src python3 -m pytest` → `294 passed in 3.52s` |
-| Stdlib-only core | `pyproject.toml:23` → `dependencies = []` |
-| Alpha v0.1.7 | `pyproject.toml:7,15` |
-| Runner exists | `src/atri_sangam/runner/{cli,monitor,sources,config}.py`; console script `atri-sangam-run`; systemd unit `runner/deploy/atri-sangam.service` |
-| Sources | `--source sim \| gpsd \| serial` (`runner/cli.py:56`) |
-| Channels wired into the daemon | `runner/cli.py:18-26` imports Cn0, Holdover, Ntp, MultiNtp, Roughtime, MultiRoughtime, Wwvb collectors |
-| Solar NOT wired | `runner/cli.py` imports no solar collector; `predictors/solar.py` is used by tests and `demo` only |
-| 12 OpenSpec contracts | `openspec/specs/` directory listing |
-| Dashboard is live, read-only | `dashboard/app.py:172,176` open the store with `read_only=True`; `dcc.Interval` polls |
-| Repo is private | `gh repo view wegofwd2020-hub/atri-sangam` → `"isPrivate": true` |
+| Claim                          | How verified                                                                                                                                 |
+| ------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------- |
+| 294 tests pass                 | Ran `PYTHONPATH=src python3 -m pytest` → `294 passed in 3.52s`                                                                               |
+| Stdlib-only core               | `pyproject.toml:23` → `dependencies = []`                                                                                                    |
+| Alpha v0.1.7                   | `pyproject.toml:7,15`                                                                                                                        |
+| Runner exists                  | `src/atri_sangam/runner/{cli,monitor,sources,config}.py`; console script `atri-sangam-run`; systemd unit `runner/deploy/atri-sangam.service` |
+| Sources                        | `--source sim \| gpsd \| serial` (`runner/cli.py:56`)                                                                                        |
+| Channels wired into the daemon | `runner/cli.py:18-26` imports Cn0, Holdover, Ntp, MultiNtp, Roughtime, MultiRoughtime, Wwvb collectors                                       |
+| Solar NOT wired                | `runner/cli.py` imports no solar collector; `predictors/solar.py` is used by tests and `demo` only                                           |
+| 12 OpenSpec contracts          | `openspec/specs/` directory listing                                                                                                          |
+| Dashboard is live, read-only   | `dashboard/app.py:172,176` open the store with `read_only=True`; `dcc.Interval` polls                                                        |
+| Repo is private                | `gh repo view wegofwd2020-hub/atri-sangam` → `"isPrivate": true`                                                                             |
 
 ## Decisions
 
 1. **Framed as a WeGoFwd2020 product** (`type: product`), listed alongside the
-   other products — with one explicit line stating it does *not* share the
+   other products — with one explicit line stating it does _not_ share the
    content-generation engine, so `<SharedEngineDiagram />` is not read as
    covering it.
 2. **Maturity stated up front**, in the excerpt itself, not buried in a Status
@@ -57,7 +57,7 @@ have published an incorrect maturity claim. Facts verified directly:
    covers the Saptarishi, the mānasputra origin, the tongue/wisdom symbolism,
    and Mandala 5 being the Atri Mandala — but has **no** Svarbhanu eclipse
    story and no RV 5.40 reference. The site copy therefore leads with the Atri
-   Mandala and places hymn 5.40 *within* it, rather than repeating the
+   Mandala and places hymn 5.40 _within_ it, rather than repeating the
    repository README's unattested "credits him with restoring the Sun".
 
 ## §1 — New file: `src/data/work/atri-sangam.md`
@@ -89,7 +89,7 @@ text-only).
 Body sections:
 
 1. **What is Atri Sangam** — the sangam thesis: independent channels whose
-   disagreement *is* the signal.
+   disagreement _is_ the signal.
 2. **Why the name** — approved copy, leading with the Atri Mandala.
 3. **The problem it solves** — a receiver cannot audit itself; a fixed site with
    a surveyed antenna makes position a known truth to check against.
