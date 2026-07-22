@@ -29,7 +29,7 @@
 
 | Path | Responsibility |
 |---|---|
-| `web/vitest.config.ts` | Test runner config with the `@/` path alias |
+| `web/vitest.config.mts` | Test runner config with the `@/` path alias (`.mts` — see Task 1) |
 | `web/src/demo/flag.ts` | The single `isDemo` predicate — nothing else imports `process.env.NEXT_PUBLIC_DEMO` |
 | `web/src/demo/keys.ts` | Request-key construction and normalisation. Pure, no I/O. |
 | `web/src/demo/keys.test.ts` | Tests for the above |
@@ -90,7 +90,7 @@
 `thittam/web` has no unit test runner today — only Playwright e2e. The demo transport is pure logic and deserves real tests, so this task adds Vitest and the one flag every later task depends on.
 
 **Files:**
-- Create: `web/vitest.config.ts`
+- Create: `web/vitest.config.mts`
 - Create: `web/src/demo/flag.ts`
 - Create: `web/src/demo/flag.test.ts`
 - Modify: `web/package.json`
@@ -109,7 +109,7 @@ npm install -D vitest@^2 @vitejs/plugin-react@^4 vite-tsconfig-paths@^5
 
 - [ ] **Step 2: Create the Vitest config**
 
-`web/vitest.config.ts`:
+`web/vitest.config.mts` — note the `.mts` extension. `web/package.json` has no `"type": "module"`, so a `.ts` config is bundled as CommonJS, and `vite-tsconfig-paths@5` is ESM-only with no CJS build — the config fails to load before any test runs. `.mts` forces Vite to load it as ESM. Do **not** add `"type": "module"` to `package.json` instead: it would break `web/playwright.config.ts`, which uses CommonJS `__dirname`.
 
 ```ts
 import { defineConfig } from "vitest/config";
@@ -224,7 +224,7 @@ Expected: no errors
 - [ ] **Step 10: Commit**
 
 ```bash
-git add web/package.json web/package-lock.json web/vitest.config.ts web/src/demo/flag.ts web/src/demo/flag.test.ts web/src/env.ts
+git add web/package.json web/package-lock.json web/vitest.config.mts web/src/demo/flag.ts web/src/demo/flag.test.ts web/src/env.ts
 git commit -m "feat(web): add demo-mode flag and a Vitest harness"
 ```
 
