@@ -308,16 +308,19 @@ export function requestKey(method: string, path: string): string {
  * Keys to try, most specific first.
  *
  * A capture cannot cover every filter combination, so a request carrying a
- * query string falls back to the unfiltered recording. Showing the full list
- * where a filtered one was asked for is a smaller lie than showing an error.
+ * query string falls back to the unfiltered recording. A bare "?" with nothing
+ * after it is not a real query — it collapses to just the unfiltered key.
  */
 export function lookupKeys(method: string, path: string): string[] {
-  const exact = requestKey(method, path);
   const queryStart = path.indexOf("?");
-  if (queryStart === -1) return [exact];
+  if (queryStart === -1) return [requestKey(method, path)];
 
   const bare = requestKey(method, path.slice(0, queryStart));
-  return bare === exact ? [exact] : [exact, bare];
+
+  // Nothing after the "?" → no real query, only the bare key.
+  if (queryStart === path.length - 1) return [bare];
+
+  return [requestKey(method, path), bare];
 }
 ```
 
