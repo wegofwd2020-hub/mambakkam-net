@@ -81,9 +81,20 @@ the rest are deliberately independent of it.
 | `wwvb_time_offset`      | WWVB 60 kHz radio time minus the local clock            | Terrestrial time, no network needed                                   |
 | `holdover_residual`     | Observed offset minus the local clock's own drift model | Slow manipulation that tracks nothing real                            |
 
-NTP consensus uses Marzullo interval intersection, so a Byzantine minority of
-servers is both out-voted and flagged. Roughtime consensus works the same way,
-and additionally reports how many servers failed cryptographic verification.
+NTP consensus uses Marzullo interval intersection to pick the servers telling
+a consistent story, then takes the median of what those servers themselves
+reported — so a server cannot win simply by claiming to be precise. That value
+must also be vouched for by a quorum of them, which stops a server widening its
+own uncertainty until it bridges two honest servers that genuinely disagree.
+Disagreement is flagged either way. Roughtime consensus works the same way, and
+additionally reports how many servers failed cryptographic verification.
+
+The honest limit: claimed precision no longer decides how much a server counts,
+but it still decides which servers are heard. Where the honest servers report
+differing precision, a server claiming a very tight interval can crowd out a
+more precise one and pull the result toward itself — bounded by the widest
+honest uncertainty in the round, and impossible when they all report the same.
+Closing that is open work, not a solved problem.
 
 ## How it decides
 
