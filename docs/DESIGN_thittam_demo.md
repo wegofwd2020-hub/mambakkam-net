@@ -94,6 +94,34 @@ responses depend on events the seeds do not replay — captured fixtures would
 likely come back empty or misleading. `seeds/demo/xyz-cba/006_inventory.sql`
 seeds inventory directly, so that section has real data behind it.
 
+### Step 0 — probe the dashboard before building anything
+
+The same concern applies to the landing page. `src/lib/api/dashboard.ts:134`
+sets `BASE = "/v1/reports/dashboard"` and calls six endpoints off it —
+`/portfolio`, `/financial`, `/approvals`, `/team`, `/compliance`, `/summary`.
+All six are reporting-backed.
+
+There is also a routing oddity: that path is `/v1/...`, not `/api/v1/...`.
+`resolveBaseUrl` (`web/src/lib/api/client.ts:33`) matches only `/api/v1/*`
+prefixes, so these six fall through to the default — `env.iamApiUrl`, the IAM
+gateway on :9086. The dashboard appears to ask IAM for reporting data. Harmless
+for the demo (fixtures key on the path string, no URL is built), but it means
+these endpoints may not resolve against a live stack at all.
+
+**So the first implementation step is to stand up the local stack and attempt to
+capture all six — before any demo code is written.**
+
+- All six return real data → dashboard stays the landing page, as designed.
+- They 404, or return `200` with empty payloads → drop `/` from the slice and
+  land on `/productions` after login. Nine pages, four wrappers, every page
+  backed by a directly-seeded table.
+
+Do not hand-author dashboard fixtures to paper over this. A landing page whose
+numbers no code produced is worse than no landing page.
+
+If the probe shows the endpoints are genuinely broken, that is a real finding
+about Thittam worth filing on its own, independent of the demo.
+
 Routes outside the slice are reachable only if their fixtures exist; otherwise
 navigation entries to them are hidden in demo mode. A visibly broken page is
 worse than an absent one.
