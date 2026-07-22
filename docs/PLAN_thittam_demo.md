@@ -589,7 +589,7 @@ If `tsc --noEmit` reports the JSON import cannot be resolved, add to `web/tsconf
 - [ ] **Step 9: Run the tests and watch them pass**
 
 Run: `cd web && npm test && npx tsc --noEmit`
-Expected: PASS — 16 passed; no type errors
+Expected: PASS — 15 passed (8 prior + 7 here); no type errors
 
 - [ ] **Step 10: Commit**
 
