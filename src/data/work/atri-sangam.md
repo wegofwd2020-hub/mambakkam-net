@@ -81,20 +81,25 @@ the rest are deliberately independent of it.
 | `wwvb_time_offset`      | WWVB 60 kHz radio time minus the local clock            | Terrestrial time, no network needed                                   |
 | `holdover_residual`     | Observed offset minus the local clock's own drift model | Slow manipulation that tracks nothing real                            |
 
-NTP consensus uses Marzullo interval intersection to pick the servers telling
-a consistent story, then takes the median of what those servers themselves
-reported — so a server cannot win simply by claiming to be precise. That value
-must also be vouched for by a quorum of them, which stops a server widening its
-own uncertainty until it bridges two honest servers that genuinely disagree.
-Disagreement is flagged either way. Roughtime consensus works the same way, and
-additionally reports how many servers failed cryptographic verification.
+NTP consensus counts every server whose claimed uncertainty is within bounds,
+takes the median of what those servers themselves reported, and requires that
+value to be vouched for by a quorum of them — each server's own interval has
+to contain it. No server is picked or dropped on the strength of how precise
+it claims to be, so a server cannot win by claiming precision it does not
+have, and one widening its own uncertainty to bridge two honest servers that
+genuinely disagree cannot get the round vouched for. Disagreement is flagged
+either way. Roughtime consensus works the same way, and additionally reports
+how many servers failed cryptographic verification.
 
-The honest limit: claimed precision no longer decides how much a server counts,
-but it still decides which servers are heard. Where the honest servers report
-differing precision, a server claiming a very tight interval can crowd out a
-more precise one and pull the result toward itself — bounded by the widest
-honest uncertainty in the round, and impossible when they all report the same.
-Closing that is open work, not a solved problem.
+The honest limit: a lying minority still contributes to the median, so it can
+move the result — but only within the range the honest counted servers
+themselves reported, never outside it. And the trade runs the other way too.
+Because every counted server enters the median, a single lying server can now
+push a round below the vouching threshold and **silence** it, where the older
+rule would have answered. That fails safe — no reading is published, and the
+staleness detector treats the silence as the fault it is — but it means the
+guarantee is about correctness, not availability. One server can stop the
+channel answering; it cannot make it answer wrongly.
 
 ## How it decides
 
