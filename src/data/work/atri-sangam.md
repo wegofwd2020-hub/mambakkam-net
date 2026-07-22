@@ -101,6 +101,23 @@ staleness detector treats the silence as the fault it is — but it means the
 guarantee is about correctness, not availability. One server can stop the
 channel answering; it cannot make it answer wrongly.
 
+"Within bounds" is a real number a site can set, because a bound that cannot
+be changed is a bound that eventually silences somebody. Three flags:
+
+| Flag | Bounds | Default |
+| ------------------------------ | ---------------------------------------------- | ------- |
+| `--ntp-max-half-width-s`       | half the measured round-trip delay              | 1.0 s   |
+| `--roughtime-max-half-width-s` | the signed uncertainty plus half the round trip | 2.0 s   |
+| `--roughtime-max-radius-s`     | the signed uncertainty on its own               | 10.0 s  |
+
+A Roughtime server has to clear both of its bounds, and they catch different
+things. A server on a satellite or congested cellular path — modest signed
+uncertainty, slow link — is admitted by raising the width bound alone. A
+server *claiming* an implausibly wide uncertainty is not; that one is held by
+the radius bound, and needs both raised. Raising either widens how far a
+single server can reach when it tries to bridge two honest ones that
+genuinely disagree, which is the whole reason the bounds exist.
+
 ## How it decides
 
 Three detector layers, because the attacks come in three shapes:
