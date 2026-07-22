@@ -67,7 +67,7 @@ Audited `thittam/web` on 2026-07-22:
 | route handlers (`route.ts`) | none |
 | pages | 29, **all 29 are `"use client"`** |
 | data access | funnels through `src/lib/api/client.ts` and `src/lib/api/auth.ts` |
-| dynamic routes | 7 `[id]` segments; 3 are in scope |
+| dynamic routes | 7 `[id]` segments; 2 are in scope |
 
 Every page being a client component is what makes this cheap: there is no
 server-render path to replace, only a transport to stub.
@@ -76,51 +76,67 @@ server-render path to replace, only a transport to stub.
 
 ## Scope — the guided slice
 
-Roughly 8–10 pages telling one coherent XYZ_CBA (movie production, INR) story:
+Five pages telling one coherent XYZ_CBA (movie production, INR) story:
 
 1. `/login` — demo credentials, pre-filled
-2. `/` — dashboard
-3. `/productions` → `/productions/[id]`
-4. `/budgets` → `/budgets/[id]`
-5. `/expenses` → `/expenses/[id]`
-6. `/inventory` → `/inventory/[id]`
+2. `/productions` — landing page after login
+3. `/productions/[id]`
+4. `/budgets`
+5. `/budgets/[id]`
 
-Ten pages, four of them `[id]` detail views — which is where the four route
-wrappers below come from.
+Two `[id]` detail views — which is where the two route wrappers below come from.
 
-`/reports` is deliberately out. The reporting service builds its view from a
-cross-service event projection (`services/reporting/consumer.go`), so its
-responses depend on events the seeds do not replay — captured fixtures would
-likely come back empty or misleading. `seeds/demo/xyz-cba/006_inventory.sql`
-seeds inventory directly, so that section has real data behind it.
+### Why the slice is this small: only 3 of 10 services expose REST
 
-### Step 0 — probe the dashboard before building anything
+This is the constraint that sets the scope, so it is worth stating plainly.
+Thittam's browser client can only reach services that register a grpc-gateway.
+Measured 2026-07-22 with
+`grep -rl 'RegisterHandlerFromEndpoint\|runtime.NewServeMux' cmd/*/`:
 
-The same concern applies to the landing page. `src/lib/api/dashboard.ts:134`
-sets `BASE = "/v1/reports/dashboard"` and calls six endpoints off it —
-`/portfolio`, `/financial`, `/approvals`, `/team`, `/compliance`, `/summary`.
-All six are reporting-backed.
+| Service | grpc-gateway | Port |
+|---|---|---|
+| `iam` | ✅ | :9086 |
+| `project-management` | ✅ | :9080 |
+| `budget-planning` | ✅ | :9081 |
+| `expense-tracking` | ❌ gRPC only | — |
+| `inventory-management` | ❌ gRPC only | — |
+| `reporting-analytics` | ❌ gRPC only | — |
+| `billing`, `document`, `general-ledger`, `notifications` | ❌ gRPC only | — |
 
-There is also a routing oddity: that path is `/v1/...`, not `/api/v1/...`.
-`resolveBaseUrl` (`web/src/lib/api/client.ts:33`) matches only `/api/v1/*`
-prefixes, so these six fall through to the default — `env.iamApiUrl`, the IAM
-gateway on :9086. The dashboard appears to ask IAM for reporting data. Harmless
-for the demo (fixtures key on the path string, no URL is built), but it means
-these endpoints may not resolve against a live stack at all.
+`scripts/dev-start.sh` confirms it — "gateway ready" is logged on exactly :9080,
+:9081 and :9086.
 
-**So the first implementation step is to stand up the local stack and attempt to
-capture all six — before any demo code is written.**
+So `resolveBaseUrl` (`web/src/lib/api/client.ts:33`) having only three branches
+is not an oversight; it is the entire REST surface. Every other path falls
+through to `env.iamApiUrl` and 404s there:
 
-- All six return real data → dashboard stays the landing page, as designed.
-- They 404, or return `200` with empty payloads → drop `/` from the slice and
-  land on `/productions` after login. Nine pages, four wrappers, every page
-  backed by a directly-seeded table.
+| Page | Calls | Reachable |
+|---|---|---|
+| `/login` | `/api/v1/auth/login` → :9086 | ✅ |
+| `/productions[/id]` | `/api/v1/productions` → :9080 | ✅ |
+| `/budgets[/id]` | `/api/v1/budgets` → :9081 | ✅ |
+| `/expenses[/id]` | `/api/v1/expenses` → falls to :9086 | ❌ |
+| `/inventory[/id]` | `/api/v1/assets` → falls to :9086 | ❌ |
+| `/` dashboard | `/v1/reports/dashboard/*` → falls to :9086 | ❌ |
 
-Do not hand-author dashboard fixtures to paper over this. A landing page whose
-numbers no code produced is worse than no landing page.
+There is nothing to record from for the unreachable pages, and hand-authoring
+their fixtures is ruled out — a screen whose numbers no code produced is worse
+than an absent screen. Hence five pages.
 
-If the probe shows the endpoints are genuinely broken, that is a real finding
-about Thittam worth filing on its own, independent of the demo.
+**The dashboard is not the landing page.** `/login` redirects to `/productions`
+in demo mode. `src/lib/api/dashboard.ts:134` drives `/` from six
+reporting-backed endpoints under `BASE = "/v1/reports/dashboard"`, none of which
+resolve. (Note that path is `/v1/...`, not `/api/v1/...` — a second reason it
+would never route correctly.)
+
+### Separate finding, not a demo problem
+
+Thittam's web tier is ahead of its REST surface by seven services: `/expenses`,
+`/inventory`, `/reports`, `/notifications`, `/documents` and `/billing` call
+endpoints that no running process serves. Those pages appear non-functional in
+the product, not merely in a demo — consistent with the critique's note that
+Playwright covers only a budgets journey. Worth filing against
+`project-critique/thittam-critique.md` independently of this work.
 
 Routes outside the slice are reachable only if their fixtures exist; otherwise
 navigation entries to them are hidden in demo mode. A visibly broken page is
@@ -142,7 +158,7 @@ is invented.
 | 3 | `thittam/web/src/demo/transport.ts` | Lookup keyed `"GET /api/v1/productions"`. Unknown key throws an explicit `ApiError`. |
 | 4 | `thittam/web/src/demo/manifest.ts` | Path→fixture map, plus the `[id]` values feeding `generateStaticParams`. |
 | 5 | `client.ts` + `auth.ts` demo branches | ~5 lines at the top of each transport function, guarded by `env.demoMode`. |
-| 6 | 4 route wrappers | `budgets/[id]`, `productions/[id]`, `expenses/[id]`, `inventory/[id]` |
+| 6 | 2 route wrappers | `productions/[id]`, `budgets/[id]` |
 | 7 | `thittam/web/next.config.ts` | Env-gated export config |
 | 8 | `mambakkam-net/nginx/nginx.conf` | Two location blocks (below) |
 | 9 | `mambakkam-net` work page | "Try the demo" link on `/work/thittam` |
@@ -161,7 +177,7 @@ same demo branch. Stubbing only `client.ts` leaves login hitting the network.
 ### Route wrappers
 
 `generateStaticParams()` cannot be exported from a `"use client"` file. For each
-of the 4 in-scope `[id]` routes, `page.tsx` becomes a thin server component that
+of the 2 in-scope `[id]` routes, `page.tsx` becomes a thin server component that
 exports `generateStaticParams()` (ids read from the fixture manifest) and renders
 the existing client component, moved unchanged to `view.tsx`. Mechanical.
 
@@ -320,10 +336,14 @@ Then add a `/demos/thittam/` 200 assertion to
 - **Fixture rot.** Committed fixtures are a snapshot. Thittam's last substantive
   commit was 2026-05-13 so the surface is stable today, but the mitigation is the
   re-runnable capture script, not vigilance.
-- **Thin pages.** The XYZ_CBA seeds cover productions, budgets, expenses,
-  inventory and ledger directly, which is why the slice is built from those.
-  Still review the captured fixtures before committing them — an endpoint can
-  return `200` with an empty list, which the capture script will not catch.
+- **Thin pages.** `seeds/demo/xyz-cba/003_productions.sql` and
+  `004_budgets.sql` back the whole slice directly. Still review the captured
+  fixtures before committing them — an endpoint can return `200` with an empty
+  list, which the capture script will not catch.
+- **A small demo.** Five pages is a modest showing for a system this size, and
+  it deliberately shows the two services that are furthest along rather than the
+  breadth of the architecture. The honest alternative — building three
+  grpc-gateways first — was considered and deferred.
 
 ---
 
@@ -333,3 +353,7 @@ Then add a `/demos/thittam/` 200 assertion to
   live demo, and for the documented k8s path — worth doing, separately).
 - Any live backend, VPS upsize, or second host.
 - The multi-tenant switching story (XYZ Construction) — one tenant only.
+- grpc-gateway registration for `expense-tracking`, `inventory-management` and
+  `reporting-analytics`. Building these would unlock `/expenses`, `/inventory`
+  and the dashboard for both the demo and the product, and is the natural
+  follow-up — but it is Go service work, not demo work.
