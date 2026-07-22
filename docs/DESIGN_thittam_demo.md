@@ -83,10 +83,16 @@ Roughly 8–10 pages telling one coherent XYZ_CBA (movie production, INR) story:
 3. `/productions` → `/productions/[id]`
 4. `/budgets` → `/budgets/[id]`
 5. `/expenses` → `/expenses/[id]`
-6. `/reports`
+6. `/inventory` → `/inventory/[id]`
 
-Nine pages, three of them `[id]` detail views — which is where the three route
+Ten pages, four of them `[id]` detail views — which is where the four route
 wrappers below come from.
+
+`/reports` is deliberately out. The reporting service builds its view from a
+cross-service event projection (`services/reporting/consumer.go`), so its
+responses depend on events the seeds do not replay — captured fixtures would
+likely come back empty or misleading. `seeds/demo/xyz-cba/006_inventory.sql`
+seeds inventory directly, so that section has real data behind it.
 
 Routes outside the slice are reachable only if their fixtures exist; otherwise
 navigation entries to them are hidden in demo mode. A visibly broken page is
@@ -108,7 +114,7 @@ is invented.
 | 3 | `thittam/web/src/demo/transport.ts` | Lookup keyed `"GET /api/v1/productions"`. Unknown key throws an explicit `ApiError`. |
 | 4 | `thittam/web/src/demo/manifest.ts` | Path→fixture map, plus the `[id]` values feeding `generateStaticParams`. |
 | 5 | `client.ts` + `auth.ts` demo branches | ~5 lines at the top of each transport function, guarded by `env.demoMode`. |
-| 6 | 3 route wrappers | `budgets/[id]`, `productions/[id]`, `expenses/[id]` |
+| 6 | 4 route wrappers | `budgets/[id]`, `productions/[id]`, `expenses/[id]`, `inventory/[id]` |
 | 7 | `thittam/web/next.config.ts` | Env-gated export config |
 | 8 | `mambakkam-net/nginx/nginx.conf` | Two location blocks (below) |
 | 9 | `mambakkam-net` work page | "Try the demo" link on `/work/thittam` |
@@ -127,7 +133,7 @@ same demo branch. Stubbing only `client.ts` leaves login hitting the network.
 ### Route wrappers
 
 `generateStaticParams()` cannot be exported from a `"use client"` file. For each
-of the 3 in-scope `[id]` routes, `page.tsx` becomes a thin server component that
+of the 4 in-scope `[id]` routes, `page.tsx` becomes a thin server component that
 exports `generateStaticParams()` (ids read from the fixture manifest) and renders
 the existing client component, moved unchanged to `view.tsx`. Mechanical.
 
@@ -287,8 +293,9 @@ Then add a `/demos/thittam/` 200 assertion to
   commit was 2026-05-13 so the surface is stable today, but the mitigation is the
   re-runnable capture script, not vigilance.
 - **Thin pages.** The XYZ_CBA seeds cover productions, budgets, expenses,
-  inventory and ledger well; `reports` and `notifications` may render sparse.
-  Review the captured fixtures before finalising which pages make the slice.
+  inventory and ledger directly, which is why the slice is built from those.
+  Still review the captured fixtures before committing them — an endpoint can
+  return `200` with an empty list, which the capture script will not catch.
 
 ---
 
