@@ -150,7 +150,7 @@ default thresholds are consumer-grade starting points, meant to be overridden,
 and have not been validated against real jamming or spoofing hardware. Treat
 them as a place to begin tuning, not as a calibrated defence.
 
-Source code is private.
+Source code is open: [github.com/wegofwd2020-hub/atri-sangam](https://github.com/wegofwd2020-hub/atri-sangam).
 
 ## See it
 
