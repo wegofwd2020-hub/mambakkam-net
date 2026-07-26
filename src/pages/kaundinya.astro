@@ -16,7 +16,7 @@ const metadata = {
   // as the personal site rather than the company.
   ignoreTitleTemplate: true,
   description:
-    'An intellectual solutioning collective. Five products, one shared engine — Mentible, StudyBuddy OnDemand, Pramana, Kathai-Chithiram and Thittam.',
+    'An intellectual solutioning collective — we take on hard problems. Mentible, StudyBuddy OnDemand, Pramana, Kathai-Chithiram, Thittam and Atri Sangam.',
   openGraph: {
     // og:site_name defaults to the site name, so WhatsApp labels the preview card
     // 'Mambakkam'. astro-seo reads snake_case site_name; siteName is what this
@@ -32,15 +32,37 @@ const metadata = {
   },
 };
 
-// Status is stated in words and nowhere else — two of the five ship today.
-const products = [
+// `tryNow` means you can put your hands on it today; the chip says what it
+// actually is. Those are different claims: StudyBuddy OnDemand has a reachable
+// demo but no shipped product behind it (no apex DNS, and its own site work entry
+// says in-progress), so it gets the emphasis without the word 'Live'.
+/** One row of the portfolio list. Typed explicitly because an inferred union of
+ *  object literals only exposes properties present on every member, so the
+ *  logo-less row's `glyph` would not typecheck. */
+type ProductRow = {
+  name: string;
+  native?: string;
+  nativeClass?: string;
+  /** Imported product logo. Omitted only when none exists yet. */
+  mark?: string;
+  /** Letterform fallback, used when `mark` is absent. */
+  glyph?: string;
+  href: string;
+  label: string;
+  status: string;
+  /** Can a reader use it today? Not the same as "has shipped". */
+  tryNow?: boolean;
+  blurb: string;
+};
+
+const products: ProductRow[] = [
   {
     name: 'Mentible',
     mark: mentibleMark.src,
     href: 'https://mambakkam.net/mentible',
     label: 'mambakkam.net/mentible',
     status: 'Live',
-    live: true,
+    tryNow: true,
     blurb: 'Author a full book on any topic — lessons, tutorials, quizzes — then read it anywhere, offline.',
   },
   {
@@ -48,8 +70,8 @@ const products = [
     mark: studybuddyMark.src,
     href: 'https://demo.usestudybuddy.com',
     label: 'demo.usestudybuddy.com',
-    status: 'Live',
-    live: true,
+    status: 'Demo available',
+    tryNow: true,
     blurb: 'AI lessons, quizzes and tutorials for Grades 5–12 in English, French and Spanish. Runs in a browser.',
   },
   {
@@ -60,7 +82,7 @@ const products = [
     href: 'https://mambakkam.net/work/pramana',
     label: 'mambakkam.net/work/pramana',
     status: 'In development',
-    live: false,
+    tryNow: false,
     blurb: 'Compliance training generated from the regulation, with a human approval gate and a tamper-evident record.',
   },
   {
@@ -71,7 +93,7 @@ const products = [
     href: 'https://mambakkam.net/kathai-chithiram',
     label: 'mambakkam.net/kathai-chithiram',
     status: 'Prototype',
-    live: false,
+    tryNow: false,
     blurb: 'Personalised visual social-story videos for children with autism.',
   },
   {
@@ -82,8 +104,25 @@ const products = [
     href: 'https://mambakkam.net/thittam',
     label: 'mambakkam.net/thittam',
     status: 'In build',
-    live: false,
+    tryNow: false,
     blurb: "Production management that speaks your industry's language — film, construction, software, events.",
+  },
+  {
+    name: 'Atri Sangam',
+    native: 'अत्रि',
+    nativeClass: 'dv',
+    // No logo exists for this one yet, so it falls back to a letterform — see
+    // .kl-mark.is-glyph in the styles.
+    glyph: 'अ',
+    href: 'https://mambakkam.net/work/atri-sangam',
+    label: 'mambakkam.net/work/atri-sangam',
+    // Alpha, and deliberately worded that way: its own site excerpt says the
+    // monitor runs but its thresholds are not proven against real jamming
+    // hardware. Never imply field validation.
+    status: 'Alpha',
+    tryNow: false,
+    blurb:
+      'A GPS integrity monitor for fixed sites — it cross-checks satellite time and position against independent references and says when they stop agreeing.',
   },
 ];
 ---
@@ -102,8 +141,8 @@ const products = [
 
         <h1 class="kl-thesis">We choose problems <em>because</em> they are difficult.</h1>
         <p class="kl-sub">
-          An intellectual solutioning collective. Five products so far, one shared engine underneath — education,
-          compliance, special-needs learning, production management.
+          An intellectual solutioning collective. Six products so far — education, compliance, special-needs learning,
+          production management, and GPS/timing integrity.
         </p>
       </header>
 
@@ -112,13 +151,19 @@ const products = [
           products.map((p) => (
             <li>
               {/* The whole card is the link, so there is no small tap target on a phone. */}
-              <a class={`kl-card${p.live ? ' is-live' : ''}`} href={p.href}>
-                <img class="kl-mark" src={p.mark} alt="" width="56" height="56" loading="lazy" />
+              <a class={`kl-card${p.tryNow ? ' is-live' : ''}`} href={p.href}>
+                {p.mark ? (
+                  <img class="kl-mark" src={p.mark} alt="" width="56" height="56" loading="lazy" />
+                ) : (
+                  <span class="kl-mark is-glyph" aria-hidden="true">
+                    {p.glyph}
+                  </span>
+                )}
                 <div class="kl-body">
                   <div class="kl-head-row">
                     <h2 class="kl-name">{p.name}</h2>
                     {p.native && <span class={`kl-native ${p.nativeClass}`}>{p.native}</span>}
-                    <span class={`kl-status${p.live ? '' : ' soft'}`}>{p.status}</span>
+                    <span class={`kl-status${p.tryNow ? '' : ' soft'}`}>{p.status}</span>
                   </div>
                   <p class="kl-blurb">{p.blurb}</p>
                   <p class="kl-url">
@@ -136,7 +181,7 @@ const products = [
 
       <footer class="kl-foot">
         <p>
-          Two of the five are live today — start with those.
+          Mentible ships today; StudyBuddy OnDemand has a live demo. Start with those.
           <a href="mailto:wegofwd2020@gmail.com">wegofwd2020@gmail.com</a>
         </p>
       </footer>
@@ -306,6 +351,19 @@ const products = [
     background: rgba(244, 236, 221, 0.11);
     border-radius: 0.7rem;
     padding: 0.3rem;
+  }
+
+  /* Placeholder for a product with no logo yet (Atri Sangam). Deliberately a
+     letterform in the page's own gold rather than an invented mark — it should be
+     replaced the moment a real one exists. */
+  .kl-mark.is-glyph {
+    display: grid;
+    place-items: center;
+    font-family: 'Noto Serif Devanagari', serif;
+    font-size: 1.6rem;
+    line-height: 1;
+    color: var(--gold);
+    padding: 0;
   }
 
   .kl-head-row {
