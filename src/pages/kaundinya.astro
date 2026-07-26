@@ -41,8 +41,7 @@ const products = [
     label: 'mambakkam.net/mentible',
     status: 'Live',
     live: true,
-    blurb:
-      'Author a full book on any topic — lessons, tutorials, quizzes — then read it anywhere, offline.',
+    blurb: 'Author a full book on any topic — lessons, tutorials, quizzes — then read it anywhere, offline.',
   },
   {
     name: 'StudyBuddy OnDemand',
@@ -51,8 +50,7 @@ const products = [
     label: 'demo.usestudybuddy.com',
     status: 'Live',
     live: true,
-    blurb:
-      'AI lessons, quizzes and tutorials for Grades 5–12 in English, French and Spanish. Runs in a browser.',
+    blurb: 'AI lessons, quizzes and tutorials for Grades 5–12 in English, French and Spanish. Runs in a browser.',
   },
   {
     name: 'Pramana',
@@ -63,8 +61,7 @@ const products = [
     label: 'mambakkam.net/work/pramana',
     status: 'In development',
     live: false,
-    blurb:
-      'Compliance training generated from the regulation, with a human approval gate and a tamper-evident record.',
+    blurb: 'Compliance training generated from the regulation, with a human approval gate and a tamper-evident record.',
   },
   {
     name: 'Kathai-Chithiram',
@@ -86,8 +83,7 @@ const products = [
     label: 'mambakkam.net/thittam',
     status: 'In build',
     live: false,
-    blurb:
-      "Production management that speaks your industry's language — film, construction, software, events.",
+    blurb: "Production management that speaks your industry's language — film, construction, software, events.",
   },
 ];
 ---
@@ -106,8 +102,8 @@ const products = [
 
         <h1 class="kl-thesis">We choose problems <em>because</em> they are difficult.</h1>
         <p class="kl-sub">
-          An intellectual solutioning collective. Five products so far, one shared engine underneath —
-          education, compliance, special-needs learning, production management.
+          An intellectual solutioning collective. Five products so far, one shared engine underneath — education,
+          compliance, special-needs learning, production management.
         </p>
       </header>
 
@@ -126,7 +122,10 @@ const products = [
                   </div>
                   <p class="kl-blurb">{p.blurb}</p>
                   <p class="kl-url">
-                    {p.label}<span class="kl-arrow" aria-hidden="true">→</span>
+                    {p.label}
+                    <span class="kl-arrow" aria-hidden="true">
+                      →
+                    </span>
                   </p>
                 </div>
               </a>
@@ -165,7 +164,12 @@ const products = [
     /* Deep pine, darkened well past mambakkam.net's own #4A6B3C primary and pulled
        slightly blue-green so the gold reads warm against it. */
     background:
-      radial-gradient(circle 320px at 50% 6rem, rgba(220, 168, 75, 0.26) 0, rgba(192, 57, 29, 0.09) 44%, transparent 72%),
+      radial-gradient(
+        circle 320px at 50% 6rem,
+        rgba(220, 168, 75, 0.26) 0,
+        rgba(192, 57, 29, 0.09) 44%,
+        transparent 72%
+      ),
       radial-gradient(ellipse 90% 60% at 50% 118%, rgba(0, 0, 0, 0.55) 0, transparent 60%),
       linear-gradient(176deg, #102419 0%, #08150f 62%, #040c08 100%);
   }
@@ -256,7 +260,12 @@ const products = [
     padding: 1.05rem 1.15rem;
     border-radius: 0.6rem;
     border: 1px solid rgba(220, 168, 75, 0.17);
-    background: linear-gradient(100deg, rgba(244, 236, 221, 0.055) 0%, rgba(244, 236, 221, 0.015) 60%, transparent 100%);
+    background: linear-gradient(
+      100deg,
+      rgba(244, 236, 221, 0.055) 0%,
+      rgba(244, 236, 221, 0.015) 60%,
+      transparent 100%
+    );
     text-decoration: none;
     color: inherit;
     transition:
