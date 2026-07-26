@@ -12,9 +12,18 @@ import thittamMark from '~/assets/images/work/thittam-logo.svg?url';
 
 const metadata = {
   title: 'Kaundinya Labs — First to understand.',
+  // Without this the site template appends ' — Mambakkam', so a shared link reads
+  // as the personal site rather than the company.
+  ignoreTitleTemplate: true,
   description:
     'An intellectual solutioning collective. Five products, one shared engine — Mentible, StudyBuddy OnDemand, Pramana, Kathai-Chithiram and Thittam.',
   openGraph: {
+    // og:site_name defaults to the site name, so WhatsApp labels the preview card
+    // 'Mambakkam'. astro-seo reads snake_case site_name; siteName is what this
+    // repo's MetaDataOpenGraph type exposes. Both are set so the override lands
+    // whichever one is honoured.
+    site_name: 'Kaundinya Labs',
+    siteName: 'Kaundinya Labs',
     // Landscape 1200x630 — the shape WhatsApp, iMessage and Slack crop previews to.
     // Imported rather than referenced from public/: adaptOpenGraphImages() runs the
     // value through Astro's image service, which treats a bare public path as a
