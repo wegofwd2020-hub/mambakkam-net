@@ -69,7 +69,13 @@ export interface MetaDataRobots {
 }
 
 export interface MetaDataImage {
-  url: string;
+  /**
+   * A path, an absolute URL, or an imported ImageMetadata. findImage() and
+   * adaptOpenGraphImages() both accept either; ImageMetadata is in fact required
+   * for local images, because that is how the optimizer reads intrinsic
+   * dimensions — passing `imported.src` builds a MissingImageDimension error.
+   */
+  url: string | ImageMetadata;
   width?: number;
   height?: number;
 }
