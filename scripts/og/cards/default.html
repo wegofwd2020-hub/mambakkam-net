@@ -1,0 +1,104 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>mambakkam.net og:image</title>
+    <!-- render.mjs reads this to know where the PNG lands. This is the
+         site-wide fallback config.yaml points openGraph.images at, so every
+         page without its own card inherits it. -->
+    <meta name="og-out" content="src/assets/images/default.png" />
+    <link rel="stylesheet" href="../card.css" />
+    <style>
+      /* Deep pine — the site's own #4A6B3C primary darkened well past page use,
+         the same ground the Kaundinya card stands on. */
+      .card {
+        --ground:
+          radial-gradient(ellipse 70% 55% at 76% 6%, rgb(120 160 96 / 20%) 0%, transparent 62%),
+          radial-gradient(ellipse 55% 45% at 10% 96%, rgb(190 145 20 / 14%) 0%, transparent 58%),
+          linear-gradient(176deg, #16240f 0%, #0b1408 62%, #050a04 100%);
+        --frame-line: rgb(220 168 75 / 22%);
+        --frame-dot: rgb(220 168 75 / 55%);
+        --rule-line: rgb(220 168 75 / 50%);
+        --rule-dot: rgb(220 168 75 / 75%);
+        --mark-glow: rgb(220 168 75 / 35%);
+        --mark-blur: 22px;
+        --wordmark: #f4ecdd;
+        --accent: #c86a3c;
+        --statement: linear-gradient(172deg, #f6dc9a 8%, #dca84b 48%, #b4822f 96%);
+        --sub: #c7d0c5;
+      }
+
+      .brand svg {
+        width: 84px;
+        height: 84px;
+      }
+
+      /* Merriweather has no Tamil coverage and would fall back silently to a
+         sans, breaking the pairing. Name the Tamil face explicitly. */
+      .tamil {
+        margin-top: 14px;
+        font-family: 'Noto Serif Tamil', serif;
+        font-size: 34px;
+        letter-spacing: 0.02em;
+        line-height: 1.3;
+        color: #dca84b;
+      }
+
+      .wordmark {
+        font-size: 68px;
+      }
+      .tagline {
+        margin-top: 14px;
+        font-size: 25px;
+        letter-spacing: 0.18em;
+      }
+      .rule {
+        margin: 28px 0 32px;
+      }
+      .sub {
+        margin-top: 24px;
+        font-size: 24px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="card">
+      <div class="frame"><span></span><span></span><span></span><span></span></div>
+      <div class="inner">
+        <div class="brand">
+          <!-- Banyan: the tree the village sits under. Solid silhouette rather
+               than an outline — at WhatsApp thumbnail size a stroked tree turns
+               to mush, a filled one still reads. -->
+          <svg viewBox="0 0 64 64" fill="#dca84b" role="img" aria-label="">
+            <!-- Canopy: overlapping lobes, filled as one union so no internal
+                 edges show through. -->
+            <g>
+              <circle cx="32" cy="15" r="12" />
+              <circle cx="20" cy="19" r="9.5" />
+              <circle cx="44" cy="19" r="9.5" />
+              <circle cx="12" cy="23" r="6.5" />
+              <circle cx="52" cy="23" r="6.5" />
+              <rect x="10" y="19" width="44" height="8" />
+            </g>
+            <!-- Trunk, flaring into buttress roots at the base. -->
+            <path d="M28.6 25c-.4 10-1.4 18-3.6 26h14c-2.2-8-3.2-16-3.6-26z" />
+            <!-- Aerial prop roots — the thing that makes a banyan a banyan. -->
+            <g opacity="0.85">
+              <rect x="17.4" y="25" width="1.6" height="26" />
+              <rect x="45" y="25" width="1.6" height="26" />
+              <rect x="11.4" y="26" width="1.3" height="25" rx="0.6" opacity="0.75" />
+              <rect x="51.3" y="26" width="1.3" height="25" rx="0.6" opacity="0.75" />
+            </g>
+            <rect x="8" y="51" width="48" height="1.4" rx="0.7" opacity="0.55" />
+          </svg>
+          <div class="wordmark">Mambakkam</div>
+        </div>
+        <div class="tamil">மாம்பாக்கம்</div>
+        <div class="tagline">VILLAGE · LAND · PEOPLE</div>
+        <div class="rule"><i></i><b></b><s></s><b></b><i></i></div>
+        <div class="statement">The land, the temples,<br /><em>the people.</em></div>
+        <div class="sub">A farming village near the Palar — Kalavai Taluk, Ranipet District, Tamil Nadu</div>
+      </div>
+    </div>
+  </body>
+</html>

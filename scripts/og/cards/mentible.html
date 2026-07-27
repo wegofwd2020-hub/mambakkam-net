@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Mentible og:image</title>
+    <!-- render.mjs reads this to know where the PNG lands. -->
+    <meta name="og-out" content="src/assets/images/work/mentible-og.png" />
+    <link rel="stylesheet" href="../card.css" />
+    <style>
+      /* Mentible's indigo in place of the pine and gold — the /mentible aurora
+         collapsed to its darkest value, so the violet glow and the orange of
+         the mark both hold. */
+      .card {
+        --ground:
+          radial-gradient(ellipse 70% 55% at 74% 6%, rgb(99 102 241 / 22%) 0%, transparent 62%),
+          radial-gradient(ellipse 55% 45% at 12% 96%, rgb(168 85 247 / 16%) 0%, transparent 58%),
+          linear-gradient(176deg, #17142e 0%, #0d0b1c 62%, #06050e 100%);
+        --frame-line: rgb(196 181 253 / 22%);
+        --frame-dot: rgb(196 181 253 / 55%);
+        --rule-line: rgb(196 181 253 / 50%);
+        --rule-dot: rgb(196 181 253 / 75%);
+        --mark-glow: rgb(168 85 247 / 45%);
+        --wordmark: #f2eefb;
+        --accent: #b79bf5;
+        --statement: linear-gradient(100deg, #ded3fb 0%, #c4b5fd 45%, #f0abfc 100%);
+        --sub: #c3bcd8;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="card">
+      <div class="frame"><span></span><span></span><span></span><span></span></div>
+      <div class="inner">
+        <div class="brand">
+          <img src="../../../src/assets/images/work/mentible-mark.png" alt="" />
+          <div class="wordmark">Mentible</div>
+        </div>
+        <div class="tagline">AUTHOR YOURSELF</div>
+        <div class="rule"><i></i><b></b><s></s><b></b><i></i></div>
+        <div class="statement">The content is the commodity.<br /><em>The shaping</em> is yours.</div>
+        <div class="sub">Outline · Generate · Compile — a real EPUB3 or PDF, yours to keep</div>
+      </div>
+    </div>
+  </body>
+</html>
