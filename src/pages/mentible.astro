@@ -2,12 +2,24 @@
 import Layout from '~/layouts/Layout.astro';
 import Image from '~/components/common/Image.astro';
 import mentibleLogo from '~/assets/images/work/mentible-mark.png';
+import ogImage from '~/assets/images/work/mentible-og.png';
 import '@fontsource-variable/space-grotesk';
 
 const metadata = {
   title: 'Mentible — Author Yourself',
+  // The template appends ' — Mambakkam', which on a shared card reads as the
+  // clumsy 'Mentible — Author Yourself — Mambakkam'. The footer already says
+  // this is part of mambakkam.net.
+  ignoreTitleTemplate: true,
   description:
     'The content is the commodity — every model already has it. Mentible is the layer where you shape it: outline, scope, and generate a real book (EPUB3 / PDF) that is exactly what you decided it should be. Use it in your browser, try the live demo, or download the Android app.',
+  openGraph: {
+    // Landscape 1200x630 — the shape WhatsApp, iMessage and Slack crop previews
+    // to. Imported rather than referenced from public/: adaptOpenGraphImages()
+    // runs the value through Astro's image service, which treats a bare public
+    // path as a remote image and then fails for want of intrinsic dimensions.
+    images: [{ url: ogImage }],
+  },
 };
 
 const DEMO_URL = '/demos/mentible/';
