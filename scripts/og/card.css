@@ -1,0 +1,187 @@
+/*
+ * Shared house style for og:image cards.
+ *
+ * The look is lifted from src/pages/kaundinya.astro — dark ground, thin inset
+ * frame with a dot at each corner, a rule with dots, a statement line, a muted
+ * sub. Each card overrides only --ground, --accent and --statement.
+ *
+ * Fonts are pulled straight out of node_modules over file:// so a card renders
+ * with the site's own Merriweather and not a system serif that merely looks
+ * close. Paths are relative to this file.
+ */
+
+@font-face {
+  font-family: 'Merriweather';
+  font-weight: 300;
+  font-style: normal;
+  src: url('../../node_modules/@fontsource/merriweather/files/merriweather-latin-300-normal.woff2') format('woff2');
+}
+@font-face {
+  font-family: 'Merriweather';
+  font-weight: 300;
+  font-style: italic;
+  src: url('../../node_modules/@fontsource/merriweather/files/merriweather-latin-300-italic.woff2') format('woff2');
+}
+@font-face {
+  font-family: 'Merriweather';
+  font-weight: 400;
+  font-style: normal;
+  src: url('../../node_modules/@fontsource/merriweather/files/merriweather-latin-400-normal.woff2') format('woff2');
+}
+@font-face {
+  font-family: 'Merriweather';
+  font-weight: 700;
+  font-style: normal;
+  src: url('../../node_modules/@fontsource/merriweather/files/merriweather-latin-700-normal.woff2') format('woff2');
+}
+@font-face {
+  font-family: 'Merriweather';
+  font-weight: 700;
+  font-style: italic;
+  src: url('../../node_modules/@fontsource/merriweather/files/merriweather-latin-700-italic.woff2') format('woff2');
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html,
+body {
+  width: 1200px;
+  height: 630px;
+  overflow: hidden;
+}
+
+.card {
+  position: relative;
+  width: 1200px;
+  height: 630px;
+  overflow: hidden;
+  font-family: 'Merriweather', Georgia, serif;
+  background: var(--ground);
+}
+
+/* Inset rule with a dot at each corner. */
+.frame {
+  position: absolute;
+  inset: 22px;
+  border: 1px solid var(--frame-line);
+}
+.frame span {
+  position: absolute;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--frame-dot);
+}
+.frame span:nth-child(1) {
+  top: -3px;
+  left: -3px;
+}
+.frame span:nth-child(2) {
+  top: -3px;
+  right: -3px;
+}
+.frame span:nth-child(3) {
+  bottom: -3px;
+  left: -3px;
+}
+.frame span:nth-child(4) {
+  bottom: -3px;
+  right: -3px;
+}
+
+.inner {
+  position: relative;
+  height: 100%;
+  padding: 64px 88px 72px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 26px;
+}
+.brand img,
+.brand svg {
+  width: 96px;
+  height: 96px;
+  object-fit: contain;
+  filter: drop-shadow(0 0 var(--mark-blur, 26px) var(--mark-glow));
+}
+
+.wordmark {
+  font-weight: 300;
+  font-size: 72px;
+  letter-spacing: 0.1em;
+  line-height: 1;
+  color: var(--wordmark);
+}
+
+.tagline {
+  margin-top: 16px;
+  font-weight: 300;
+  font-size: 27px;
+  letter-spacing: 0.14em;
+  color: var(--accent);
+}
+
+.rule {
+  margin: 30px 0 34px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.rule i {
+  display: block;
+  width: 150px;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--rule-line));
+}
+.rule i + i {
+  background: linear-gradient(90deg, var(--rule-line), transparent);
+}
+.rule b,
+.rule s {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: var(--rule-dot);
+}
+.rule s {
+  width: 7px;
+  height: 7px;
+  background: none;
+  border: 1px solid var(--rule-dot);
+}
+
+/* Gradient-filled text: the one thing that must not be flattened to a solid,
+   since it is what makes the line read as artwork rather than a heading. */
+.statement {
+  font-weight: 700;
+  font-size: 46px;
+  line-height: 1.28;
+  letter-spacing: -0.005em;
+  background: var(--statement);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+.statement em {
+  font-style: italic;
+}
+
+.sub {
+  margin-top: 26px;
+  font-weight: 300;
+  font-size: 25px;
+  line-height: 1.55;
+  color: var(--sub);
+}
