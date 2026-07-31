@@ -1,0 +1,380 @@
+---
+import Layout from '~/layouts/Layout.astro';
+import '@fontsource-variable/jetbrains-mono';
+import '@fontsource-variable/work-sans';
+
+// Imported rather than referenced from public/: findImage() returns a bare
+// public path as a string, which adaptOpenGraphImages() then hands to
+// astroAssetsOptimizer() expecting ImageMetadata. The public copy stays for now
+// because the four generated replay pages still point their own og:image at it.
+import ogImage from '~/assets/images/work/atri-sangam-demo-og.png';
+
+const metadata = {
+  title: 'Atri Sangam demos — the assembly that notices when the sky goes dark',
+  // The template appends ' — Mambakkam', which would make this read as the
+  // village site rather than the instrument it is.
+  ignoreTitleTemplate: true,
+  description:
+    'A GPS receiver cannot audit itself. Four recorded replays — a healthy site and three shapes of attack — from the Atri Sangam GNSS integrity monitor.',
+  openGraph: {
+    type: 'website',
+    images: [{ url: ogImage }],
+  },
+};
+
+/* Palette — "Emerald Prestige", locked. Hard-coded on purpose: this page is a
+   self-contained artifact and must not follow the site's theme tokens, which
+   are light by default. Opacity is an 8-bit hex alpha suffix. */
+const BG = '#03251c';
+const PANEL = '#0a3d2e';
+const PANEL_HI = '#0f5c46';
+const GOLD = '#c9a84c';
+const GOLD_SOFT = '#f0d78c';
+const CREAM = '#f5f0e0';
+
+const MONO = "'JetBrains Mono Variable', ui-monospace, monospace";
+const SANS = "'Work Sans Variable', ui-sans-serif, system-ui, sans-serif";
+
+/** The three attack replays. Clean is the featured card and is laid out apart. */
+const siblings = [
+  {
+    name: 'Time Walk',
+    href: '/demos/atri-sangam/time-walk.html',
+    body: 'A slow spoof. GPS drifts away from the band while the independent references hold flat. CUSUM catches the accumulation.',
+    // Authoring viewBox is 100x40 for every sibling; the plate stretches it.
+    path: 'M0,35 L20,34 L40,32 L60,28 L80,22 L100,10',
+  },
+  {
+    name: 'Position Jump',
+    href: '/demos/atri-sangam/position-jump.html',
+    body: 'A crude spoof. The reported position jumps away from the surveyed antenna, and the step detector fires at once.',
+    path: 'M0,30 L45,30 V10 L100,10',
+  },
+  {
+    name: 'Dropout',
+    href: '/demos/atri-sangam/dropout.html',
+    body: 'An outage. The channels go silent, and the shaded gaps are the absence itself — jamming looks exactly like this.',
+    path: 'M0,20 H20 M40,20 H60 M80,20 H100',
+  },
+];
+
+/** Verbatim from the page this replaces — the terms are the contract, not copy. */
+const glossary = [
+  [
+    'GNSS',
+    'Global Navigation Satellite System',
+    'The family of constellations — GPS, GLONASS, Galileo, BeiDou. This monitor watches whichever ones the receiver reports.',
+  ],
+  [
+    'PNT',
+    'Positioning, Navigation and Timing',
+    'What a GNSS receiver provides, and what this system checks for integrity. Most infrastructure depends on the T more than the PN.',
+  ],
+  [
+    'NMEA 0183',
+    'National Marine Electronics Association standard 0183',
+    'The sentence format a receiver speaks. Each line is one record with a checksum, capped at 82 characters.',
+  ],
+  [
+    'RMC / GGA / GSV',
+    'Recommended Minimum / Global positioning fix / Satellites in View',
+    'The three sentence types read here: fix and time, fix quality, and per-satellite signal strength.',
+  ],
+  [
+    'C/N₀',
+    'Carrier-to-Noise density ratio',
+    'Per-satellite signal strength in dB-Hz. Its spread across satellites is a spoofing tell.',
+  ],
+  [
+    'CUSUM',
+    'Cumulative Sum control chart',
+    'A detector that accumulates small deviations, so a drift too gradual to trip a threshold still gets caught.',
+  ],
+  [
+    'SNTP / NTP',
+    '(Simple) Network Time Protocol',
+    'Time over the network, RFC 4330. Independent of the sky, but not of the network.',
+  ],
+  [
+    'Roughtime',
+    '—',
+    'Cryptographically signed time: an Ed25519 signature over a response that includes a Merkle proof for the nonce we sent.',
+  ],
+  [
+    'WWVB',
+    'NIST radio station WWVB, 60 kHz',
+    'A terrestrial time broadcast. Needs no network, so it survives outages that remove every other reference.',
+  ],
+  [
+    'Holdover',
+    '—',
+    "The local oscillator's own drift model, used to predict what the clock should be doing without any external reference.",
+  ],
+  [
+    'Marzullo',
+    "Marzullo's algorithm",
+    'Interval intersection: the region the largest number of sources agree on. Retained in code as a public export, but no longer decides the consensus offset — a lying server could shape which honest servers were heard by choosing its own interval. The offset is now the median of every source past a width bound, corroborated by a quorum.',
+  ],
+];
+---
+
+<Layout metadata={metadata}>
+  <div
+    class="ags min-h-screen w-full px-6 py-12 md:px-10 md:py-16"
+    style={`background:${BG};color:${CREAM};font-family:${SANS}`}
+  >
+    <div class="mx-auto flex w-full max-w-6xl flex-col gap-12">
+      <!-- 1. Top bar -->
+      <div class="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+        <nav class="kicker" style={`font-family:${MONO};color:${CREAM}99`} aria-label="Breadcrumb">
+          <a href="/work/atri-sangam" style={`color:${GOLD}`}>Atri Sangam</a>
+          <span aria-hidden="true"> / </span>
+          <span style={`color:${GOLD_SOFT}`} aria-current="page">Demos</span>
+        </nav>
+        <span
+          class="chip kicker inline-flex items-center rounded-full border px-2.5 py-0.5"
+          style={`font-family:${MONO};color:${CREAM}99;background:${PANEL};border-color:${PANEL_HI}`}
+        >
+          Recorded replay — simulated data only
+        </span>
+      </div>
+
+      <!-- 2. Header -->
+      <header class="flex flex-col gap-5">
+        <div class="flex flex-wrap items-center gap-4">
+          <span class="eyebrow" style={`font-family:${MONO};color:${GOLD}`}>Fixed-Site GNSS Integrity Monitoring</span>
+          <span
+            class="inline-flex items-center gap-2 rounded-full border px-2.5 py-0.5"
+            style={`background:${PANEL};border-color:${PANEL_HI}`}
+          >
+            <span class="relative flex h-2 w-2">
+              <span
+                class="absolute inline-flex h-full w-full animate-ping rounded-full opacity-75"
+                style={`background:${GOLD}`}></span>
+              <span class="relative inline-flex h-2 w-2 rounded-full" style={`background:${GOLD}`}></span>
+            </span>
+            <span class="running" style={`font-family:${MONO};color:${CREAM}`}>Monitor running</span>
+          </span>
+        </div>
+        <h1 class="h1 text-5xl tracking-tight md:text-6xl" style={`font-family:${MONO}`}>Atri Sangam</h1>
+        <p class="text-xl md:text-2xl" style={`font-family:${MONO};color:${CREAM}`}>
+          The assembly that notices when the sky goes dark
+        </p>
+      </header>
+
+      <!-- 3. Epigraph + preamble -->
+      <section
+        class="grid items-start gap-10 border-t pt-12 md:grid-cols-2 md:gap-12"
+        style={`border-color:${PANEL_HI}`}
+      >
+        <blockquote class="border-l-2 pl-8" style={`border-color:${GOLD}`}>
+          <p class="text-xl italic" lang="sa" style={`color:${CREAM}`}>यं वै सूर्यं स्वर्भानुस्तमसाविध्यदासुरः ।</p>
+          <p class="text-xl italic" lang="sa" style={`color:${CREAM}`}>अत्रयस्तमन्वविन्दन्नह्यन्ये अशक्नुवन् ॥</p>
+          <p class="mt-4 text-sm italic" style={`color:${CREAM}b3`}>
+            The sun, whom the Asura Svarbhānu had enveloped with darkness, the Atris recovered; no others were able.
+          </p>
+          <cite class="cite mt-3 block not-italic" style={`font-family:${MONO};color:${GOLD}`}>Rig Veda 5.40.9</cite>
+        </blockquote>
+        <p class="text-lg font-light leading-relaxed" style={`color:${CREAM}e6`}>
+          A GPS receiver cannot audit itself. This monitor cross-checks it against references that do not come from the
+          sky — network time, cryptographically signed time, radio time, the drift of the local clock — and watches for
+          the moment they stop agreeing.
+        </p>
+      </section>
+
+      <!-- 4. Four replays -->
+      <div class="flex items-baseline justify-between border-b pb-3" style={`border-color:${PANEL_HI}`}>
+        <h2 class="text-2xl font-bold tracking-tight" style={`font-family:${MONO};color:${CREAM}`}>Four replays</h2>
+        <span class="hidden kicker md:inline" style={`font-family:${MONO};color:${CREAM}99`}>
+          A healthy site &amp; three shapes of attack
+        </span>
+      </div>
+
+      <!-- 5. Demos grid -->
+      <section class="grid gap-4 md:grid-cols-12">
+        <a
+          href="/demos/atri-sangam/clean.html"
+          class="card flex flex-col justify-between border p-8 md:col-span-8"
+          style={`background:${PANEL};border-color:${PANEL_HI}`}
+        >
+          <div>
+            <div class="flex items-start justify-between gap-6">
+              <div>
+                <h3 class="text-2xl font-bold" style={`font-family:${MONO};color:${CREAM}`}>Clean</h3>
+                <p class="featured-kicker mt-1" style={`font-family:${MONO};color:${GOLD}`}>Baseline</p>
+              </div>
+              <div class="readout text-right" style={`font-family:${MONO};color:${CREAM}66`}>
+                <p>RESIDUAL_ERROR &lt; 0.5m</p>
+                <p>STABLE_LOCK: TRUE</p>
+              </div>
+            </div>
+            <p class="mb-8 mt-4 max-w-md text-[15px]" style={`color:${CREAM}b3`}>
+              A healthy site. The consensus band is a hairline and GPS sits inside it — every reference telling the same
+              story.
+            </p>
+          </div>
+          <div
+            class="relative h-32 w-full overflow-hidden border"
+            style={`background:${BG}80;border-color:${PANEL_HI}`}
+          >
+            <svg viewBox="0 0 400 100" preserveAspectRatio="none" class="h-full w-full" aria-hidden="true">
+              <rect x="0" y="44" width="400" height="12" fill={GOLD} opacity="0.08"></rect>
+              <path
+                d="M0,50 L50,52 L100,48 L150,51 L200,49 L250,50 L300,50 L350,51 L400,50"
+                fill="none"
+                stroke={GOLD}
+                stroke-width="1.5"></path>
+            </svg>
+            <span class="plate-caption absolute bottom-1 right-2" style={`font-family:${MONO};color:${GOLD}80`}>
+              NOMINAL TELEMETRY
+            </span>
+          </div>
+        </a>
+
+        <div class="flex flex-col gap-4 md:col-span-4">
+          {
+            siblings.map((s) => (
+              <a
+                href={s.href}
+                class="card flex flex-col gap-4 border p-6"
+                style={`background:${PANEL};border-color:${PANEL_HI}`}
+              >
+                <div>
+                  <h3 class="text-lg font-bold" style={`font-family:${MONO};color:${CREAM}`}>
+                    {s.name}
+                  </h3>
+                  <p class="mt-2 text-xs font-light leading-snug" style={`color:${CREAM}80`}>
+                    {s.body}
+                  </p>
+                </div>
+                <div
+                  class="mt-auto h-12 w-full overflow-hidden border"
+                  style={`background:${BG}80;border-color:${PANEL_HI}`}
+                >
+                  <svg viewBox="0 0 100 40" preserveAspectRatio="none" class="h-full w-full" aria-hidden="true">
+                    <path d={s.path} fill="none" stroke={GOLD} stroke-width="1" />
+                  </svg>
+                </div>
+              </a>
+            ))
+          }
+        </div>
+      </section>
+
+      <!-- 6. Glossary -->
+      <section class="border-t pt-12" style={`border-color:${PANEL_HI}`}>
+        <h2 class="mb-6 text-2xl font-bold tracking-tight" style={`font-family:${MONO};color:${CREAM}`}>
+          Terms used on these pages
+        </h2>
+        <div class="overflow-x-auto">
+          <table class="w-full text-left">
+            <thead>
+              <tr class="th" style={`font-family:${MONO};color:${GOLD}`}>
+                <th class="pb-4 pr-6 font-bold">Term</th>
+                <th class="pb-4 pr-6 font-bold">Stands for</th>
+                <th class="pb-4 font-bold">What it means here</th>
+              </tr>
+            </thead>
+            <tbody>
+              {
+                glossary.map(([term, stands, meaning]) => (
+                  <tr class="border-t align-top text-sm" style={`border-color:${PANEL_HI}80`}>
+                    <td class="py-4 pr-6 font-bold" style={`font-family:${MONO};color:${CREAM}`}>
+                      {term}
+                    </td>
+                    <td class="py-4 pr-6" style={`color:${CREAM}b3`}>
+                      {stands}
+                    </td>
+                    <td class="py-4" style={`color:${CREAM}99`}>
+                      {meaning}
+                    </td>
+                  </tr>
+                ))
+              }
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <footer class="border-t pt-8 text-sm" style={`border-color:${PANEL_HI};color:${CREAM}99`}>
+        <a href="/work/atri-sangam" style={`color:${GOLD}`}>About Atri Sangam</a>
+        <span aria-hidden="true"> · </span>
+        <a href="https://github.com/wegofwd2020-hub/atri-sangam" style={`color:${GOLD}`}>Source code</a>
+      </footer>
+    </div>
+  </div>
+</Layout>
+
+<style define:vars={{ goldHover: '#c9a84c66' }}>
+  /* The spec sets the hover border with onMouseEnter/onMouseLeave. A CSS rule is
+     the same result with no JavaScript, which suits a static page. */
+  .card {
+    text-decoration: none;
+    transition: border-color 160ms ease;
+  }
+  .card:hover {
+    border-color: var(--goldHover) !important;
+  }
+
+  /* Sizes below 12px and letter-spacing in em are outside Tailwind's scale, so
+     the spec's type table is expressed directly. */
+  .kicker {
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.25em;
+  }
+  .chip {
+    letter-spacing: 0.2em;
+  }
+  .eyebrow {
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.3em;
+  }
+  .running {
+    font-size: 9px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.15em;
+  }
+  .cite {
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.2em;
+  }
+  .featured-kicker {
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.2em;
+  }
+  .readout {
+    font-size: 11px;
+    line-height: 1.6;
+  }
+  .plate-caption {
+    font-size: 8px;
+    letter-spacing: 0.1em;
+  }
+  .th {
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.2em;
+  }
+
+  .h1 {
+    font-weight: 500;
+    line-height: 1.08;
+    background-image: linear-gradient(180deg, #f5f0e0 0%, #f0d78c 55%, #c9a84c 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+
+  /* The site body is light. Without this the cream page background shows through
+     wherever this page is shorter than the viewport. */
+  .ags {
+    position: relative;
+  }
+</style>
