@@ -1,0 +1,375 @@
+---
+import Layout from '~/layouts/Layout.astro';
+import ResidualChart from '~/components/atri-sangam/ResidualChart.astro';
+import '@fontsource-variable/jetbrains-mono';
+import '@fontsource-variable/work-sans';
+
+import ogImage from '~/assets/images/work/atri-sangam-demo-og.png';
+
+import clean from '~/data/atri-sangam/clean.json';
+import timeWalk from '~/data/atri-sangam/time-walk.json';
+import positionJump from '~/data/atri-sangam/position-jump.json';
+import dropout from '~/data/atri-sangam/dropout.json';
+
+/* Exported by `atri-sangam-export-demo --json` from the simulator. Every number
+   on this page comes from those files — including the dotted threshold bands,
+   which are the ones the daemon actually applied. Nothing here is authored. */
+const REPLAYS = {
+  clean: { data: clean, label: 'Clean', eyebrow: 'Healthy Site' },
+  'time-walk': { data: timeWalk, label: 'Time Walk', eyebrow: 'Slow Spoof' },
+  'position-jump': { data: positionJump, label: 'Position Jump', eyebrow: 'Crude Spoof' },
+  dropout: { data: dropout, label: 'Dropout', eyebrow: 'Outage' },
+};
+
+export function getStaticPaths() {
+  return ['clean', 'time-walk', 'position-jump', 'dropout'].map((scenario) => ({
+    params: { scenario },
+  }));
+}
+
+const { scenario } = Astro.params;
+const replay = REPLAYS[scenario as keyof typeof REPLAYS];
+const { data, label, eyebrow } = replay;
+
+const metadata = {
+  title: `Atri Sangam — ${label} replay`,
+  ignoreTitleTemplate: true,
+  description: data.caption,
+  openGraph: { type: 'article', images: [{ url: ogImage }] },
+};
+
+const BG = '#03251c';
+const PANEL = '#0a3d2e';
+const PANEL_HI = '#0f5c46';
+const GOLD = '#c9a84c';
+const GOLD_SOFT = '#f0d78c';
+const CREAM = '#f5f0e0';
+
+/* Two semantic colours, used only for status. An integrity monitor cannot
+   signal ALARM in the same colour as OK. OK stays cream rather than green: on a
+   page where six channels are usually all fine, green would be the loudest
+   thing on screen and alarm would have to shout over it. Absence of colour
+   reads as nominal. */
+const ALARM = '#e06c5a';
+const STALE = '#d9a441';
+const statusColour = (s: string) => (s === 'alarm' ? ALARM : s === 'stale' ? STALE : CREAM);
+
+const MONO = "'JetBrains Mono Variable', ui-monospace, monospace";
+const SANS = "'Work Sans Variable', ui-sans-serif, system-ui, sans-serif";
+
+const UNITS: Record<string, { unit: string; digits: number }> = {
+  gps_time_offset: { unit: 'ms', digits: 3 },
+  ntp_time_offset: { unit: 'ms', digits: 3 },
+  roughtime_time_offset: { unit: 'ms', digits: 3 },
+  gps_position_error: { unit: 'm', digits: 2 },
+  gps_cn0_spread: { unit: 'dB-Hz', digits: 2 },
+  glonass_cn0_spread: { unit: 'dB-Hz', digits: 2 },
+};
+
+const GPS_TIME = 'gps_time_offset';
+const strip = data.channels.filter((c) => c.name !== GPS_TIME);
+const agreed = data.lastAgreedS === null ? 'NO AGREEMENT IN THIS REPLAY' : `LAST_AGREED: T−${data.lastAgreedS}s`;
+---
+
+<Layout metadata={metadata}>
+  <div
+    class="ags min-h-screen w-full px-6 py-12 md:px-10 md:py-16"
+    style={`background:${BG};color:${CREAM};font-family:${SANS}`}
+  >
+    <div class="mx-auto flex w-full max-w-6xl flex-col gap-12">
+      <!-- 1. Top bar -->
+      <div class="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+        <nav class="kicker" style={`font-family:${MONO};color:${CREAM}99`} aria-label="Breadcrumb">
+          <a href="/work/atri-sangam" style={`color:${GOLD}`}>Atri Sangam</a>
+          <span aria-hidden="true"> / </span>
+          <a href="/demos/atri-sangam" style={`color:${GOLD}`}>Demos</a>
+          <span aria-hidden="true"> / </span>
+          <span style={`color:${GOLD_SOFT}`} aria-current="page">{label}</span>
+        </nav>
+        <span
+          class="chip kicker inline-flex items-center rounded-full border px-2.5 py-0.5"
+          style={`font-family:${MONO};color:${CREAM}99;background:${PANEL};border-color:${PANEL_HI}`}
+        >
+          Recorded replay — simulated data only
+        </span>
+      </div>
+
+      <!-- 2. Scenario nav -->
+      <nav class="flex flex-wrap gap-2" aria-label="Scenarios">
+        {
+          Object.entries(REPLAYS).map(([slug, r]) => (
+            <a
+              href={`/demos/atri-sangam/${slug}`}
+              class="navpill rounded-full border px-3 py-1"
+              style={
+                slug === scenario
+                  ? `font-family:${MONO};background:${PANEL_HI};border-color:${PANEL_HI};color:${GOLD_SOFT}`
+                  : `font-family:${MONO};border-color:${PANEL_HI};color:${CREAM}99`
+              }
+              aria-current={slug === scenario ? 'page' : undefined}
+            >
+              {r.label}
+            </a>
+          ))
+        }
+        <a
+          href="/demos/atri-sangam"
+          class="navpill rounded-full border px-3 py-1"
+          style={`font-family:${MONO};border-color:${PANEL_HI};color:${CREAM}99`}>Index</a
+        >
+      </nav>
+
+      <!-- 3. Header -->
+      <header class="flex flex-col gap-4">
+        <span class="eyebrow" style={`font-family:${MONO};color:${GOLD}`}>{eyebrow}</span>
+        <h1 class="h1 text-5xl tracking-tight md:text-6xl" style={`font-family:${MONO}`}>{label}</h1>
+        <p class="max-w-3xl text-lg font-light leading-relaxed" style={`color:${CREAM}e6`}>
+          {data.caption}
+        </p>
+      </header>
+
+      <!-- 4. Verdict band -->
+      <div
+        class="flex flex-col gap-2 border p-6 md:flex-row md:items-baseline md:justify-between"
+        style={`background:${PANEL};border-color:${PANEL_HI}`}
+      >
+        <span class="text-4xl font-bold" style={`font-family:${MONO};color:${statusColour(data.status)}`}>
+          {data.status.toUpperCase()}
+        </span>
+        <span class="readout" style={`font-family:${MONO};color:${CREAM}66`}>{agreed}</span>
+      </div>
+
+      <!-- 5. Channel status row -->
+      <div class="flex flex-wrap gap-2">
+        {
+          data.channels.map((c) => (
+            <span
+              class="kicker inline-flex items-center rounded-full border px-2.5 py-0.5"
+              style={`font-family:${MONO};border-color:${PANEL_HI};color:${statusColour(c.status)}`}
+            >
+              {c.name}: {c.status.toUpperCase()}
+            </span>
+          ))
+        }
+      </div>
+
+      <!-- 6. Headline chart -->
+      <section class="border-t pt-12" style={`border-color:${PANEL_HI}`}>
+        <div class="mb-4 flex items-baseline justify-between border-b pb-3" style={`border-color:${PANEL_HI}`}>
+          <h2 class="text-2xl font-bold tracking-tight" style={`font-family:${MONO};color:${CREAM}`}>
+            GPS vs the assembly
+          </h2>
+          <span class="hidden kicker md:inline" style={`font-family:${MONO};color:${CREAM}99`}>
+            The band is where the independent references agree
+          </span>
+        </div>
+        <ResidualChart
+          samples={data.consensus.gps as [number, number][]}
+          band={data.consensus.band as [number, number, number][]}
+          windowS={data.windowS}
+          unit="ms"
+          digits={3}
+          height="h-64"
+          label="GPS TIME OFFSET"
+        />
+      </section>
+
+      <!-- 7. Channel grid -->
+      <section class="border-t pt-12" style={`border-color:${PANEL_HI}`}>
+        <h2 class="mb-6 text-2xl font-bold tracking-tight" style={`font-family:${MONO};color:${CREAM}`}>
+          Every channel
+        </h2>
+        <div class="grid gap-4 md:grid-cols-2">
+          {
+            strip.map((c) => (
+              <article class="flex flex-col gap-4 border p-6" style={`background:${PANEL};border-color:${PANEL_HI}`}>
+                <div class="flex items-baseline justify-between gap-4">
+                  <h3 class="text-lg font-bold" style={`font-family:${MONO};color:${CREAM}`}>
+                    {c.name}
+                  </h3>
+                  <span class="kicker" style={`font-family:${MONO};color:${statusColour(c.status)}`}>
+                    {c.status.toUpperCase()}
+                  </span>
+                </div>
+                <ResidualChart
+                  samples={c.samples as [number, number][]}
+                  target={c.target}
+                  thresholds={c.thresholds}
+                  windowS={data.windowS}
+                  unit={UNITS[c.name]?.unit ?? ''}
+                  digits={UNITS[c.name]?.digits ?? 2}
+                  height="h-40"
+                  label={c.thresholds ? 'APPLIED THRESHOLDS' : undefined}
+                />
+                <dl class="grid grid-cols-[7rem_1fr] gap-x-4 gap-y-2 text-sm">
+                  <dt class="kicker pt-1" style={`font-family:${MONO};color:${GOLD}`}>
+                    Variable
+                  </dt>
+                  <dd style={`font-family:${MONO};color:${CREAM}cc;font-size:12px`}>{c.doc.variable}</dd>
+                  <dt class="kicker pt-1" style={`font-family:${MONO};color:${GOLD}`}>
+                    Source
+                  </dt>
+                  <dd style={`color:${CREAM}b3`}>{c.doc.source}</dd>
+                  <dt class="kicker pt-1" style={`font-family:${MONO};color:${GOLD}`}>
+                    Means
+                  </dt>
+                  <dd style={`color:${CREAM}99`}>{c.doc.description}</dd>
+                  <dt class="kicker pt-1" style={`font-family:${MONO};color:${GOLD}`}>
+                    Formula
+                  </dt>
+                  <dd style={`font-family:${MONO};color:${GOLD_SOFT};font-size:11px;word-break:break-word`}>
+                    {c.doc.formula}
+                  </dd>
+                </dl>
+              </article>
+            ))
+          }
+        </div>
+      </section>
+
+      <!-- 8. Detectors -->
+      <section class="border-t pt-12" style={`border-color:${PANEL_HI}`}>
+        <h2 class="mb-2 text-2xl font-bold tracking-tight" style={`font-family:${MONO};color:${CREAM}`}>
+          How every channel is judged
+        </h2>
+        <p class="mb-6 max-w-3xl font-light" style={`color:${CREAM}b3`}>
+          The same three detectors run on every channel above. Thresholds are per channel and are the ones the daemon
+          actually applied — the dotted bands on each chart are drawn from them.
+        </p>
+        <div class="overflow-x-auto">
+          <table class="w-full text-left">
+            <thead>
+              <tr class="th" style={`font-family:${MONO};color:${GOLD}`}>
+                <th class="pb-4 pr-6 font-bold">Detector</th>
+                <th class="pb-4 pr-6 font-bold">Rule</th>
+                <th class="pb-4 font-bold">Source</th>
+              </tr>
+            </thead>
+            <tbody>
+              {
+                data.detectors.map((d) => (
+                  <tr class="border-t align-top text-sm" style={`border-color:${PANEL_HI}80`}>
+                    <td class="py-4 pr-6 font-bold" style={`font-family:${MONO};color:${CREAM}`}>
+                      {d.name}
+                    </td>
+                    <td class="py-4 pr-6" style={`font-family:${MONO};color:${CREAM}cc;font-size:12px`}>
+                      {d.rule}
+                    </td>
+                    <td class="py-4" style={`font-family:${MONO};color:${CREAM}99;font-size:12px`}>
+                      {d.source}
+                    </td>
+                  </tr>
+                ))
+              }
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <footer class="border-t pt-8 text-sm" style={`border-color:${PANEL_HI};color:${CREAM}99`}>
+        <a href="/work/atri-sangam" style={`color:${GOLD}`}>About Atri Sangam</a>
+        <span aria-hidden="true"> · </span>
+        <a href="https://github.com/wegofwd2020-hub/atri-sangam" style={`color:${GOLD}`}> Source code </a>
+        <span aria-hidden="true"> · </span>
+        <a href="/demos/atri-sangam" style={`color:${GOLD}`}>All four replays</a>
+      </footer>
+    </div>
+  </div>
+</Layout>
+
+<script>
+  /* Hover readout. The chart is already drawn server-side; this only adds the
+     crosshair and the value under the pointer, so the page is fully legible
+     with JavaScript off. */
+  document.querySelectorAll<HTMLElement>('[data-chart]').forEach((root) => {
+    const json = root.querySelector('script[type="application/json"]');
+    const svg = root.querySelector('svg');
+    const cursor = root.querySelector<SVGGElement>('.ags-cursor');
+    const tip = root.querySelector<HTMLElement>('.ags-tip');
+    if (!json?.textContent || !svg || !cursor || !tip) return;
+
+    const { samples, yMin, yMax, windowS, unit, digits, vw, vh } = JSON.parse(json.textContent);
+    if (!samples.length) return;
+
+    const pad = 8;
+    const toX = (t: number) => ((windowS - t) / (windowS || 1)) * vw;
+    const toY = (v: number) => pad + (1 - (v - yMin) / (yMax - yMin)) * (vh - pad * 2);
+
+    const line = cursor.querySelector('line')!;
+    const dot = cursor.querySelector('circle')!;
+
+    root.addEventListener('pointermove', (event) => {
+      const box = root.getBoundingClientRect();
+      // The viewBox is stretched by preserveAspectRatio="none", so pointer
+      // position maps by ratio rather than through the SVG's own coordinates.
+      const ratio = (event.clientX - box.left) / box.width;
+      const wanted = windowS - ratio * windowS;
+
+      let nearest = samples[0];
+      for (const sample of samples) {
+        if (Math.abs(sample[0] - wanted) < Math.abs(nearest[0] - wanted)) nearest = sample;
+      }
+      const [t, v] = nearest;
+
+      line.setAttribute('x1', String(toX(t)));
+      line.setAttribute('x2', String(toX(t)));
+      dot.setAttribute('cx', String(toX(t)));
+      dot.setAttribute('cy', String(toY(v)));
+      cursor.style.display = '';
+
+      tip.textContent = `${v.toFixed(digits)}${unit ? ' ' + unit : ''} · T−${Math.round(t)}s`;
+      tip.classList.remove('hidden');
+    });
+
+    root.addEventListener('pointerleave', () => {
+      cursor.style.display = 'none';
+      tip.classList.add('hidden');
+    });
+  });
+</script>
+
+<style>
+  .kicker {
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.25em;
+  }
+  .chip {
+    letter-spacing: 0.2em;
+  }
+  .eyebrow {
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.3em;
+  }
+  .navpill {
+    font-size: 11px;
+    letter-spacing: 0.1em;
+    text-decoration: none;
+    transition: border-color 160ms ease;
+  }
+  .navpill:hover {
+    border-color: #c9a84c66;
+  }
+  .readout {
+    font-size: 11px;
+    letter-spacing: 0.1em;
+  }
+  .th {
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.2em;
+  }
+  .h1 {
+    font-weight: 500;
+    line-height: 1.08;
+    background-image: linear-gradient(180deg, #f5f0e0 0%, #f0d78c 55%, #c9a84c 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+  .ags {
+    position: relative;
+  }
+</style>
