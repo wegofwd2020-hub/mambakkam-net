@@ -27,6 +27,11 @@ export default defineConfig({
   redirects: {
     // StudyBuddy Q was rebranded and spun out as Mentible (2026-06).
     '/work/studybuddy-q': '/work/mentible',
+    // The Atri Sangam replay .html URLs are preserved as real files in
+    // public/demos/atri-sangam/. An Astro redirect emits them as directories
+    // (clean.html/index.html), which only resolves if the server first
+    // redirects /clean.html to /clean.html/ — a server behaviour worth not
+    // depending on for URLs that are already public.
   },
 
   integrations: [
