@@ -5,6 +5,16 @@ author: siva-m
 type: product
 status: live
 url: https://mambakkam.net/demos/mentible/
+# The three ways in, matching what /mentible offers. Without these the detail
+# page showed a single generic "Visit site" pointing at the read-only demo,
+# which undersold a product that is actually usable in a browser today.
+links:
+  - label: Use it in your browser
+    href: /app/mentible/
+  - label: Try the live demo
+    href: /demos/mentible/
+  - label: Download Android app
+    href: https://github.com/wegofwd2020-hub/mambakkam-net/releases/latest/download/Mentible.apk
 image: ~/assets/images/work/mentible-logo.png
 tags:
   - React Native

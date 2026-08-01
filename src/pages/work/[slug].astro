@@ -31,7 +31,12 @@ const { Content } = await render(item);
 const allPeople = await getCollection('people', ({ data }) => !data.draft);
 const author = allPeople.find((p) => p.id === item.data.author);
 
-const { title, excerpt, type, status, url, tags, image, theme } = item.data;
+const { title, excerpt, type, status, url, tags, image, theme, links } = item.data;
+
+/* `links` supersedes `url`. The fallback keeps every entry that only sets a
+   url rendering exactly as it did before. */
+const ctas = links?.length ? links : url ? [{ label: 'Visit site', href: url }] : [];
+const isExternal = (href: string) => /^https?:\/\//.test(href);
 
 /* A themed entry renders through the bare layout: PageLayout supplies the
    site's cream header and footer, and those above a dark body read as a broken
@@ -120,28 +125,30 @@ const metadata = { title, description: excerpt };
 
         <div class="flex flex-wrap gap-3">
           {
-            url && (
+            ctas.map((cta, i) => (
               <a
-                href={url}
-                target="_blank"
-                rel="noopener noreferrer"
-                class="inline-flex items-center gap-2 btn btn-primary text-sm"
+                href={cta.href}
+                target={isExternal(cta.href) ? '_blank' : undefined}
+                rel={isExternal(cta.href) ? 'noopener noreferrer' : undefined}
+                class={`inline-flex items-center gap-2 text-sm btn ${i === 0 ? 'btn-primary' : 'btn-secondary'}`}
               >
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  class="w-4 h-4"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  stroke-width="2"
-                >
-                  <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
-                  <polyline points="15 3 21 3 21 9" />
-                  <line x1="10" y1="14" x2="21" y2="3" />
-                </svg>
-                Visit site
+                {isExternal(cta.href) && (
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    class="w-4 h-4"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                  >
+                    <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
+                    <polyline points="15 3 21 3 21 9" />
+                    <line x1="10" y1="14" x2="21" y2="3" />
+                  </svg>
+                )}
+                {cta.label}
               </a>
-            )
+            ))
           }
           {
             author && (
