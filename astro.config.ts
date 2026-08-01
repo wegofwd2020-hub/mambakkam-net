@@ -21,6 +21,8 @@ const hasExternalScripts = false;
 const whenExternalScripts = (items: (() => AstroIntegration) | (() => AstroIntegration)[] = []) =>
   hasExternalScripts ? (Array.isArray(items) ? items.map((item) => item()) : [items()]) : [];
 
+import themeEditor from './integrations/theme-editor';
+
 export default defineConfig({
   output: 'static',
 
@@ -44,6 +46,9 @@ export default defineConfig({
   },
 
   integrations: [
+    // Dev-only: registers a middleware on the dev server and contributes
+    // nothing to a build. See integrations/theme-editor.ts.
+    themeEditor(),
     tailwind({
       applyBaseStyles: false,
     }),

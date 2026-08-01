@@ -1,0 +1,304 @@
+---
+import Layout from '~/layouts/Layout.astro';
+import ThemeStyle from '~/components/ThemeStyle.astro';
+import ThemeNav from '~/components/ThemeNav.astro';
+import { getCollection } from 'astro:content';
+import { themes, type Theme } from '~/themes';
+import '@fontsource-variable/jetbrains-mono';
+import '@fontsource-variable/work-sans';
+
+/**
+ * Which product wears which theme, and what the themes actually look like.
+ *
+ * Read-only in a build. Under `npm run dev` each product also gets a control
+ * that rewrites its `theme:` frontmatter through the dev-server middleware in
+ * integrations/theme-editor.ts — the same edit you would make by hand, landing
+ * as a git diff. Nothing here writes to a deployed site; a change reaches
+ * production the way every change does, by being committed and merged.
+ */
+
+const metadata = {
+  title: 'Themes — which product wears which',
+  ignoreTitleTemplate: true,
+  description: 'The registered page themes, and the product each one is applied to.',
+};
+
+// The console renders in the theme it is describing first, so the page itself
+// is a sample of the system rather than a table about it.
+const t = themes.azure;
+const { panel: PANEL, panelHi: PANEL_HI, accent: GOLD, accentSoft: GOLD_SOFT, text: TEXT } = t;
+const MONO = t.mono;
+
+const work = await getCollection('work', ({ data }) => !data.draft);
+const products = work
+  .map((item) => ({
+    slug: item.id,
+    title: item.data.title,
+    theme: (item.data as { theme?: string }).theme ?? null,
+  }))
+  .sort((a, b) => a.title.localeCompare(b.title));
+
+const registry = Object.values(themes) as Theme[];
+
+/** Which products a theme is applied to — the registry's own view. */
+const appliedTo = (id: string) => products.filter((p) => p.theme === id).map((p) => p.title);
+
+/* Branded pages import a theme directly rather than declaring it in
+   frontmatter, so the collection cannot see them. Listed explicitly, because a
+   console that showed only half the truth would be worse than no console. */
+const pageThemes = [
+  { page: '/atri-sangam', theme: 'emerald' },
+  { page: '/demos/atri-sangam', theme: 'emerald' },
+  { page: '/demos/atri-sangam/[scenario]', theme: 'emerald' },
+  { page: '/work', theme: 'azure' },
+  { page: '/kaundinya', theme: null },
+  { page: '/mentible', theme: null },
+  { page: '/thittam', theme: null },
+  { page: '/kathai-chithiram', theme: null },
+];
+
+const isDev = import.meta.env.DEV;
+---
+
+<Layout metadata={metadata}>
+  <ThemeStyle theme={t} />
+  <div class="th-page w-full px-6 py-12 md:px-10 md:py-16">
+    <div class="mx-auto flex w-full max-w-5xl flex-col gap-12">
+      <ThemeNav />
+
+      <header class="flex flex-col gap-5">
+        <span class="th-eyebrow">Page Themes</span>
+        <h1 class="th-h1 text-5xl tracking-tight md:text-6xl">Themes</h1>
+        <p class="max-w-3xl text-lg font-light leading-relaxed" style={`color:${TEXT}e6`}>
+          Every registered theme, and the product each one is applied to. Themes live in
+          <code style={`font-family:${MONO};color:${GOLD_SOFT}`}>src/themes/</code> — adding one is a file plus a registry
+          line.
+        </p>
+        {
+          isDev ? (
+            <p
+              class="th-kicker inline-flex w-fit items-center rounded-full border px-3 py-1"
+              style={`color:${GOLD_SOFT};background:${PANEL};border-color:${PANEL_HI}`}
+            >
+              Dev mode — assignments are editable below
+            </p>
+          ) : (
+            <p
+              class="th-kicker inline-flex w-fit items-center rounded-full border px-3 py-1"
+              style={`color:${TEXT}99;border-color:${PANEL_HI}`}
+            >
+              Read-only — run npm run dev to edit
+            </p>
+          )
+        }
+      </header>
+
+      <!-- The registry -->
+      <section class="border-t pt-12" style={`border-color:${PANEL_HI}`}>
+        <h2 class="mb-6 text-2xl font-bold tracking-tight" style={`font-family:${MONO};color:${TEXT}`}>
+          Registered themes
+        </h2>
+        <div class="grid gap-4 md:grid-cols-2">
+          {
+            registry.map((theme) => (
+              <article class="flex flex-col gap-4 border p-6" style={`background:${PANEL};border-color:${PANEL_HI}`}>
+                <div class="flex items-baseline justify-between gap-3">
+                  <h3 class="text-lg font-bold" style={`font-family:${MONO};color:${TEXT}`}>
+                    {theme.label}
+                  </h3>
+                  <code class="th-kicker" style={`color:${GOLD}`}>
+                    {theme.id}
+                  </code>
+                </div>
+
+                {/* Swatches in token order, so two themes can be compared slot by slot. */}
+                <div class="flex flex-wrap gap-2">
+                  {(
+                    [
+                      ['bg', theme.bg],
+                      ['panel', theme.panel],
+                      ['panelHi', theme.panelHi],
+                      ['accent', theme.accent],
+                      ['accentSoft', theme.accentSoft],
+                      ['text', theme.text],
+                    ] as [string, string][]
+                  ).map(([name, value]) => (
+                    <div class="flex flex-col gap-1">
+                      <span
+                        class="block h-10 w-16 border"
+                        style={`background:${value};border-color:${PANEL_HI}`}
+                        title={`${name} ${value}`}
+                      />
+                      <span class="th-caption" style={`color:${TEXT}99`}>
+                        {name}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+
+                {/* A live sample: the H1 gradient and a hairline, in this theme. */}
+                <div class="border p-4" style={`background:${theme.bg};border-color:${theme.panelHi}`}>
+                  <p
+                    class="text-2xl"
+                    style={`font-family:${theme.mono};font-weight:500;background-image:${theme.gradient};-webkit-background-clip:text;background-clip:text;color:transparent`}
+                  >
+                    {theme.label}
+                  </p>
+                  <p class="mt-2 text-xs font-light" style={`font-family:${theme.sans};color:${theme.text}b3`}>
+                    Prose sits on the ground, hairlines are {theme.id === 'azure' ? 'gold' : 'a lighter ground'}.
+                  </p>
+                </div>
+
+                <p class="text-sm font-light" style={`color:${TEXT}99`}>
+                  {appliedTo(theme.id).length > 0 ? (
+                    <>Applied to: {appliedTo(theme.id).join(', ')}</>
+                  ) : (
+                    <>Not applied to any work entry.</>
+                  )}
+                </p>
+              </article>
+            ))
+          }
+        </div>
+      </section>
+
+      <!-- Work entries -->
+      <section class="border-t pt-12" style={`border-color:${PANEL_HI}`}>
+        <div class="mb-6 flex items-baseline justify-between border-b pb-3" style={`border-color:${PANEL_HI}`}>
+          <h2 class="text-2xl font-bold tracking-tight" style={`font-family:${MONO};color:${TEXT}`}>Work entries</h2>
+          <span class="th-kicker hidden md:inline" style={`color:${TEXT}99`}>
+            theme: in src/data/work/&lt;slug&gt;.md
+          </span>
+        </div>
+
+        <div class="overflow-x-auto">
+          <table class="w-full text-left">
+            <thead>
+              <tr class="th-thead">
+                <th class="pb-4 pr-6 font-bold">Product</th>
+                <th class="pb-4 pr-6 font-bold">Theme</th>
+                <th class="pb-4 font-bold">{isDev ? 'Change' : 'To change'}</th>
+              </tr>
+            </thead>
+            <tbody>
+              {
+                products.map((p) => (
+                  <tr class="border-t align-middle text-sm" style={`border-color:${PANEL_HI}80`}>
+                    <td class="py-3 pr-6" style={`font-family:${MONO};color:${TEXT}`}>
+                      {p.title}
+                    </td>
+                    <td class="py-3 pr-6" style={`font-family:${MONO};color:${p.theme ? GOLD_SOFT : `${TEXT}66`}`}>
+                      {p.theme ?? '—'}
+                    </td>
+                    <td class="py-3">
+                      {isDev ? (
+                        <select
+                          class="th-theme-select border px-2 py-1 text-xs"
+                          data-slug={p.slug}
+                          style={`font-family:${MONO};background:${PANEL};border-color:${PANEL_HI};color:${TEXT}`}
+                        >
+                          <option value="" selected={!p.theme}>
+                            — none —
+                          </option>
+                          {registry.map((theme) => (
+                            <option value={theme.id} selected={p.theme === theme.id}>
+                              {theme.id}
+                            </option>
+                          ))}
+                        </select>
+                      ) : (
+                        <code class="text-xs" style={`font-family:${MONO};color:${TEXT}99`}>
+                          theme: {registry[0].id}
+                        </code>
+                      )}
+                    </td>
+                  </tr>
+                ))
+              }
+            </tbody>
+          </table>
+        </div>
+
+        {
+          isDev && (
+            <p class="mt-6 text-sm font-light" style={`color:${TEXT}99`}>
+              A change rewrites the entry's frontmatter on disk. Review it with{' '}
+              <code style={`font-family:${MONO};color:${GOLD_SOFT}`}>git diff</code>, then{' '}
+              <code style={`font-family:${MONO};color:${GOLD_SOFT}`}>npm run theme:publish</code> to commit, push and
+              open a PR. Nothing is live until that PR is merged.
+            </p>
+          )
+        }
+      </section>
+
+      <!-- Branded pages -->
+      <section class="border-t pt-12" style={`border-color:${PANEL_HI}`}>
+        <h2 class="mb-2 text-2xl font-bold tracking-tight" style={`font-family:${MONO};color:${TEXT}`}>
+          Branded pages
+        </h2>
+        <p class="mb-6 max-w-3xl font-light" style={`color:${TEXT}b3`}>
+          These import a theme directly rather than declaring one in frontmatter, so they are not editable here. A page
+          with no theme still carries its palette inline and has not been migrated.
+        </p>
+        <div class="overflow-x-auto">
+          <table class="w-full text-left">
+            <thead>
+              <tr class="th-thead">
+                <th class="pb-4 pr-6 font-bold">Page</th>
+                <th class="pb-4 font-bold">Theme</th>
+              </tr>
+            </thead>
+            <tbody>
+              {
+                pageThemes.map((row) => (
+                  <tr class="border-t text-sm" style={`border-color:${PANEL_HI}80`}>
+                    <td class="py-3 pr-6" style={`font-family:${MONO};color:${TEXT}cc`}>
+                      {row.page}
+                    </td>
+                    <td class="py-3" style={`font-family:${MONO};color:${row.theme ? GOLD_SOFT : `${TEXT}66`}`}>
+                      {row.theme ?? 'inline, not migrated'}
+                    </td>
+                  </tr>
+                ))
+              }
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <footer class="border-t pt-8 text-sm" style={`border-color:${PANEL_HI};color:${TEXT}99`}>
+        <a href="/work" style={`color:${GOLD}`}>Products</a>
+        <span aria-hidden="true"> · </span>
+        <a href="/kaundinya" style={`color:${GOLD}`}>Kaundinya Labs</a>
+      </footer>
+    </div>
+  </div>
+</Layout>
+
+<script>
+  /* Dev only — in a build the selects are never rendered, so this finds
+     nothing and does nothing. */
+  document.querySelectorAll<HTMLSelectElement>('.th-theme-select').forEach((select) => {
+    const original = select.value;
+    select.addEventListener('change', async () => {
+      const slug = select.dataset.slug;
+      select.disabled = true;
+      try {
+        const res = await fetch('/__theme-editor', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ slug, theme: select.value || null }),
+        });
+        const body = await res.json();
+        if (!body.ok) throw new Error(body.error);
+        // The dev server rebuilds the collection on the file write; reloading
+        // is the honest way to show what the page now actually reads.
+        location.reload();
+      } catch (error) {
+        select.value = original;
+        select.disabled = false;
+        alert(`Could not set theme: ${(error as Error).message}`);
+      }
+    });
+  });
+</script>
