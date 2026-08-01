@@ -166,6 +166,24 @@ const workCollection = defineCollection({
     status: z.enum(['live', 'in-progress', 'in-client-deployment', 'archived']).default('live'),
 
     url: z.string().url().optional(),
+
+    /* Call-to-action buttons on the detail page. A product with more than one
+       way in — a hosted app, a read-only demo, an APK — cannot say that through
+       the single `url` above, which renders as one generic "Visit site".
+       Supersedes `url` when present. First entry is styled primary, the rest
+       secondary; an http(s) href opens in a new tab with the external-link
+       icon, an internal path does not.
+       (Not to be confused with the people collection's `links`, which is an
+       object of social handles.) */
+    links: z
+      .array(
+        z.object({
+          label: z.string(),
+          href: z.string(),
+        })
+      )
+      .optional(),
+
     landingUrl: z.string().optional(), // internal one-pager route (e.g. /thittam) — cards link here when set
 
     // Opt-in dark theme for the detail page. Only 'emerald' exists — the
