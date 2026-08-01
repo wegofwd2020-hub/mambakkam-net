@@ -20,7 +20,8 @@
     "check:prettier": "prettier --check .",
     "fix": "npm run fix:eslint && npm run fix:prettier",
     "fix:eslint": "eslint --fix .",
-    "fix:prettier": "prettier -w ."
+    "fix:prettier": "prettier -w .",
+    "theme:publish": "bash scripts/themes/publish.sh"
   },
   "dependencies": {
     "@astrojs/rss": "^4.0.12",
