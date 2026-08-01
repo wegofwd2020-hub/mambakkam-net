@@ -1,0 +1,2 @@
+:HL["/demos/thittam/_next/static/chunks/0dot62u6.29mz.css","style"]
+0:{"tree":{"name":"","param":null,"prefetchHints":16,"slots":{"children":{"name":"/_not-found","param":null,"prefetchHints":0,"slots":{"children":{"name":"__PAGE__","param":null,"prefetchHints":0,"slots":null}}}}},"staleTime":300,"buildId":"NhcwTjEWITTJ0-a6U61y_"}

@@ -63,6 +63,18 @@ The full model — vertical plugin system, per-vertical UI adaptation, runbook f
 
 Active development. Two demo verticals are seeded: XYZ_CBA Productions (film, INR) and XYZ Construction LLC (construction, USD). Core services are implemented; work is ongoing on reporting, document e-signatures, and the billing service.
 
+## See it
+
+The [dashboard demo](/demos/thittam/) is a read-only snapshot of the film
+vertical — XYZ_CBA Productions — covering the login, the productions list and
+a production's detail, and the budgets list and a budget's detail. Five pages,
+not the whole product: the other services expose no REST surface for a static
+export to record against.
+
+Every value in it is recorded from a seeded local stack, not a live
+installation, and nothing can be saved. Sign in with the credentials the page
+shows.
+
 ## Documentation
 
 Architecture docs, ADRs, and API specifications live in the [Thittam Docs](https://github.com/wegofwd2020-hub/thittam_docs) repository — including 11 standard architecture diagrams maintained alongside the codebase.

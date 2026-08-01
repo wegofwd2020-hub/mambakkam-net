@@ -191,6 +191,32 @@ else
   fail "GET /work/studybuddy-ondemand" "status=$STATUS"
 fi
 
+# ── Thittam demo ───────────────────────────────────────────────────────────
+echo ""
+echo "Thittam demo:"
+log_step "GET /demos/thittam/"
+RESP=$(http_get "$BASE_URL/demos/thittam/")
+STATUS=$(extract_status "$RESP")
+BODY=$(extract_body "$RESP")
+if [[ "$STATUS" == "200" ]] && grep -qi 'thittam' <<<"$BODY"; then
+  pass "GET /demos/thittam/ returns 200 + 'Thittam' in body"
+else
+  fail "GET /demos/thittam/" "status=$STATUS"
+fi
+
+# A missing hashed asset must 404, not fall back to index.html. A 200 here
+# means the SPA fallback is swallowing asset requests, which is what poisoned
+# the Cloudflare cache during the Mentible deploy — the CDN caches the HTML
+# shell under a .js URL and the app hangs on a blank screen.
+log_step "GET /demos/thittam/_next/<missing>.js (expect 404)"
+RESP=$(http_get_noredirect "$BASE_URL/demos/thittam/_next/static/chunks/does-not-exist-$(date +%s).js")
+STATUS=$(extract_status "$RESP")
+if [[ "$STATUS" == "404" ]]; then
+  pass "missing _next asset returns 404, not the SPA shell"
+else
+  fail "GET /demos/thittam/_next/<missing>.js" "status=$STATUS (expected 404)"
+fi
+
 # ── 404 handling ───────────────────────────────────────────────────────────
 echo ""
 echo "404 handling:"
