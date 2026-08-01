@@ -9,6 +9,8 @@ excerpt: >
 author: siva-m
 type: product
 status: in-progress
+landingUrl: /atri-sangam
+theme: emerald
 tags:
   - Python
   - GNSS
@@ -168,6 +170,9 @@ and have not been validated against real jamming or spoofing hardware. Treat
 them as a place to begin tuning, not as a calibrated defence.
 
 Source code is open: [github.com/wegofwd2020-hub/atri-sangam](https://github.com/wegofwd2020-hub/atri-sangam).
+
+See the [full overview](/atri-sangam) for the short version of what this is
+and why it is named as it is.
 
 ## See it
 

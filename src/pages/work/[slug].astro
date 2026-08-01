@@ -1,7 +1,13 @@
 ---
 import { getCollection, render } from 'astro:content';
 import { Image } from 'astro:assets';
-import Layout from '~/layouts/PageLayout.astro';
+import PageLayout from '~/layouts/PageLayout.astro';
+import BareLayout from '~/layouts/Layout.astro';
+// Loaded for every work page, not only themed ones: an @fontsource import is
+// static. Two woff2 files against not duplicating this route, which is the
+// trade the theme field exists to avoid.
+import '@fontsource-variable/jetbrains-mono';
+import '@fontsource-variable/work-sans';
 
 export async function getStaticPaths() {
   const work = await getCollection('work', ({ data }) => !data.draft && !data.comingSoon);
@@ -23,7 +29,15 @@ const { Content } = await render(item);
 const allPeople = await getCollection('people', ({ data }) => !data.draft);
 const author = allPeople.find((p) => p.id === item.data.author);
 
-const { title, excerpt, type, status, url, tags, image } = item.data;
+const { title, excerpt, type, status, url, tags, image, theme } = item.data;
+
+/* A themed entry renders through the bare layout: PageLayout supplies the
+   site's cream header and footer, and those above a dark body read as a broken
+   page rather than a deliberate one. Everything below is the same markup either
+   way — only the wrapper and one class change, with the palette applied in the
+   style block. */
+const isEmerald = theme === 'emerald';
+const Wrapper = isEmerald ? BareLayout : PageLayout;
 
 // Logo: raster (png/jpg/webp) is optimised via <Image>; svg is passed through as a URL.
 const imageKey = image ? image.replace('~/', '/src/') : null;
@@ -55,96 +69,266 @@ const statusLabel: Record<string, string> = {
 const metadata = { title, description: excerpt };
 ---
 
-<Layout metadata={metadata}>
-  <div class="mx-auto max-w-3xl px-6 py-16">
-    <!-- Header -->
-    <header class="mb-12">
-      {
-        resolvedImage && (
-          <Image
-            src={resolvedImage}
-            alt={`${title} logo`}
-            width={224}
-            height={224}
-            class="w-28 h-28 object-contain mb-6"
-          />
-        )
-      }
-      {
-        svgLogoUrl && (
-          <img src={svgLogoUrl} alt={`${title} logo`} width="144" height="144" class="w-36 h-36 object-contain mb-6" />
-        )
-      }
-
-      <div class="flex items-center gap-3 mb-4">
-        <span class="text-sm font-heading font-medium text-muted uppercase tracking-widest">
-          {typeLabel[type] ?? type}
-        </span>
-        <span class={`text-xs font-heading font-medium px-2.5 py-1 rounded-full ${statusColor[status] ?? ''}`}>
-          {statusLabel[status] ?? status}
-        </span>
-      </div>
-
-      <h1 class="text-4xl font-heading font-bold text-gray-900 dark:text-white mb-4">
-        {title}
-      </h1>
-
-      <p class="text-xl leading-relaxed text-muted mb-6">{excerpt}</p>
-
-      <div class="flex flex-wrap gap-3">
+<Wrapper metadata={metadata}>
+  <div class:list={['work-detail', isEmerald && 'is-emerald']}>
+    <div class="mx-auto max-w-3xl px-6 py-16">
+      <!-- Header -->
+      <header class="mb-12">
         {
-          url && (
-            <a
-              href={url}
-              target="_blank"
-              rel="noopener noreferrer"
-              class="inline-flex items-center gap-2 btn btn-primary text-sm"
-            >
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                class="w-4 h-4"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                stroke-width="2"
-              >
-                <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
-                <polyline points="15 3 21 3 21 9" />
-                <line x1="10" y1="14" x2="21" y2="3" />
-              </svg>
-              Visit site
-            </a>
+          resolvedImage && (
+            <Image
+              src={resolvedImage}
+              alt={`${title} logo`}
+              width={224}
+              height={224}
+              class="w-28 h-28 object-contain mb-6"
+            />
           )
         }
         {
-          author && (
-            <a href={`/people/${author.id}`} class="btn btn-secondary text-sm">
-              By {author.data.name}
-            </a>
+          svgLogoUrl && (
+            <img
+              src={svgLogoUrl}
+              alt={`${title} logo`}
+              width="144"
+              height="144"
+              class="w-36 h-36 object-contain mb-6"
+            />
           )
         }
-      </div>
-    </header>
 
-    <!-- Tags -->
-    {
-      tags && tags.length > 0 && (
-        <div class="flex flex-wrap gap-2 mb-10">
-          {tags.map((tag) => (
-            <span class="text-xs font-mono px-2.5 py-1 rounded bg-gray-100 dark:bg-gray-800 text-muted">{tag}</span>
-          ))}
+        <div class="flex items-center gap-3 mb-4">
+          <span class="text-sm font-heading font-medium text-muted uppercase tracking-widest">
+            {typeLabel[type] ?? type}
+          </span>
+          <span class={`text-xs font-heading font-medium px-2.5 py-1 rounded-full ${statusColor[status] ?? ''}`}>
+            {statusLabel[status] ?? status}
+          </span>
         </div>
-      )
-    }
 
-    <!-- Body content -->
-    <section class="prose dark:prose-invert max-w-none mb-12">
-      <Content />
-    </section>
+        <h1 class="text-4xl font-heading font-bold text-gray-900 dark:text-white mb-4">
+          {title}
+        </h1>
 
-    <!-- Back -->
-    <div class="pt-8 border-t border-gray-200 dark:border-gray-700">
-      <a href="/work" class="text-sm font-heading font-medium text-primary hover:underline"> ← All work </a>
+        <p class="text-xl leading-relaxed text-muted mb-6">{excerpt}</p>
+
+        <div class="flex flex-wrap gap-3">
+          {
+            url && (
+              <a
+                href={url}
+                target="_blank"
+                rel="noopener noreferrer"
+                class="inline-flex items-center gap-2 btn btn-primary text-sm"
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  class="w-4 h-4"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                >
+                  <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
+                  <polyline points="15 3 21 3 21 9" />
+                  <line x1="10" y1="14" x2="21" y2="3" />
+                </svg>
+                Visit site
+              </a>
+            )
+          }
+          {
+            author && (
+              <a href={`/people/${author.id}`} class="btn btn-secondary text-sm">
+                By {author.data.name}
+              </a>
+            )
+          }
+        </div>
+      </header>
+
+      <!-- Tags -->
+      {
+        tags && tags.length > 0 && (
+          <div class="flex flex-wrap gap-2 mb-10">
+            {tags.map((tag) => (
+              <span class="text-xs font-mono px-2.5 py-1 rounded bg-gray-100 dark:bg-gray-800 text-muted">{tag}</span>
+            ))}
+          </div>
+        )
+      }
+
+      <!-- Body content -->
+      <section class="prose dark:prose-invert max-w-none mb-12">
+        <Content />
+      </section>
+
+      <!-- Back -->
+      <div class="back pt-8 border-t border-gray-200 dark:border-gray-700">
+        <a href="/work" class="text-sm font-heading font-medium text-primary hover:underline"> ← All work </a>
+        {
+          isEmerald && (
+            <a href="/atri-sangam" class="ml-4 text-sm font-heading font-medium">
+              Overview →
+            </a>
+          )
+        }
+      </div>
     </div>
   </div>
-</Layout>
+</Wrapper>
+
+<style>
+  /* "Emerald Prestige" — the palette the Atri Sangam demo pages use, applied to
+     a work detail page that opts in via `theme: emerald`. Scoped entirely under
+     .is-emerald, so the other eight catalog entries are untouched.
+
+     The overrides are heavy-handed on purpose: the markup carries Tailwind
+     colour utilities (text-gray-900, bg-gray-100) that would otherwise win, and
+     duplicating the whole template to avoid them would be worse than out-
+     specifying them here. */
+  .is-emerald {
+    --bg: #03251c;
+    --panel: #0a3d2e;
+    --panel-hi: #0f5c46;
+    --gold: #c9a84c;
+    --gold-soft: #f0d78c;
+    --cream: #f5f0e0;
+    --mono: 'JetBrains Mono Variable', ui-monospace, monospace;
+    --sans: 'Work Sans Variable', ui-sans-serif, system-ui, sans-serif;
+
+    /* The site body is light. Without a full-height background the cream page
+       shows below the content on short entries. */
+    min-height: 100vh;
+    background: var(--bg);
+    color: var(--cream);
+    font-family: var(--sans);
+  }
+
+  .is-emerald :global(h1) {
+    font-family: var(--mono);
+    font-weight: 500;
+    line-height: 1.08;
+    background-image: linear-gradient(180deg, #f5f0e0 0%, #f0d78c 55%, #c9a84c 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+
+  .is-emerald :global(h2),
+  .is-emerald :global(h3),
+  .is-emerald :global(h4) {
+    font-family: var(--mono);
+    color: var(--cream) !important;
+    letter-spacing: -0.01em;
+  }
+
+  /* The type label ("Product") and the excerpt both ride on .text-muted. */
+  .is-emerald :global(.text-muted) {
+    color: #f5f0e0b3 !important;
+  }
+
+  /* Status pill — the utility classes carry amber/green backgrounds that fight
+     the palette, so it is restated as a bordered chip like the demo pages use. */
+  .is-emerald :global(header span[class*='rounded-full']) {
+    background: var(--panel) !important;
+    color: var(--gold-soft) !important;
+    border: 1px solid var(--panel-hi);
+    font-family: var(--mono);
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+  }
+
+  .is-emerald :global(.btn) {
+    background: var(--panel) !important;
+    border: 1px solid var(--panel-hi) !important;
+    color: var(--cream) !important;
+    font-family: var(--mono);
+    transition: border-color 160ms ease;
+  }
+  .is-emerald :global(.btn:hover) {
+    border-color: #c9a84c66 !important;
+  }
+
+  /* Tag chips. */
+  .is-emerald :global(.font-mono[class*='rounded']) {
+    background: var(--panel) !important;
+    border: 1px solid var(--panel-hi);
+    color: #f5f0e0cc !important;
+  }
+
+  /* Tailwind Typography reads these custom properties. Both the base and the
+     inverted set are written, because the page is dark whichever colour mode
+     the visitor's browser reports. */
+  .is-emerald :global(.prose) {
+    --tw-prose-body: #f5f0e0e6;
+    --tw-prose-headings: #f5f0e0;
+    --tw-prose-lead: #f5f0e0b3;
+    --tw-prose-links: #c9a84c;
+    --tw-prose-bold: #f5f0e0;
+    --tw-prose-counters: #c9a84c;
+    --tw-prose-bullets: #0f5c46;
+    --tw-prose-hr: #0f5c46;
+    --tw-prose-quotes: #f5f0e0;
+    --tw-prose-quote-borders: #c9a84c;
+    --tw-prose-captions: #f5f0e099;
+    --tw-prose-code: #f0d78c;
+    --tw-prose-pre-code: #f5f0e0;
+    --tw-prose-pre-bg: #03251c;
+    --tw-prose-th-borders: #0f5c46;
+    --tw-prose-td-borders: #0f5c4680;
+    --tw-prose-invert-body: #f5f0e0e6;
+    --tw-prose-invert-headings: #f5f0e0;
+    --tw-prose-invert-lead: #f5f0e0b3;
+    --tw-prose-invert-links: #c9a84c;
+    --tw-prose-invert-bold: #f5f0e0;
+    --tw-prose-invert-counters: #c9a84c;
+    --tw-prose-invert-bullets: #0f5c46;
+    --tw-prose-invert-hr: #0f5c46;
+    --tw-prose-invert-quotes: #f5f0e0;
+    --tw-prose-invert-quote-borders: #c9a84c;
+    --tw-prose-invert-captions: #f5f0e099;
+    --tw-prose-invert-code: #f0d78c;
+    --tw-prose-invert-pre-code: #f5f0e0;
+    --tw-prose-invert-pre-bg: #03251c;
+    --tw-prose-invert-th-borders: #0f5c46;
+    --tw-prose-invert-td-borders: #0f5c4680;
+  }
+
+  /* The channels and flags tables are the densest thing on the page. */
+  .is-emerald :global(.prose table) {
+    font-size: 0.875rem;
+  }
+  .is-emerald :global(.prose th) {
+    font-family: var(--mono);
+    color: var(--gold) !important;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    font-size: 0.7rem;
+  }
+  .is-emerald :global(.prose code) {
+    font-family: var(--mono);
+    background: var(--panel);
+    border: 1px solid var(--panel-hi);
+    border-radius: 2px;
+    padding: 0.1em 0.35em;
+  }
+  /* Tailwind Typography wraps inline code in literal backticks via ::before
+     and ::after. They read as punctuation in plain prose, but inside a
+     bordered chip they look like a rendering fault. */
+  .is-emerald :global(.prose code::before),
+  .is-emerald :global(.prose code::after) {
+    content: none;
+  }
+  .is-emerald :global(.prose pre) {
+    border: 1px solid var(--panel-hi);
+  }
+
+  .is-emerald :global(.back) {
+    border-color: var(--panel-hi) !important;
+  }
+  .is-emerald :global(.back a) {
+    color: var(--gold) !important;
+    font-family: var(--mono);
+  }
+</style>

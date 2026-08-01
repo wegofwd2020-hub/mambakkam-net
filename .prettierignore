@@ -13,3 +13,6 @@ public/app
 # files, and they are regenerated wholesale rather than edited, so a readable
 # diff buys nothing. See docs/DESIGN_atri_sangam_replays.md.
 src/data/atri-sangam
+
+# Playwright MCP snapshots — tool output, not project content.
+.playwright-mcp

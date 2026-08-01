@@ -1,0 +1,348 @@
+---
+import Layout from '~/layouts/Layout.astro';
+import '@fontsource-variable/jetbrains-mono';
+import '@fontsource-variable/work-sans';
+
+import ogImage from '~/assets/images/work/atri-sangam-demo-og.png';
+
+/* The branded page for Atri Sangam, matching /mentible, /thittam and
+   /kathai-chithiram. It sells the problem; /work/atri-sangam remains the
+   catalog entry and carries the depth — channels table, consensus rules,
+   architecture. Every claim here is lifted from that entry rather than
+   restated, so the two cannot drift apart on the facts. */
+
+const metadata = {
+  title: 'Atri Sangam — the assembly that notices when the sky goes dark',
+  // The template appends ' — Mambakkam', which on a shared card would read as
+  // the village site rather than the instrument.
+  ignoreTitleTemplate: true,
+  description:
+    'A GPS receiver cannot audit itself. Atri Sangam cross-checks it against references that do not come from the sky — network time, signed time, radio time, the drift of the local clock — and raises an explainable alarm when they stop agreeing.',
+  openGraph: { type: 'website', images: [{ url: ogImage }] },
+};
+
+/* "Emerald Prestige", the palette the demo pages use. Hard-coded rather than
+   themed: this page is dark-only by design and must not follow the site's
+   light tokens. Opacity is an 8-bit hex alpha suffix. */
+const BG = '#03251c';
+const PANEL = '#0a3d2e';
+const PANEL_HI = '#0f5c46';
+const GOLD = '#c9a84c';
+const GOLD_SOFT = '#f0d78c';
+const CREAM = '#f5f0e0';
+
+const MONO = "'JetBrains Mono Variable', ui-monospace, monospace";
+const SANS = "'Work Sans Variable', ui-sans-serif, system-ui, sans-serif";
+
+/** The eight residual channels, verbatim from work/atri-sangam.md. */
+const channels = [
+  {
+    name: 'gps_time_offset',
+    sky: true,
+    measures: 'GPS-reported UTC minus the local clock',
+    catches: 'Time spoofing, receiver faults',
+  },
+  {
+    name: 'gps_position_error',
+    sky: true,
+    measures: 'Distance of the reported fix from the surveyed site',
+    catches: 'Position spoofing, multipath',
+  },
+  {
+    name: 'gps_cn0_spread',
+    sky: true,
+    measures: 'Spread of per-satellite signal strength',
+    catches: 'Spoofing tell — a single transmitter collapses the spread toward zero',
+  },
+  {
+    name: 'ntp_time_offset',
+    sky: false,
+    measures: 'Network time minus the local clock',
+    catches: 'Independent time cross-check',
+  },
+  {
+    name: 'ntp_consensus_spread',
+    sky: false,
+    measures: 'Widest disagreement among several NTP servers',
+    catches: 'A minority of lying time servers',
+  },
+  {
+    name: 'roughtime_time_offset',
+    sky: false,
+    measures: 'Ed25519-signed time minus the local clock',
+    catches: 'Time reference an attacker cannot forge without the key',
+  },
+  {
+    name: 'wwvb_time_offset',
+    sky: false,
+    measures: 'WWVB 60 kHz radio time minus the local clock',
+    catches: 'Terrestrial time, no network needed',
+  },
+  {
+    name: 'holdover_residual',
+    sky: false,
+    measures: "Observed offset minus the local clock's own drift model",
+    catches: 'Slow manipulation that tracks nothing real',
+  },
+];
+
+/** The three attack shapes, with the same sparklines the demos index uses. */
+const attacks = [
+  {
+    name: 'Time Walk',
+    href: '/demos/atri-sangam/time-walk',
+    body: 'A slow spoof. GPS drifts away from the band while the independent references hold flat. CUSUM catches the accumulation.',
+    path: 'M0,35 L20,34 L40,32 L60,28 L80,22 L100,10',
+  },
+  {
+    name: 'Position Jump',
+    href: '/demos/atri-sangam/position-jump',
+    body: 'A crude spoof. The reported position jumps away from the surveyed antenna, and the step detector fires at once.',
+    path: 'M0,30 L45,30 V10 L100,10',
+  },
+  {
+    name: 'Dropout',
+    href: '/demos/atri-sangam/dropout',
+    body: 'An outage. The channels go silent, and the shaded gaps are the absence itself — jamming looks exactly like this.',
+    path: 'M0,20 H20 M40,20 H60 M80,20 H100',
+  },
+];
+---
+
+<Layout metadata={metadata}>
+  <div
+    class="ags min-h-screen w-full px-6 py-12 md:px-10 md:py-16"
+    style={`background:${BG};color:${CREAM};font-family:${SANS}`}
+  >
+    <div class="mx-auto flex w-full max-w-6xl flex-col gap-12">
+      <!-- 1. Top bar -->
+      <div class="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+        <nav class="kicker" style={`font-family:${MONO};color:${CREAM}99`} aria-label="Breadcrumb">
+          <a href="/kaundinya" style={`color:${GOLD}`}>Kaundinya Labs</a>
+          <span aria-hidden="true"> / </span>
+          <span style={`color:${GOLD_SOFT}`} aria-current="page">Atri Sangam</span>
+        </nav>
+        <span
+          class="chip kicker inline-flex items-center rounded-full border px-2.5 py-0.5"
+          style={`font-family:${MONO};color:${CREAM}99;background:${PANEL};border-color:${PANEL_HI}`}
+        >
+          Alpha — thresholds not proven against real hardware
+        </span>
+      </div>
+
+      <!-- 2. Header -->
+      <header class="flex flex-col gap-5">
+        <span class="eyebrow" style={`font-family:${MONO};color:${GOLD}`}> Fixed-Site GNSS Integrity Monitoring </span>
+        <h1 class="h1 text-5xl tracking-tight md:text-6xl" style={`font-family:${MONO}`}>Atri Sangam</h1>
+        <p class="text-xl md:text-2xl" style={`font-family:${MONO};color:${CREAM}`}>
+          The assembly that notices when the sky goes dark
+        </p>
+      </header>
+
+      <!-- 3. The name is the thesis -->
+      <section
+        class="grid items-start gap-10 border-t pt-12 md:grid-cols-2 md:gap-12"
+        style={`border-color:${PANEL_HI}`}
+      >
+        <blockquote class="border-l-2 pl-8" style={`border-color:${GOLD}`}>
+          <p class="text-xl italic" lang="sa" style={`color:${CREAM}`}>यं वै सूर्यं स्वर्भानुस्तमसाविध्यदासुरः ।</p>
+          <p class="text-xl italic" lang="sa" style={`color:${CREAM}`}>अत्रयस्तमन्वविन्दन्नह्यन्ये अशक्नुवन् ॥</p>
+          <p class="mt-4 text-sm italic" style={`color:${CREAM}b3`}>
+            The sun, whom the Asura Svarbhānu had enveloped with darkness, the Atris recovered; no others were able.
+          </p>
+          <cite class="cite mt-3 block not-italic" style={`font-family:${MONO};color:${GOLD}`}> Rig Veda 5.40.9 </cite>
+        </blockquote>
+        <div class="flex flex-col gap-4 font-light leading-relaxed" style={`color:${CREAM}e6`}>
+          <p>
+            In hymn 5.40 the sky's most trusted reference goes dark — the eclipse of Svarbhānu — and is understood
+            rather than merely feared. The fifth Mandala of the Rigveda is called the Atri Mandala.
+          </p>
+          <p>
+            <em>Sangam</em> (சங்கம்) is confluence and assembly: rivers meeting, and the classical Tamil academies where
+            independent voices reached consensus by collective judgment. That is the architecture — a sangam of independent
+            channels deliberating over what the sky and the clocks are really saying.
+          </p>
+        </div>
+      </section>
+
+      <!-- 4. The problem -->
+      <section class="border-t pt-12" style={`border-color:${PANEL_HI}`}>
+        <h2 class="mb-6 text-2xl font-bold tracking-tight" style={`font-family:${MONO};color:${CREAM}`}>
+          A GPS receiver cannot audit itself
+        </h2>
+        <div class="grid gap-8 md:grid-cols-2">
+          <p class="text-lg font-light leading-relaxed" style={`color:${CREAM}e6`}>
+            GPS is infrastructure that almost everything else quietly depends on, and it is easy to attack. Jamming
+            drowns the signal. Spoofing is worse: the receiver keeps reporting a confident fix, and the fix is a lie.
+            Both are cheap. Neither announces itself.
+          </p>
+          <p class="text-lg font-light leading-relaxed" style={`color:${CREAM}e6`}>
+            The defence is not a better receiver — it is a second opinion that does not come from the same sky. Atri
+            Sangam's premise is that a site which already knows where it is can check what it is being told.
+          </p>
+        </div>
+      </section>
+
+      <!-- 5. The assembly -->
+      <section class="border-t pt-12" style={`border-color:${PANEL_HI}`}>
+        <div class="mb-6 flex items-baseline justify-between border-b pb-3" style={`border-color:${PANEL_HI}`}>
+          <h2 class="text-2xl font-bold tracking-tight" style={`font-family:${MONO};color:${CREAM}`}>The assembly</h2>
+          <span class="hidden kicker md:inline" style={`font-family:${MONO};color:${CREAM}99`}>
+            Gold marks the channels that come from the sky
+          </span>
+        </div>
+        <p class="mb-6 max-w-3xl font-light leading-relaxed" style={`color:${CREAM}b3`}>
+          Each channel is a residual — an observed value minus what it should be — fed into one engine. Only the GPS
+          channels come from the satellite constellation; the rest are deliberately independent of it.
+        </p>
+        <div class="grid gap-4 md:grid-cols-2">
+          {
+            channels.map((c) => (
+              <article class="flex flex-col gap-2 border p-5" style={`background:${PANEL};border-color:${PANEL_HI}`}>
+                <div class="flex items-baseline justify-between gap-3">
+                  <h3 class="text-sm font-bold" style={`font-family:${MONO};color:${c.sky ? GOLD_SOFT : CREAM}`}>
+                    {c.name}
+                  </h3>
+                  <span class="kicker shrink-0" style={`font-family:${MONO};color:${c.sky ? GOLD : CREAM}66`}>
+                    {c.sky ? 'from the sky' : 'independent'}
+                  </span>
+                </div>
+                <p class="text-sm" style={`color:${CREAM}b3`}>
+                  {c.measures}
+                </p>
+                <p class="text-xs font-light leading-snug" style={`color:${CREAM}99`}>
+                  {c.catches}
+                </p>
+              </article>
+            ))
+          }
+        </div>
+      </section>
+
+      <!-- 6. Three shapes of attack -->
+      <section class="border-t pt-12" style={`border-color:${PANEL_HI}`}>
+        <div class="mb-6 flex items-baseline justify-between border-b pb-3" style={`border-color:${PANEL_HI}`}>
+          <h2 class="text-2xl font-bold tracking-tight" style={`font-family:${MONO};color:${CREAM}`}>
+            Three shapes of attack
+          </h2>
+          <span class="hidden kicker md:inline" style={`font-family:${MONO};color:${CREAM}99`}>
+            Recorded replays — simulated data only
+          </span>
+        </div>
+        <div class="grid gap-4 md:grid-cols-3">
+          {
+            attacks.map((a) => (
+              <a
+                href={a.href}
+                class="card flex flex-col gap-4 border p-6"
+                style={`background:${PANEL};border-color:${PANEL_HI}`}
+              >
+                <div>
+                  <h3 class="text-lg font-bold" style={`font-family:${MONO};color:${CREAM}`}>
+                    {a.name}
+                  </h3>
+                  <p class="mt-2 text-xs font-light leading-snug" style={`color:${CREAM}80`}>
+                    {a.body}
+                  </p>
+                </div>
+                <div
+                  class="mt-auto h-12 w-full overflow-hidden border"
+                  style={`background:${BG}80;border-color:${PANEL_HI}`}
+                >
+                  <svg viewBox="0 0 100 40" preserveAspectRatio="none" class="h-full w-full" aria-hidden="true">
+                    <path d={a.path} fill="none" stroke={GOLD} stroke-width="1" />
+                  </svg>
+                </div>
+              </a>
+            ))
+          }
+        </div>
+        <p class="mt-6 text-sm font-light" style={`color:${CREAM}99`}>
+          A healthy site is the fourth. See all four in the
+          <a href="/demos/atri-sangam" style={`color:${GOLD}`}>dashboard demo</a>, where GPS is plotted against the
+          consensus band the independent references span — a hairline when everything agrees, fanning open when it
+          stops.
+        </p>
+      </section>
+
+      <!-- 7. Status -->
+      <section class="border-t pt-12" style={`border-color:${PANEL_HI}`}>
+        <h2 class="mb-6 text-2xl font-bold tracking-tight" style={`font-family:${MONO};color:${CREAM}`}>
+          Where it actually stands
+        </h2>
+        <div class="grid gap-8 md:grid-cols-2">
+          <p class="font-light leading-relaxed" style={`color:${CREAM}e6`}>
+            Alpha. The monitor runs: the daemon, the detection layers, the storage and the dashboard are built and
+            tested, and the independent time channels — NTP consensus, Roughtime, WWVB — are wired in and opt-in per
+            site.
+          </p>
+          <p class="font-light leading-relaxed" style={`color:${CREAM}b3`}>
+            What is honestly not done: the solar channel exists as a predictor but is not yet wired into the daemon, and
+            the star-tracker channel is a roadmap idea. The default thresholds are consumer-grade starting points, meant
+            to be overridden, and have not been validated against real jamming or spoofing hardware. Treat them as a
+            place to begin tuning, not as a calibrated defence.
+          </p>
+        </div>
+        <p class="mt-8 max-w-3xl font-light leading-relaxed" style={`color:${CREAM}99`}>
+          There is no language model anywhere in it — nothing is generated, nothing is inferred. It is arithmetic on
+          residuals, and the reason it can be trusted is that you can read every step of it.
+        </p>
+      </section>
+
+      <footer class="border-t pt-8 text-sm" style={`border-color:${PANEL_HI};color:${CREAM}99`}>
+        <a href="/demos/atri-sangam" style={`color:${GOLD}`}>Dashboard demo</a>
+        <span aria-hidden="true"> · </span>
+        <a href="/work/atri-sangam" style={`color:${GOLD}`}>Full technical overview</a>
+        <span aria-hidden="true"> · </span>
+        <a href="https://github.com/wegofwd2020-hub/atri-sangam" style={`color:${GOLD}`}>Source code</a>
+      </footer>
+    </div>
+  </div>
+</Layout>
+
+<style>
+  .card {
+    text-decoration: none;
+    transition: border-color 160ms ease;
+  }
+  .card:hover {
+    border-color: #c9a84c66 !important;
+  }
+
+  /* Sizes below 12px and letter-spacing in em sit outside Tailwind's scale. */
+  .kicker {
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.25em;
+  }
+  .chip {
+    letter-spacing: 0.2em;
+  }
+  .eyebrow {
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.3em;
+  }
+  .cite {
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.2em;
+  }
+
+  .h1 {
+    font-weight: 500;
+    line-height: 1.08;
+    background-image: linear-gradient(180deg, #f5f0e0 0%, #f0d78c 55%, #c9a84c 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+
+  /* The site body is light; without this the cream page background shows
+     through wherever this page is shorter than the viewport. */
+  .ags {
+    position: relative;
+  }
+</style>

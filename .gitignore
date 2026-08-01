@@ -33,3 +33,6 @@ pnpm-lock.yaml
 # history, otherwise leave as a working-tree artefact. See
 # scripts/docs_index/README.md.
 DRIFT_REPORT.md
+
+# Snapshots written by the Playwright MCP server during verification.
+.playwright-mcp/
