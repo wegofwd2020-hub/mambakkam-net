@@ -1,7 +1,9 @@
 ---
 import { getCollection } from 'astro:content';
-import Layout from '~/layouts/PageLayout.astro';
-import Hero from '~/components/widgets/Hero.astro';
+import Layout from '~/layouts/Layout.astro';
+import ThemeStyle from '~/components/ThemeStyle.astro';
+import ThemeNav from '~/components/ThemeNav.astro';
+import { themes } from '~/themes';
 
 // This page is Siva Mambakkam's work. When another person is added to /people,
 // give them their own work page rather than listing everyone here.
@@ -23,13 +25,6 @@ const typeLabel: Record<string, string> = {
   research: 'Research',
 };
 
-const statusColor: Record<string, string> = {
-  live: 'text-green-700 bg-green-50 dark:text-green-300 dark:bg-green-900/30',
-  'in-progress': 'text-amber-700 bg-amber-50 dark:text-amber-300 dark:bg-amber-900/30',
-  'in-client-deployment': 'text-green-700 bg-green-50 dark:text-green-300 dark:bg-green-900/30',
-  archived: 'text-gray-600 bg-gray-100 dark:text-gray-300 dark:bg-gray-800',
-};
-
 const statusLabel: Record<string, string> = {
   live: 'Live',
   'in-progress': 'In Progress',
@@ -38,78 +33,105 @@ const statusLabel: Record<string, string> = {
 };
 
 const metadata = { title: 'Work from Mambakkam' };
+
+/* Azure & Gold. This page renders through the bare layout like the other
+   themed pages, so it carries its own breadcrumb home — there is no site
+   header above a dark ground. */
+const t = themes.azure;
+const { panel: PANEL, panelHi: PANEL_HI, accentSoft: GOLD_SOFT, text: TEXT } = t;
+const MONO = t.mono;
 ---
 
 <Layout metadata={metadata}>
-  <Hero tagline="Software & Projects">
-    <Fragment slot="title">Work</Fragment>
-    <Fragment slot="subtitle">
-      Software products and projects from people of Mambakkam — built with care, shipped to the world.
-    </Fragment>
-  </Hero>
+  <ThemeStyle theme={t} />
+  <div class="th-page w-full px-6 py-12 md:px-10 md:py-16">
+    <div class="mx-auto flex w-full max-w-5xl flex-col gap-12">
+      <!-- Site navigation. This page has no header of its own, so the strip
+           carries it — see ThemeNav. -->
+      <ThemeNav current="/work" />
 
-  <section class="px-6 py-12 mx-auto max-w-5xl">
-    {
-      ordered.length === 0 ? (
-        <p class="text-center text-muted py-16">Products coming soon.</p>
-      ) : (
-        <div class="grid gap-6 sm:grid-cols-2">
-          {ordered.map((item) => {
-            const comingSoon = item.data.comingSoon;
-            const href = item.data.landingUrl ?? (comingSoon ? undefined : `/work/${item.id}`);
-            const Tag = href ? 'a' : 'div';
-            const tagProps = href
-              ? {
-                  href,
-                  class:
-                    'group block rounded-2xl border border-gray-200 dark:border-gray-700 p-6 hover:border-primary hover:shadow-md transition-all duration-200 bg-white dark:bg-gray-900',
-                }
-              : {
-                  class:
-                    'block rounded-2xl border border-gray-200 dark:border-gray-700 p-6 bg-white dark:bg-gray-900 opacity-90',
-                };
-            return (
-              <Tag {...tagProps}>
-                <div class="flex items-center justify-between mb-3">
-                  <span class="text-xs font-heading font-medium text-muted uppercase tracking-wider">
-                    {typeLabel[item.data.type] ?? item.data.type}
-                  </span>
-                  <div class="flex items-center gap-2">
-                    {comingSoon && (
-                      <span class="text-xs font-heading font-medium px-2.5 py-0.5 rounded-full text-blue-700 bg-blue-50 dark:text-blue-300 dark:bg-blue-900/30">
-                        Coming soon
+      <!-- Header -->
+      <header class="flex flex-col gap-5">
+        <span class="th-eyebrow">Software &amp; Projects</span>
+        <h1 class="th-h1 text-5xl tracking-tight md:text-6xl">Work</h1>
+        <p class="max-w-3xl text-lg font-light leading-relaxed" style={`color:${TEXT}e6`}>
+          Software products and projects from people of Mambakkam — built with care, shipped to the world.
+        </p>
+      </header>
+
+      <section class="border-t pt-12" style={`border-color:${PANEL_HI}`}>
+        {
+          ordered.length === 0 ? (
+            <p class="py-16 text-center" style={`color:${TEXT}99`}>
+              Products coming soon.
+            </p>
+          ) : (
+            <div class="grid gap-6 sm:grid-cols-2">
+              {ordered.map((item) => {
+                const comingSoon = item.data.comingSoon;
+                const href = item.data.landingUrl ?? (comingSoon ? undefined : `/work/${item.id}`);
+                const Tag = href ? 'a' : 'div';
+                const tagProps = href
+                  ? {
+                      href,
+                      class: 'th-card group block border p-6',
+                      style: `background:${PANEL};border-color:${PANEL_HI}`,
+                    }
+                  : {
+                      class: 'block border p-6 opacity-90',
+                      style: `background:${PANEL};border-color:${PANEL_HI}`,
+                    };
+                return (
+                  <Tag {...tagProps}>
+                    <div class="flex items-center justify-between mb-3">
+                      <span class="th-kicker" style={`color:${TEXT}99`}>
+                        {typeLabel[item.data.type] ?? item.data.type}
                       </span>
+                      <div class="flex items-center gap-2">
+                        {comingSoon && (
+                          <span
+                            class="th-kicker inline-flex items-center rounded-full border px-2.5 py-0.5"
+                            style={`color:${TEXT}99;border-color:${PANEL_HI}`}
+                          >
+                            Coming soon
+                          </span>
+                        )}
+                        <span
+                          class="th-kicker inline-flex items-center rounded-full border px-2.5 py-0.5"
+                          style={`color:${GOLD_SOFT};background:${PANEL};border-color:${PANEL_HI}`}
+                        >
+                          {statusLabel[item.data.status] ?? item.data.status}
+                        </span>
+                      </div>
+                    </div>
+
+                    <h2 class="mb-2 mt-3 text-xl font-bold" style={`font-family:${MONO};color:${TEXT}`}>
+                      {item.data.title}
+                    </h2>
+
+                    <p class="mb-4 line-clamp-3 text-sm font-light leading-relaxed" style={`color:${TEXT}b3`}>
+                      {item.data.excerpt}
+                    </p>
+
+                    {item.data.tags && item.data.tags.length > 0 && (
+                      <div class="flex flex-wrap gap-1.5">
+                        {item.data.tags.map((tag) => (
+                          <span
+                            class="rounded border px-2 py-0.5 text-xs"
+                            style={`font-family:${MONO};color:${TEXT}cc;background:${PANEL};border-color:${PANEL_HI}`}
+                          >
+                            {tag}
+                          </span>
+                        ))}
+                      </div>
                     )}
-                    <span
-                      class={`text-xs font-heading font-medium px-2.5 py-0.5 rounded-full ${statusColor[item.data.status] ?? ''}`}
-                    >
-                      {statusLabel[item.data.status] ?? item.data.status}
-                    </span>
-                  </div>
-                </div>
-
-                <h2
-                  class={`text-xl font-heading font-bold text-gray-900 dark:text-white mb-2 ${href ? 'group-hover:text-primary transition-colors' : ''}`}
-                >
-                  {item.data.title}
-                </h2>
-
-                <p class="text-sm leading-relaxed text-muted mb-4 line-clamp-3">{item.data.excerpt}</p>
-
-                {item.data.tags && item.data.tags.length > 0 && (
-                  <div class="flex flex-wrap gap-1.5">
-                    {item.data.tags.map((tag) => (
-                      <span class="text-xs font-mono px-2 py-0.5 rounded bg-gray-100 dark:bg-gray-800 text-muted">
-                        {tag}
-                      </span>
-                    ))}
-                  </div>
-                )}
-              </Tag>
-            );
-          })}
-        </div>
-      )
-    }
-  </section>
+                  </Tag>
+                );
+              })}
+            </div>
+          )
+        }
+      </section>
+    </div>
+  </div>
 </Layout>

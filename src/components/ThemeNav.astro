@@ -1,0 +1,44 @@
+---
+/**
+ * Site navigation for pages that render through the bare layout.
+ *
+ * A themed page supplies its own full-bleed dark ground, so it cannot use
+ * PageLayout's header — a cream nav bar above a dark body reads as a broken
+ * page. The cost is that a top-level page like /work would otherwise offer no
+ * way anywhere else. This restores that, styled from the active theme's
+ * tokens.
+ *
+ * Links are read from `headerData` rather than restated, so a change to the
+ * site nav reaches themed pages too. Dropdowns are flattened: this is a single
+ * strip, and a hover menu on a page with no header chrome would be a second
+ * navigation idiom for no gain. A group's own landing page is used where it
+ * has one, otherwise its first child.
+ */
+import { headerData } from '~/navigation';
+
+interface Props {
+  /** Marks the current page, e.g. '/work'. */
+  current?: string;
+  /** Where the wordmark points. */
+  home?: string;
+}
+
+const { current, home = '/' } = Astro.props;
+
+/** One flat entry per top-level nav item. */
+const items = headerData.links.map((link) => {
+  const href = 'href' in link && link.href ? link.href : (link.links?.[0]?.href ?? home);
+  return { text: link.text, href };
+});
+---
+
+<nav class="th-nav flex flex-wrap items-baseline gap-x-6 gap-y-2" aria-label="Site">
+  <a href={home} class="th-nav-brand">Mambakkam</a>
+  {
+    items.map((item) => (
+      <a href={item.href} class="th-nav-link" aria-current={current && item.href === current ? 'page' : undefined}>
+        {item.text}
+      </a>
+    ))
+  }
+</nav>

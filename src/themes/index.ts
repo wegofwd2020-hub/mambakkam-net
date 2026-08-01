@@ -55,10 +55,12 @@ export interface Theme {
   stale?: string;
 }
 
+import { azure } from './azure';
 import { emerald } from './emerald';
 import { pine } from './pine';
 
 export const themes = {
+  azure,
   emerald,
   pine,
 } satisfies Record<string, Theme>;
