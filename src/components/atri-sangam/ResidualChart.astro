@@ -1,4 +1,6 @@
 ---
+import { themes } from '~/themes';
+
 /**
  * One residual trace on a plate, drawn server-side from real samples.
  *
@@ -92,10 +94,10 @@ const bandPath = band.length
     ].join(' ')
   : '';
 
-const GOLD = '#c9a84c';
-const CREAM = '#f5f0e0';
-const PANEL_HI = '#0f5c46';
-const BG = '#03251c';
+/* Colours come from the registered theme rather than literals here; the SVG
+   needs real values for stroke and fill attributes, which cannot read CSS
+   custom properties. */
+const { accent: GOLD, text: CREAM, panelHi: PANEL_HI, bg: BG } = themes.emerald;
 
 const hover = JSON.stringify({ samples, yMin, yMax, windowS, unit, digits, vw: VW, vh: VH });
 ---
@@ -147,13 +149,13 @@ const hover = JSON.stringify({ samples, yMin, yMax, windowS, unit, digits, vw: V
 
   <span
     class="ags-tip pointer-events-none absolute left-2 top-1 hidden"
-    style={`font-family:'JetBrains Mono Variable',ui-monospace,monospace;font-size:9px;color:${CREAM}`}></span>
+    style={`font-family:${themes.emerald.mono};font-size:9px;color:${CREAM}`}></span>
 
   {
     label && (
       <span
         class="pointer-events-none absolute bottom-1 right-2"
-        style={`font-family:'JetBrains Mono Variable',ui-monospace,monospace;font-size:8px;letter-spacing:0.1em;color:${GOLD}80`}
+        style={`font-family:${themes.emerald.mono};font-size:8px;letter-spacing:0.1em;color:${GOLD}80`}
       >
         {label}
       </span>

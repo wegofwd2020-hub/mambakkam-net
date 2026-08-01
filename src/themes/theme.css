@@ -1,0 +1,138 @@
+/*
+ * Structural classes shared by every branded page, driven entirely by the
+ * --th-* custom properties that ThemeStyle.astro emits. Nothing here names a
+ * colour, so the same rules serve any registered theme.
+ *
+ * These were duplicated verbatim across the Atri Sangam pitch page, the demos
+ * index and the four replays before this file existed. The sizes below 12px
+ * and the letter-spacing in em sit outside Tailwind's scale, which is why they
+ * are CSS rather than utility classes.
+ *
+ * Class names are prefixed th- so they cannot collide with the site's own
+ * styles, which are global on pages that use PageLayout.
+ */
+
+/* Uppercase micro-label: breadcrumbs, captions, status chips. */
+.th-kicker {
+  font-family: var(--th-mono);
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.25em;
+}
+
+/* A kicker inside a pill — slightly tighter, since the border adds width. */
+.th-chip {
+  letter-spacing: 0.2em;
+}
+
+/* The section-opening label above an H1. */
+.th-eyebrow {
+  font-family: var(--th-mono);
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.3em;
+  color: var(--th-accent);
+}
+
+/* Attribution under a blockquote. */
+.th-cite {
+  font-family: var(--th-mono);
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.2em;
+  color: var(--th-accent);
+}
+
+/* A kicker one step up — sits under a card title, where 10px would be lost. */
+.th-kicker-md {
+  font-family: var(--th-mono);
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.2em;
+}
+
+/* The smallest label: a caption inside a chart plate, deliberately quiet. */
+.th-caption {
+  font-family: var(--th-mono);
+  font-size: 8px;
+  letter-spacing: 0.1em;
+}
+
+/* Live-status label — the smallest type on the page, beside a pulsing dot. */
+.th-status {
+  font-family: var(--th-mono);
+  font-size: 9px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+}
+
+/* Machine readout — values a system would print, not prose.
+   Two forms, because they are genuinely different jobs: a single tracked line
+   ("LAST_AGREED: T-157s") reads as an instrument label, while a stacked pair
+   needs the leading instead and would look gappy with the tracking. */
+.th-readout {
+  font-family: var(--th-mono);
+  font-size: 11px;
+  letter-spacing: 0.1em;
+}
+.th-readout-stack {
+  font-family: var(--th-mono);
+  font-size: 11px;
+  line-height: 1.6;
+}
+
+/* Table header. */
+.th-thead {
+  font-family: var(--th-mono);
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.2em;
+  color: var(--th-accent);
+}
+
+/* Navigation pill. */
+.th-navpill {
+  font-family: var(--th-mono);
+  font-size: 11px;
+  letter-spacing: 0.1em;
+  text-decoration: none;
+  transition: border-color 160ms ease;
+}
+.th-navpill:hover {
+  border-color: color-mix(in srgb, var(--th-accent) 40%, transparent);
+}
+
+/* The page H1, painted through the theme's gradient. */
+.th-h1 {
+  font-family: var(--th-mono);
+  font-weight: 500;
+  line-height: 1.08;
+  background-image: var(--th-gradient);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+/* A clickable card. The hover tint is derived from the accent rather than
+   hard-coded, so it follows whichever theme is active. */
+.th-card {
+  text-decoration: none;
+  transition: border-color 160ms ease;
+}
+.th-card:hover {
+  border-color: color-mix(in srgb, var(--th-accent) 40%, transparent) !important;
+}
+
+/* Full-bleed page shell. The site body is light, so without a full-height
+   background the cream page shows through wherever content is shorter than
+   the viewport. */
+.th-page {
+  position: relative;
+  min-height: 100vh;
+  background: var(--th-bg);
+  color: var(--th-text);
+  font-family: var(--th-sans);
+}

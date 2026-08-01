@@ -2,6 +2,8 @@
 import Layout from '~/layouts/Layout.astro';
 import '@fontsource-variable/jetbrains-mono';
 import '@fontsource-variable/work-sans';
+import ThemeStyle from '~/components/ThemeStyle.astro';
+import { themes } from '~/themes';
 
 import ogImage from '~/assets/images/work/atri-sangam-demo-og.png';
 
@@ -21,18 +23,12 @@ const metadata = {
   openGraph: { type: 'website', images: [{ url: ogImage }] },
 };
 
-/* "Emerald Prestige", the palette the demo pages use. Hard-coded rather than
-   themed: this page is dark-only by design and must not follow the site's
-   light tokens. Opacity is an 8-bit hex alpha suffix. */
-const BG = '#03251c';
-const PANEL = '#0a3d2e';
-const PANEL_HI = '#0f5c46';
-const GOLD = '#c9a84c';
-const GOLD_SOFT = '#f0d78c';
-const CREAM = '#f5f0e0';
+/* Palette comes from the registered theme — still literal hex where it lands
+   in an inline style, but written once in src/themes/emerald.ts. */
+const t = themes.emerald;
+const { bg: BG, panel: PANEL, panelHi: PANEL_HI, accent: GOLD, accentSoft: GOLD_SOFT, text: CREAM } = t;
 
-const MONO = "'JetBrains Mono Variable', ui-monospace, monospace";
-const SANS = "'Work Sans Variable', ui-sans-serif, system-ui, sans-serif";
+const MONO = t.mono;
 
 /** The eight residual channels, verbatim from work/atri-sangam.md. */
 const channels = [
@@ -110,20 +106,18 @@ const attacks = [
 ---
 
 <Layout metadata={metadata}>
-  <div
-    class="ags min-h-screen w-full px-6 py-12 md:px-10 md:py-16"
-    style={`background:${BG};color:${CREAM};font-family:${SANS}`}
-  >
+  <ThemeStyle theme={t} />
+  <div class="th-page w-full px-6 py-12 md:px-10 md:py-16">
     <div class="mx-auto flex w-full max-w-6xl flex-col gap-12">
       <!-- 1. Top bar -->
       <div class="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-        <nav class="kicker" style={`font-family:${MONO};color:${CREAM}99`} aria-label="Breadcrumb">
+        <nav class="th-kicker" style={`font-family:${MONO};color:${CREAM}99`} aria-label="Breadcrumb">
           <a href="/kaundinya" style={`color:${GOLD}`}>Kaundinya Labs</a>
           <span aria-hidden="true"> / </span>
           <span style={`color:${GOLD_SOFT}`} aria-current="page">Atri Sangam</span>
         </nav>
         <span
-          class="chip kicker inline-flex items-center rounded-full border px-2.5 py-0.5"
+          class="th-chip th-kicker inline-flex items-center rounded-full border px-2.5 py-0.5"
           style={`font-family:${MONO};color:${CREAM}99;background:${PANEL};border-color:${PANEL_HI}`}
         >
           Alpha — thresholds not proven against real hardware
@@ -132,8 +126,10 @@ const attacks = [
 
       <!-- 2. Header -->
       <header class="flex flex-col gap-5">
-        <span class="eyebrow" style={`font-family:${MONO};color:${GOLD}`}> Fixed-Site GNSS Integrity Monitoring </span>
-        <h1 class="h1 text-5xl tracking-tight md:text-6xl" style={`font-family:${MONO}`}>Atri Sangam</h1>
+        <span class="th-eyebrow" style={`font-family:${MONO};color:${GOLD}`}>
+          Fixed-Site GNSS Integrity Monitoring
+        </span>
+        <h1 class="th-h1 text-5xl tracking-tight md:text-6xl" style={`font-family:${MONO}`}>Atri Sangam</h1>
         <p class="text-xl md:text-2xl" style={`font-family:${MONO};color:${CREAM}`}>
           The assembly that notices when the sky goes dark
         </p>
@@ -150,7 +146,9 @@ const attacks = [
           <p class="mt-4 text-sm italic" style={`color:${CREAM}b3`}>
             The sun, whom the Asura Svarbhānu had enveloped with darkness, the Atris recovered; no others were able.
           </p>
-          <cite class="cite mt-3 block not-italic" style={`font-family:${MONO};color:${GOLD}`}> Rig Veda 5.40.9 </cite>
+          <cite class="th-cite mt-3 block not-italic" style={`font-family:${MONO};color:${GOLD}`}>
+            Rig Veda 5.40.9
+          </cite>
         </blockquote>
         <div class="flex flex-col gap-4 font-light leading-relaxed" style={`color:${CREAM}e6`}>
           <p>
@@ -187,7 +185,7 @@ const attacks = [
       <section class="border-t pt-12" style={`border-color:${PANEL_HI}`}>
         <div class="mb-6 flex items-baseline justify-between border-b pb-3" style={`border-color:${PANEL_HI}`}>
           <h2 class="text-2xl font-bold tracking-tight" style={`font-family:${MONO};color:${CREAM}`}>The assembly</h2>
-          <span class="hidden kicker md:inline" style={`font-family:${MONO};color:${CREAM}99`}>
+          <span class="th-kicker hidden md:inline" style={`font-family:${MONO};color:${CREAM}99`}>
             Gold marks the channels that come from the sky
           </span>
         </div>
@@ -203,7 +201,7 @@ const attacks = [
                   <h3 class="text-sm font-bold" style={`font-family:${MONO};color:${c.sky ? GOLD_SOFT : CREAM}`}>
                     {c.name}
                   </h3>
-                  <span class="kicker shrink-0" style={`font-family:${MONO};color:${c.sky ? GOLD : CREAM}66`}>
+                  <span class="th-kicker shrink-0" style={`font-family:${MONO};color:${c.sky ? GOLD : CREAM}66`}>
                     {c.sky ? 'from the sky' : 'independent'}
                   </span>
                 </div>
@@ -225,7 +223,7 @@ const attacks = [
           <h2 class="text-2xl font-bold tracking-tight" style={`font-family:${MONO};color:${CREAM}`}>
             Three shapes of attack
           </h2>
-          <span class="hidden kicker md:inline" style={`font-family:${MONO};color:${CREAM}99`}>
+          <span class="th-kicker hidden md:inline" style={`font-family:${MONO};color:${CREAM}99`}>
             Recorded replays — simulated data only
           </span>
         </div>
@@ -234,7 +232,7 @@ const attacks = [
             attacks.map((a) => (
               <a
                 href={a.href}
-                class="card flex flex-col gap-4 border p-6"
+                class="th-card flex flex-col gap-4 border p-6"
                 style={`background:${PANEL};border-color:${PANEL_HI}`}
               >
                 <div>
@@ -299,50 +297,3 @@ const attacks = [
     </div>
   </div>
 </Layout>
-
-<style>
-  .card {
-    text-decoration: none;
-    transition: border-color 160ms ease;
-  }
-  .card:hover {
-    border-color: #c9a84c66 !important;
-  }
-
-  /* Sizes below 12px and letter-spacing in em sit outside Tailwind's scale. */
-  .kicker {
-    font-size: 10px;
-    text-transform: uppercase;
-    letter-spacing: 0.25em;
-  }
-  .chip {
-    letter-spacing: 0.2em;
-  }
-  .eyebrow {
-    font-size: 11px;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 0.3em;
-  }
-  .cite {
-    font-size: 10px;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 0.2em;
-  }
-
-  .h1 {
-    font-weight: 500;
-    line-height: 1.08;
-    background-image: linear-gradient(180deg, #f5f0e0 0%, #f0d78c 55%, #c9a84c 100%);
-    -webkit-background-clip: text;
-    background-clip: text;
-    color: transparent;
-  }
-
-  /* The site body is light; without this the cream page background shows
-     through wherever this page is shorter than the viewport. */
-  .ags {
-    position: relative;
-  }
-</style>

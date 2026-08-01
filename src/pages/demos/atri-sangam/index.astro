@@ -2,6 +2,8 @@
 import Layout from '~/layouts/Layout.astro';
 import '@fontsource-variable/jetbrains-mono';
 import '@fontsource-variable/work-sans';
+import ThemeStyle from '~/components/ThemeStyle.astro';
+import { themes } from '~/themes';
 
 // Imported rather than referenced from public/: findImage() returns a bare
 // public path as a string, which adaptOpenGraphImages() then hands to
@@ -22,18 +24,13 @@ const metadata = {
   },
 };
 
-/* Palette — "Emerald Prestige", locked. Hard-coded on purpose: this page is a
-   self-contained artifact and must not follow the site's theme tokens, which
-   are light by default. Opacity is an 8-bit hex alpha suffix. */
-const BG = '#03251c';
-const PANEL = '#0a3d2e';
-const PANEL_HI = '#0f5c46';
-const GOLD = '#c9a84c';
-const GOLD_SOFT = '#f0d78c';
-const CREAM = '#f5f0e0';
+/* Palette comes from the registered theme. Still literal hex where it lands
+   in an inline style or an SVG attribute — those cannot read custom
+   properties — but written once, in src/themes/emerald.ts. */
+const t = themes.emerald;
+const { bg: BG, panel: PANEL, panelHi: PANEL_HI, accent: GOLD, accentSoft: GOLD_SOFT, text: CREAM } = t;
 
-const MONO = "'JetBrains Mono Variable', ui-monospace, monospace";
-const SANS = "'Work Sans Variable', ui-sans-serif, system-ui, sans-serif";
+const MONO = t.mono;
 
 /** The three attack replays. Clean is the featured card and is laid out apart. */
 const siblings = [
@@ -119,20 +116,18 @@ const glossary = [
 ---
 
 <Layout metadata={metadata}>
-  <div
-    class="ags min-h-screen w-full px-6 py-12 md:px-10 md:py-16"
-    style={`background:${BG};color:${CREAM};font-family:${SANS}`}
-  >
+  <ThemeStyle theme={t} />
+  <div class="th-page w-full px-6 py-12 md:px-10 md:py-16">
     <div class="mx-auto flex w-full max-w-6xl flex-col gap-12">
       <!-- 1. Top bar -->
       <div class="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-        <nav class="kicker" style={`font-family:${MONO};color:${CREAM}99`} aria-label="Breadcrumb">
+        <nav class="th-kicker" style={`font-family:${MONO};color:${CREAM}99`} aria-label="Breadcrumb">
           <a href="/work/atri-sangam" style={`color:${GOLD}`}>Atri Sangam</a>
           <span aria-hidden="true"> / </span>
           <span style={`color:${GOLD_SOFT}`} aria-current="page">Demos</span>
         </nav>
         <span
-          class="chip kicker inline-flex items-center rounded-full border px-2.5 py-0.5"
+          class="th-chip th-kicker inline-flex items-center rounded-full border px-2.5 py-0.5"
           style={`font-family:${MONO};color:${CREAM}99;background:${PANEL};border-color:${PANEL_HI}`}
         >
           Recorded replay — simulated data only
@@ -142,7 +137,9 @@ const glossary = [
       <!-- 2. Header -->
       <header class="flex flex-col gap-5">
         <div class="flex flex-wrap items-center gap-4">
-          <span class="eyebrow" style={`font-family:${MONO};color:${GOLD}`}>Fixed-Site GNSS Integrity Monitoring</span>
+          <span class="th-eyebrow" style={`font-family:${MONO};color:${GOLD}`}
+            >Fixed-Site GNSS Integrity Monitoring</span
+          >
           <span
             class="inline-flex items-center gap-2 rounded-full border px-2.5 py-0.5"
             style={`background:${PANEL};border-color:${PANEL_HI}`}
@@ -153,10 +150,10 @@ const glossary = [
                 style={`background:${GOLD}`}></span>
               <span class="relative inline-flex h-2 w-2 rounded-full" style={`background:${GOLD}`}></span>
             </span>
-            <span class="running" style={`font-family:${MONO};color:${CREAM}`}>Monitor running</span>
+            <span class="th-status" style={`font-family:${MONO};color:${CREAM}`}>Monitor running</span>
           </span>
         </div>
-        <h1 class="h1 text-5xl tracking-tight md:text-6xl" style={`font-family:${MONO}`}>Atri Sangam</h1>
+        <h1 class="th-h1 text-5xl tracking-tight md:text-6xl" style={`font-family:${MONO}`}>Atri Sangam</h1>
         <p class="text-xl md:text-2xl" style={`font-family:${MONO};color:${CREAM}`}>
           The assembly that notices when the sky goes dark
         </p>
@@ -173,7 +170,7 @@ const glossary = [
           <p class="mt-4 text-sm italic" style={`color:${CREAM}b3`}>
             The sun, whom the Asura Svarbhānu had enveloped with darkness, the Atris recovered; no others were able.
           </p>
-          <cite class="cite mt-3 block not-italic" style={`font-family:${MONO};color:${GOLD}`}>Rig Veda 5.40.9</cite>
+          <cite class="th-cite mt-3 block not-italic" style={`font-family:${MONO};color:${GOLD}`}>Rig Veda 5.40.9</cite>
         </blockquote>
         <p class="text-lg font-light leading-relaxed" style={`color:${CREAM}e6`}>
           A GPS receiver cannot audit itself. This monitor cross-checks it against references that do not come from the
@@ -185,7 +182,7 @@ const glossary = [
       <!-- 4. Four replays -->
       <div class="flex items-baseline justify-between border-b pb-3" style={`border-color:${PANEL_HI}`}>
         <h2 class="text-2xl font-bold tracking-tight" style={`font-family:${MONO};color:${CREAM}`}>Four replays</h2>
-        <span class="hidden kicker md:inline" style={`font-family:${MONO};color:${CREAM}99`}>
+        <span class="th-kicker hidden md:inline" style={`font-family:${MONO};color:${CREAM}99`}>
           A healthy site &amp; three shapes of attack
         </span>
       </div>
@@ -194,16 +191,16 @@ const glossary = [
       <section class="grid gap-4 md:grid-cols-12">
         <a
           href="/demos/atri-sangam/clean"
-          class="card flex flex-col justify-between border p-8 md:col-span-8"
+          class="th-card flex flex-col justify-between border p-8 md:col-span-8"
           style={`background:${PANEL};border-color:${PANEL_HI}`}
         >
           <div>
             <div class="flex items-start justify-between gap-6">
               <div>
                 <h3 class="text-2xl font-bold" style={`font-family:${MONO};color:${CREAM}`}>Clean</h3>
-                <p class="featured-kicker mt-1" style={`font-family:${MONO};color:${GOLD}`}>Baseline</p>
+                <p class="th-kicker-md mt-1" style={`font-family:${MONO};color:${GOLD}`}>Baseline</p>
               </div>
-              <div class="readout text-right" style={`font-family:${MONO};color:${CREAM}66`}>
+              <div class="th-readout-stack text-right" style={`font-family:${MONO};color:${CREAM}66`}>
                 <p>RESIDUAL_ERROR &lt; 0.5m</p>
                 <p>STABLE_LOCK: TRUE</p>
               </div>
@@ -225,7 +222,7 @@ const glossary = [
                 stroke={GOLD}
                 stroke-width="1.5"></path>
             </svg>
-            <span class="plate-caption absolute bottom-1 right-2" style={`font-family:${MONO};color:${GOLD}80`}>
+            <span class="th-caption absolute bottom-1 right-2" style={`font-family:${MONO};color:${GOLD}80`}>
               NOMINAL TELEMETRY
             </span>
           </div>
@@ -236,7 +233,7 @@ const glossary = [
             siblings.map((s) => (
               <a
                 href={s.href}
-                class="card flex flex-col gap-4 border p-6"
+                class="th-card flex flex-col gap-4 border p-6"
                 style={`background:${PANEL};border-color:${PANEL_HI}`}
               >
                 <div>
@@ -269,7 +266,7 @@ const glossary = [
         <div class="overflow-x-auto">
           <table class="w-full text-left">
             <thead>
-              <tr class="th" style={`font-family:${MONO};color:${GOLD}`}>
+              <tr class="th-thead" style={`font-family:${MONO};color:${GOLD}`}>
                 <th class="pb-4 pr-6 font-bold">Term</th>
                 <th class="pb-4 pr-6 font-bold">Stands for</th>
                 <th class="pb-4 font-bold">What it means here</th>
@@ -304,77 +301,3 @@ const glossary = [
     </div>
   </div>
 </Layout>
-
-<style define:vars={{ goldHover: '#c9a84c66' }}>
-  /* The spec sets the hover border with onMouseEnter/onMouseLeave. A CSS rule is
-     the same result with no JavaScript, which suits a static page. */
-  .card {
-    text-decoration: none;
-    transition: border-color 160ms ease;
-  }
-  .card:hover {
-    border-color: var(--goldHover) !important;
-  }
-
-  /* Sizes below 12px and letter-spacing in em are outside Tailwind's scale, so
-     the spec's type table is expressed directly. */
-  .kicker {
-    font-size: 10px;
-    text-transform: uppercase;
-    letter-spacing: 0.25em;
-  }
-  .chip {
-    letter-spacing: 0.2em;
-  }
-  .eyebrow {
-    font-size: 11px;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 0.3em;
-  }
-  .running {
-    font-size: 9px;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 0.15em;
-  }
-  .cite {
-    font-size: 10px;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 0.2em;
-  }
-  .featured-kicker {
-    font-size: 12px;
-    text-transform: uppercase;
-    letter-spacing: 0.2em;
-  }
-  .readout {
-    font-size: 11px;
-    line-height: 1.6;
-  }
-  .plate-caption {
-    font-size: 8px;
-    letter-spacing: 0.1em;
-  }
-  .th {
-    font-size: 10px;
-    text-transform: uppercase;
-    letter-spacing: 0.2em;
-  }
-
-  .h1 {
-    font-weight: 500;
-    line-height: 1.08;
-    background-image: linear-gradient(180deg, #f5f0e0 0%, #f0d78c 55%, #c9a84c 100%);
-    -webkit-background-clip: text;
-    background-clip: text;
-    color: transparent;
-  }
-
-  /* The site body is light. Without this the cream page background shows through
-     wherever this page is shorter than the viewport. */
-  .ags {
-    position: relative;
-  }
-</style>
