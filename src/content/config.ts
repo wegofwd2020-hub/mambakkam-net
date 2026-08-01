@@ -1,3 +1,4 @@
+import { THEME_IDS } from '~/themes';
 import { z, defineCollection } from 'astro:content';
 import { glob } from 'astro/loaders';
 
@@ -171,7 +172,7 @@ const workCollection = defineCollection({
     // palette the Atri Sangam demo pages use. A themed entry renders through
     // the bare layout instead of PageLayout, because the site's cream header
     // above a dark body reads as a broken page rather than a deliberate one.
-    theme: z.enum(['emerald']).optional(),
+    theme: z.enum(THEME_IDS as [string, ...string[]]).optional(),
 
     image: z.string().optional(),
     tags: z.array(z.string()).optional(),

@@ -3,6 +3,8 @@ import Layout from '~/layouts/Layout.astro';
 import ResidualChart from '~/components/atri-sangam/ResidualChart.astro';
 import '@fontsource-variable/jetbrains-mono';
 import '@fontsource-variable/work-sans';
+import ThemeStyle from '~/components/ThemeStyle.astro';
+import { themes } from '~/themes';
 
 import ogImage from '~/assets/images/work/atri-sangam-demo-og.png';
 
@@ -38,24 +40,18 @@ const metadata = {
   openGraph: { type: 'article', images: [{ url: ogImage }] },
 };
 
-const BG = '#03251c';
-const PANEL = '#0a3d2e';
-const PANEL_HI = '#0f5c46';
-const GOLD = '#c9a84c';
-const GOLD_SOFT = '#f0d78c';
-const CREAM = '#f5f0e0';
+/* Palette comes from the registered theme — still literal hex where it lands
+   in an inline style, but written once in src/themes/emerald.ts. */
+const t = themes.emerald;
+const { panel: PANEL, panelHi: PANEL_HI, accent: GOLD, accentSoft: GOLD_SOFT, text: CREAM } = t;
 
-/* Two semantic colours, used only for status. An integrity monitor cannot
-   signal ALARM in the same colour as OK. OK stays cream rather than green: on a
-   page where six channels are usually all fine, green would be the loudest
-   thing on screen and alarm would have to shout over it. Absence of colour
-   reads as nominal. */
-const ALARM = '#e06c5a';
-const STALE = '#d9a441';
+/* Status colours are theme tokens; see the note on Theme.alarm. A theme
+   without them falls back to plain text, which is the honest default. */
+const ALARM = t.alarm ?? CREAM;
+const STALE = t.stale ?? CREAM;
 const statusColour = (s: string) => (s === 'alarm' ? ALARM : s === 'stale' ? STALE : CREAM);
 
-const MONO = "'JetBrains Mono Variable', ui-monospace, monospace";
-const SANS = "'Work Sans Variable', ui-sans-serif, system-ui, sans-serif";
+const MONO = t.mono;
 
 const UNITS: Record<string, { unit: string; digits: number }> = {
   gps_time_offset: { unit: 'ms', digits: 3 },
@@ -72,14 +68,12 @@ const agreed = data.lastAgreedS === null ? 'NO AGREEMENT IN THIS REPLAY' : `LAST
 ---
 
 <Layout metadata={metadata}>
-  <div
-    class="ags min-h-screen w-full px-6 py-12 md:px-10 md:py-16"
-    style={`background:${BG};color:${CREAM};font-family:${SANS}`}
-  >
+  <ThemeStyle theme={t} />
+  <div class="th-page w-full px-6 py-12 md:px-10 md:py-16">
     <div class="mx-auto flex w-full max-w-6xl flex-col gap-12">
       <!-- 1. Top bar -->
       <div class="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-        <nav class="kicker" style={`font-family:${MONO};color:${CREAM}99`} aria-label="Breadcrumb">
+        <nav class="th-kicker" style={`font-family:${MONO};color:${CREAM}99`} aria-label="Breadcrumb">
           <a href="/work/atri-sangam" style={`color:${GOLD}`}>Atri Sangam</a>
           <span aria-hidden="true"> / </span>
           <a href="/demos/atri-sangam" style={`color:${GOLD}`}>Demos</a>
@@ -87,7 +81,7 @@ const agreed = data.lastAgreedS === null ? 'NO AGREEMENT IN THIS REPLAY' : `LAST
           <span style={`color:${GOLD_SOFT}`} aria-current="page">{label}</span>
         </nav>
         <span
-          class="chip kicker inline-flex items-center rounded-full border px-2.5 py-0.5"
+          class="th-chip th-kicker inline-flex items-center rounded-full border px-2.5 py-0.5"
           style={`font-family:${MONO};color:${CREAM}99;background:${PANEL};border-color:${PANEL_HI}`}
         >
           Recorded replay — simulated data only
@@ -100,7 +94,7 @@ const agreed = data.lastAgreedS === null ? 'NO AGREEMENT IN THIS REPLAY' : `LAST
           Object.entries(REPLAYS).map(([slug, r]) => (
             <a
               href={`/demos/atri-sangam/${slug}`}
-              class="navpill rounded-full border px-3 py-1"
+              class="th-navpill rounded-full border px-3 py-1"
               style={
                 slug === scenario
                   ? `font-family:${MONO};background:${PANEL_HI};border-color:${PANEL_HI};color:${GOLD_SOFT}`
@@ -114,15 +108,15 @@ const agreed = data.lastAgreedS === null ? 'NO AGREEMENT IN THIS REPLAY' : `LAST
         }
         <a
           href="/demos/atri-sangam"
-          class="navpill rounded-full border px-3 py-1"
+          class="th-navpill rounded-full border px-3 py-1"
           style={`font-family:${MONO};border-color:${PANEL_HI};color:${CREAM}99`}>Index</a
         >
       </nav>
 
       <!-- 3. Header -->
       <header class="flex flex-col gap-4">
-        <span class="eyebrow" style={`font-family:${MONO};color:${GOLD}`}>{eyebrow}</span>
-        <h1 class="h1 text-5xl tracking-tight md:text-6xl" style={`font-family:${MONO}`}>{label}</h1>
+        <span class="th-eyebrow" style={`font-family:${MONO};color:${GOLD}`}>{eyebrow}</span>
+        <h1 class="th-h1 text-5xl tracking-tight md:text-6xl" style={`font-family:${MONO}`}>{label}</h1>
         <p class="max-w-3xl text-lg font-light leading-relaxed" style={`color:${CREAM}e6`}>
           {data.caption}
         </p>
@@ -136,7 +130,7 @@ const agreed = data.lastAgreedS === null ? 'NO AGREEMENT IN THIS REPLAY' : `LAST
         <span class="text-4xl font-bold" style={`font-family:${MONO};color:${statusColour(data.status)}`}>
           {data.status.toUpperCase()}
         </span>
-        <span class="readout" style={`font-family:${MONO};color:${CREAM}66`}>{agreed}</span>
+        <span class="th-readout" style={`font-family:${MONO};color:${CREAM}66`}>{agreed}</span>
       </div>
 
       <!-- 5. Channel status row -->
@@ -144,7 +138,7 @@ const agreed = data.lastAgreedS === null ? 'NO AGREEMENT IN THIS REPLAY' : `LAST
         {
           data.channels.map((c) => (
             <span
-              class="kicker inline-flex items-center rounded-full border px-2.5 py-0.5"
+              class="th-kicker inline-flex items-center rounded-full border px-2.5 py-0.5"
               style={`font-family:${MONO};border-color:${PANEL_HI};color:${statusColour(c.status)}`}
             >
               {c.name}: {c.status.toUpperCase()}
@@ -159,7 +153,7 @@ const agreed = data.lastAgreedS === null ? 'NO AGREEMENT IN THIS REPLAY' : `LAST
           <h2 class="text-2xl font-bold tracking-tight" style={`font-family:${MONO};color:${CREAM}`}>
             GPS vs the assembly
           </h2>
-          <span class="hidden kicker md:inline" style={`font-family:${MONO};color:${CREAM}99`}>
+          <span class="th-kicker hidden md:inline" style={`font-family:${MONO};color:${CREAM}99`}>
             The band is where the independent references agree
           </span>
         </div>
@@ -187,7 +181,7 @@ const agreed = data.lastAgreedS === null ? 'NO AGREEMENT IN THIS REPLAY' : `LAST
                   <h3 class="text-lg font-bold" style={`font-family:${MONO};color:${CREAM}`}>
                     {c.name}
                   </h3>
-                  <span class="kicker" style={`font-family:${MONO};color:${statusColour(c.status)}`}>
+                  <span class="th-kicker" style={`font-family:${MONO};color:${statusColour(c.status)}`}>
                     {c.status.toUpperCase()}
                   </span>
                 </div>
@@ -202,19 +196,19 @@ const agreed = data.lastAgreedS === null ? 'NO AGREEMENT IN THIS REPLAY' : `LAST
                   label={c.thresholds ? 'APPLIED THRESHOLDS' : undefined}
                 />
                 <dl class="grid grid-cols-[7rem_1fr] gap-x-4 gap-y-2 text-sm">
-                  <dt class="kicker pt-1" style={`font-family:${MONO};color:${GOLD}`}>
+                  <dt class="th-kicker pt-1" style={`font-family:${MONO};color:${GOLD}`}>
                     Variable
                   </dt>
                   <dd style={`font-family:${MONO};color:${CREAM}cc;font-size:12px`}>{c.doc.variable}</dd>
-                  <dt class="kicker pt-1" style={`font-family:${MONO};color:${GOLD}`}>
+                  <dt class="th-kicker pt-1" style={`font-family:${MONO};color:${GOLD}`}>
                     Source
                   </dt>
                   <dd style={`color:${CREAM}b3`}>{c.doc.source}</dd>
-                  <dt class="kicker pt-1" style={`font-family:${MONO};color:${GOLD}`}>
+                  <dt class="th-kicker pt-1" style={`font-family:${MONO};color:${GOLD}`}>
                     Means
                   </dt>
                   <dd style={`color:${CREAM}99`}>{c.doc.description}</dd>
-                  <dt class="kicker pt-1" style={`font-family:${MONO};color:${GOLD}`}>
+                  <dt class="th-kicker pt-1" style={`font-family:${MONO};color:${GOLD}`}>
                     Formula
                   </dt>
                   <dd style={`font-family:${MONO};color:${GOLD_SOFT};font-size:11px;word-break:break-word`}>
@@ -239,7 +233,7 @@ const agreed = data.lastAgreedS === null ? 'NO AGREEMENT IN THIS REPLAY' : `LAST
         <div class="overflow-x-auto">
           <table class="w-full text-left">
             <thead>
-              <tr class="th" style={`font-family:${MONO};color:${GOLD}`}>
+              <tr class="th-thead" style={`font-family:${MONO};color:${GOLD}`}>
                 <th class="pb-4 pr-6 font-bold">Detector</th>
                 <th class="pb-4 pr-6 font-bold">Rule</th>
                 <th class="pb-4 font-bold">Source</th>
@@ -327,49 +321,3 @@ const agreed = data.lastAgreedS === null ? 'NO AGREEMENT IN THIS REPLAY' : `LAST
     });
   });
 </script>
-
-<style>
-  .kicker {
-    font-size: 10px;
-    text-transform: uppercase;
-    letter-spacing: 0.25em;
-  }
-  .chip {
-    letter-spacing: 0.2em;
-  }
-  .eyebrow {
-    font-size: 11px;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 0.3em;
-  }
-  .navpill {
-    font-size: 11px;
-    letter-spacing: 0.1em;
-    text-decoration: none;
-    transition: border-color 160ms ease;
-  }
-  .navpill:hover {
-    border-color: #c9a84c66;
-  }
-  .readout {
-    font-size: 11px;
-    letter-spacing: 0.1em;
-  }
-  .th {
-    font-size: 10px;
-    text-transform: uppercase;
-    letter-spacing: 0.2em;
-  }
-  .h1 {
-    font-weight: 500;
-    line-height: 1.08;
-    background-image: linear-gradient(180deg, #f5f0e0 0%, #f0d78c 55%, #c9a84c 100%);
-    -webkit-background-clip: text;
-    background-clip: text;
-    color: transparent;
-  }
-  .ags {
-    position: relative;
-  }
-</style>

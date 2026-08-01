@@ -1,0 +1,38 @@
+---
+/**
+ * Emits a theme's tokens as CSS custom properties, and pulls in the shared
+ * structural classes that read them.
+ *
+ * Drop this once near the top of a branded page. Everything in theme.css —
+ * .th-kicker, .th-eyebrow, the H1 gradient, card hover — then works, and any
+ * inline style can reach the same values through var(--th-*).
+ *
+ * The properties land on :root rather than a wrapper class because each of
+ * these is a whole document with one theme; scoping them buys nothing and
+ * would stop them reaching anything rendered outside the wrapper.
+ */
+import type { Theme } from '~/themes';
+import '~/themes/theme.css';
+
+interface Props {
+  theme: Theme;
+}
+
+const { theme } = Astro.props;
+
+const vars = [
+  ['--th-bg', theme.bg],
+  ['--th-panel', theme.panel],
+  ['--th-panel-hi', theme.panelHi],
+  ['--th-accent', theme.accent],
+  ['--th-accent-soft', theme.accentSoft],
+  ['--th-text', theme.text],
+  ['--th-mono', theme.mono],
+  ['--th-sans', theme.sans],
+  ['--th-gradient', theme.gradient],
+]
+  .map(([k, v]) => `${k}:${v}`)
+  .join(';');
+---
+
+<style is:inline set:html={`:root{${vars}}`}></style>

@@ -3,6 +3,8 @@ import { getCollection, render } from 'astro:content';
 import { Image } from 'astro:assets';
 import PageLayout from '~/layouts/PageLayout.astro';
 import BareLayout from '~/layouts/Layout.astro';
+import ThemeStyle from '~/components/ThemeStyle.astro';
+import { themeById } from '~/themes';
 // Loaded for every work page, not only themed ones: an @fontsource import is
 // static. Two woff2 files against not duplicating this route, which is the
 // trade the theme field exists to avoid.
@@ -38,6 +40,9 @@ const { title, excerpt, type, status, url, tags, image, theme } = item.data;
    style block. */
 const isEmerald = theme === 'emerald';
 const Wrapper = isEmerald ? BareLayout : PageLayout;
+// themeById throws on an unregistered id, so a typo in frontmatter fails the
+// build rather than silently rendering in the wrong palette.
+const activeTheme = theme ? themeById(theme) : null;
 
 // Logo: raster (png/jpg/webp) is optimised via <Image>; svg is passed through as a URL.
 const imageKey = image ? image.replace('~/', '/src/') : null;
@@ -70,6 +75,7 @@ const metadata = { title, description: excerpt };
 ---
 
 <Wrapper metadata={metadata}>
+  {activeTheme && <ThemeStyle theme={activeTheme} />}
   <div class:list={['work-detail', isEmerald && 'is-emerald']}>
     <div class="mx-auto max-w-3xl px-6 py-16">
       <!-- Header -->
@@ -188,14 +194,16 @@ const metadata = { title, description: excerpt };
      duplicating the whole template to avoid them would be worse than out-
      specifying them here. */
   .is-emerald {
-    --bg: #03251c;
-    --panel: #0a3d2e;
-    --panel-hi: #0f5c46;
-    --gold: #c9a84c;
-    --gold-soft: #f0d78c;
-    --cream: #f5f0e0;
-    --mono: 'JetBrains Mono Variable', ui-monospace, monospace;
-    --sans: 'Work Sans Variable', ui-sans-serif, system-ui, sans-serif;
+    /* Aliases onto the tokens ThemeStyle emits, so the rules below read the
+       same as before while the values live in src/themes/. */
+    --bg: var(--th-bg);
+    --panel: var(--th-panel);
+    --panel-hi: var(--th-panel-hi);
+    --gold: var(--th-accent);
+    --gold-soft: var(--th-accent-soft);
+    --cream: var(--th-text);
+    --mono: var(--th-mono);
+    --sans: var(--th-sans);
 
     /* The site body is light. Without a full-height background the cream page
        shows below the content on short entries. */
@@ -209,7 +217,7 @@ const metadata = { title, description: excerpt };
     font-family: var(--mono);
     font-weight: 500;
     line-height: 1.08;
-    background-image: linear-gradient(180deg, #f5f0e0 0%, #f0d78c 55%, #c9a84c 100%);
+    background-image: var(--th-gradient);
     -webkit-background-clip: text;
     background-clip: text;
     color: transparent;
@@ -260,38 +268,40 @@ const metadata = { title, description: excerpt };
   /* Tailwind Typography reads these custom properties. Both the base and the
      inverted set are written, because the page is dark whichever colour mode
      the visitor's browser reports. */
+  /* The 8-digit values below carry opacity the tokens do not, so they stay
+     literal. Everything else reads from the theme. */
   .is-emerald :global(.prose) {
     --tw-prose-body: #f5f0e0e6;
-    --tw-prose-headings: #f5f0e0;
+    --tw-prose-headings: var(--th-text);
     --tw-prose-lead: #f5f0e0b3;
-    --tw-prose-links: #c9a84c;
-    --tw-prose-bold: #f5f0e0;
-    --tw-prose-counters: #c9a84c;
-    --tw-prose-bullets: #0f5c46;
-    --tw-prose-hr: #0f5c46;
-    --tw-prose-quotes: #f5f0e0;
-    --tw-prose-quote-borders: #c9a84c;
+    --tw-prose-links: var(--th-accent);
+    --tw-prose-bold: var(--th-text);
+    --tw-prose-counters: var(--th-accent);
+    --tw-prose-bullets: var(--th-panel-hi);
+    --tw-prose-hr: var(--th-panel-hi);
+    --tw-prose-quotes: var(--th-text);
+    --tw-prose-quote-borders: var(--th-accent);
     --tw-prose-captions: #f5f0e099;
-    --tw-prose-code: #f0d78c;
-    --tw-prose-pre-code: #f5f0e0;
-    --tw-prose-pre-bg: #03251c;
-    --tw-prose-th-borders: #0f5c46;
+    --tw-prose-code: var(--th-accent-soft);
+    --tw-prose-pre-code: var(--th-text);
+    --tw-prose-pre-bg: var(--th-bg);
+    --tw-prose-th-borders: var(--th-panel-hi);
     --tw-prose-td-borders: #0f5c4680;
     --tw-prose-invert-body: #f5f0e0e6;
-    --tw-prose-invert-headings: #f5f0e0;
+    --tw-prose-invert-headings: var(--th-text);
     --tw-prose-invert-lead: #f5f0e0b3;
-    --tw-prose-invert-links: #c9a84c;
-    --tw-prose-invert-bold: #f5f0e0;
-    --tw-prose-invert-counters: #c9a84c;
-    --tw-prose-invert-bullets: #0f5c46;
-    --tw-prose-invert-hr: #0f5c46;
-    --tw-prose-invert-quotes: #f5f0e0;
-    --tw-prose-invert-quote-borders: #c9a84c;
+    --tw-prose-invert-links: var(--th-accent);
+    --tw-prose-invert-bold: var(--th-text);
+    --tw-prose-invert-counters: var(--th-accent);
+    --tw-prose-invert-bullets: var(--th-panel-hi);
+    --tw-prose-invert-hr: var(--th-panel-hi);
+    --tw-prose-invert-quotes: var(--th-text);
+    --tw-prose-invert-quote-borders: var(--th-accent);
     --tw-prose-invert-captions: #f5f0e099;
-    --tw-prose-invert-code: #f0d78c;
-    --tw-prose-invert-pre-code: #f5f0e0;
-    --tw-prose-invert-pre-bg: #03251c;
-    --tw-prose-invert-th-borders: #0f5c46;
+    --tw-prose-invert-code: var(--th-accent-soft);
+    --tw-prose-invert-pre-code: var(--th-text);
+    --tw-prose-invert-pre-bg: var(--th-bg);
+    --tw-prose-invert-th-borders: var(--th-panel-hi);
     --tw-prose-invert-td-borders: #0f5c4680;
   }
 
