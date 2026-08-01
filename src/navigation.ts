@@ -24,6 +24,7 @@ export const headerData = {
         { text: 'Mentible', href: getPermalink('/mentible') },
         { text: 'Thittam', href: getPermalink('/thittam') },
         { text: 'Kathai Chithiram', href: getPermalink('/kathai-chithiram') },
+        { text: 'Atri Sangam', href: getPermalink('/atri-sangam') },
         { text: 'Services', href: getPermalink('/services') },
       ],
     },

@@ -24,6 +24,15 @@ const whenExternalScripts = (items: (() => AstroIntegration) | (() => AstroInteg
 export default defineConfig({
   output: 'static',
 
+  // NOTE on trailing slashes. Locally, /kaundinya/ and /demos/atri-sangam/
+  // 404 while /kaundinya and /demos/atri-sangam work; in production both
+  // resolve, because nginx maps /page/ to page/index.html. `trailingSlash`
+  // does NOT fix this: it governs the dev server and on-demand rendered
+  // pages, and every page here is prerendered (output: 'static'), so Astro
+  // leaves the question to the host. Tried 'ignore' explicitly — no effect.
+  // A local trailing-slash 404 therefore says nothing about production;
+  // check the deployed URL instead.
+
   redirects: {
     // StudyBuddy Q was rebranded and spun out as Mentible (2026-06).
     '/work/studybuddy-q': '/work/mentible',

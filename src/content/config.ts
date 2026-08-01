@@ -167,6 +167,12 @@ const workCollection = defineCollection({
     url: z.string().url().optional(),
     landingUrl: z.string().optional(), // internal one-pager route (e.g. /thittam) — cards link here when set
 
+    // Opt-in dark theme for the detail page. Only 'emerald' exists — the
+    // palette the Atri Sangam demo pages use. A themed entry renders through
+    // the bare layout instead of PageLayout, because the site's cream header
+    // above a dark body reads as a broken page rather than a deliberate one.
+    theme: z.enum(['emerald']).optional(),
+
     image: z.string().optional(),
     tags: z.array(z.string()).optional(),
 
