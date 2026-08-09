@@ -36,3 +36,7 @@ DRIFT_REPORT.md
 
 # Snapshots written by the Playwright MCP server during verification.
 .playwright-mcp/
+
+# internal build/design docs — never publish to the public site repo
+docs/superpowers/
+.superpowers/
