@@ -9,15 +9,16 @@ author: siva-m
 type: product
 status: in-progress
 image: ~/assets/images/work/agastya-logo.svg
-# Swagger first: it lists every endpoint and lets you call them from the browser,
-# which is the point of an API demo. The raw alerts payload is second, for anyone
-# who wants the scoring output without the UI. The instance is read-only — the
-# five mutating endpoints are refused at the proxy, not merely hidden by the app.
+# The console first: it shows what the pipeline decided — the intake funnel and
+# each alert's five-factor score breakdown — which is the part a reader cannot
+# get from an endpoint list. Swagger second, for anyone who wants to call the
+# API directly. The instance is read-only — the five mutating endpoints are
+# refused at the proxy, not merely hidden by the app.
 links:
-  - label: Explore the live API
+  - label: Open the live console
+    href: https://agastya.mambakkam.net
+  - label: Browse the API
     href: https://agastya.mambakkam.net/api/docs
-  - label: Sample alerts (JSON)
-    href: https://agastya.mambakkam.net/alerts
 tags:
   - Python
   - FastAPI
@@ -124,7 +125,7 @@ service with Swagger docs describing the API surface. What you can stand up
 and exercise today is real code doing real scoring, mapping, and correlation
 logic — not a mockup of a dashboard.
 
-You can check that yourself: the links above point at a live instance. Its
+You can check that yourself: the links above open a live instance, where the console shows the intake funnel and each alert's score broken into the five factors that produced it. Its
 data is seeded at startup by replaying canned attack scenarios through the
 same pipeline the ingest endpoint uses, so the alerts, MITRE mappings,
 incidents and campaigns you see are genuine output of the scoring code rather
