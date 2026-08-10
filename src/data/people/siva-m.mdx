@@ -141,7 +141,7 @@ proof, not the pitch, of everything above.
 
 ## What I'm Building
 
-Products under WeGoFwd2020. The first three put the shaping in the user's hands, not the model's; the fourth has no model in it at all:
+Products under WeGoFwd2020. The first three put the shaping in the user's hands, not the model's; the other two have no model in them at all:
 
 - **[Mentible](https://mambakkam.net/mentible)** — _live in production._ An AI
   authoring tool: you set the scope and boundaries, it compiles a real
@@ -163,6 +163,13 @@ Products under WeGoFwd2020. The first three put the shaping in the user's hands,
   dangerous one. Published on PyPI, and validated against a deterministic
   attack-scenario simulator — the thresholds are still unproven against real
   jamming, which is why it stays alpha.
+- **[AGASTYA](https://mambakkam.net/work/agastya)** — _reference
+  implementation._ A cyber-attack detection and response pipeline: multi-source
+  event scoring, MITRE ATT&CK mapping, alert deduplication, campaign
+  correlation, and automated incident response. It runs and is tested — 64
+  passing tests — but it operates on mock data. An architecture demonstrator
+  meant to be read and learned from, not a hardened SOC to put in front of
+  anything that matters.
 
 <div class="not-prose my-8 flex flex-wrap items-center gap-4">
   <a href="/demos/atri-sangam" class="btn btn-primary">
@@ -173,8 +180,10 @@ Products under WeGoFwd2020. The first three put the shaping in the user's hands,
 
 The first three are not separate builds. They share one content-generation
 engine — proven first in Mentible, then reused across the others. Atri Sangam
-is a different line of work entirely: no language model, no generation, just
-arithmetic on residuals that anyone can check.
+and AGASTYA are different lines of work entirely: no language model, no
+generation — just deterministic checks anyone can verify, residuals against
+independent references in one, threat scoring against known signatures in the
+other.
 
 <SharedEngineDiagram />
 
