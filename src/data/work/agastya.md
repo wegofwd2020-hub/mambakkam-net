@@ -3,12 +3,21 @@ title: AGASTYA
 excerpt: >
   A reference implementation of a real-time cyber-attack detection and response
   pipeline — event scoring, MITRE ATT&CK mapping, alert management, and automated
-  incident response. It runs and is tested (64 tests); an architecture demonstrator,
+  incident response. It runs and is tested (108 tests); an architecture demonstrator,
   not a hardened production SOC.
 author: siva-m
 type: product
 status: in-progress
 image: ~/assets/images/work/agastya-logo.svg
+# Swagger first: it lists every endpoint and lets you call them from the browser,
+# which is the point of an API demo. The raw alerts payload is second, for anyone
+# who wants the scoring output without the UI. The instance is read-only — the
+# five mutating endpoints are refused at the proxy, not merely hidden by the app.
+links:
+  - label: Explore the live API
+    href: https://agastya.mambakkam.net/api/docs
+  - label: Sample alerts (JSON)
+    href: https://agastya.mambakkam.net/alerts
 tags:
   - Python
   - FastAPI
@@ -35,7 +44,7 @@ to end.
 It is not a product sold to a customer. It is a design study: an answer to
 "what does a defensible, explainable detection pipeline actually look like,
 end to end, when every stage is real code and every claim is backed by a
-test?" The pipeline runs. It has a 64-test suite, all passing. It is an
+test?" The pipeline runs. It has a 108-test suite, all passing. It is an
 architecture demonstrator, not a hardened SOC.
 
 ## Why the name
@@ -110,10 +119,23 @@ core pipeline.
 
 ## What it is (and isn't)
 
-AGASTYA runs, and it is tested: 64 tests, all passing, against a FastAPI
+AGASTYA runs, and it is tested: 108 tests, all passing, against a FastAPI
 service with Swagger docs describing the API surface. What you can stand up
 and exercise today is real code doing real scoring, mapping, and correlation
 logic — not a mockup of a dashboard.
+
+You can check that yourself: the links above point at a live instance. Its
+data is seeded at startup by replaying canned attack scenarios through the
+same pipeline the ingest endpoint uses, so the alerts, MITRE mappings,
+incidents and campaigns you see are genuine output of the scoring code rather
+than fixtures written to look convincing. Twenty-one events produce four
+alerts — the rest are absorbed by deduplication and rate limiting, which is
+the funnel working, not the detector missing.
+
+The instance is deliberately read-only. Its five mutating endpoints are
+refused by the reverse proxy before a request reaches Python, and the
+application drops them from its own route table as a second layer. Publishing
+a writable security tool would have been an invitation.
 
 What it is not: it is not battle-tested against real adversaries, and it
 does not ingest live traffic. It operates on mock data — event streams
