@@ -9,6 +9,9 @@ author: siva-m
 type: product
 status: in-progress
 image: ~/assets/images/work/agastya-logo.svg
+# Not an icon like the other work logos — a 1824x2320 line drawing that the
+# default 144px square slot renders as a smudge.
+imageDisplay: illustration
 # The console first: it shows what the pipeline decided — the intake funnel and
 # each alert's five-factor score breakdown — which is the part a reader cannot
 # get from an endpoint list. Swagger second, for anyone who wants to call the

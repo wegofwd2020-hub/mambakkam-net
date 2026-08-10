@@ -31,7 +31,7 @@ const { Content } = await render(item);
 const allPeople = await getCollection('people', ({ data }) => !data.draft);
 const author = allPeople.find((p) => p.id === item.data.author);
 
-const { title, excerpt, type, status, url, tags, image, theme, links } = item.data;
+const { title, excerpt, type, status, url, tags, image, theme, links, imageDisplay } = item.data;
 
 /* `links` supersedes `url`. The fallback keeps every entry that only sets a
    url rendering exactly as it did before. */
@@ -100,10 +100,17 @@ const metadata = { title, description: excerpt };
           svgLogoUrl && (
             <img
               src={svgLogoUrl}
-              alt={`${title} logo`}
-              width="144"
-              height="144"
-              class="w-36 h-36 object-contain mb-6"
+              alt={imageDisplay === 'illustration' ? `${title} illustration` : `${title} logo`}
+              width={imageDisplay === 'illustration' ? 377 : 144}
+              height={imageDisplay === 'illustration' ? 480 : 144}
+              class={
+                imageDisplay === 'illustration'
+                  ? /* A detailed line illustration, not an icon: size it by height and
+                       let the width follow, so it is legible rather than shrunk into
+                       the square logo slot. */
+                    'h-72 sm:h-96 lg:h-[30rem] w-auto object-contain mb-8'
+                  : 'w-36 h-36 object-contain mb-6'
+              }
             />
           )
         }

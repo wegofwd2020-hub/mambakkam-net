@@ -184,6 +184,13 @@ const workCollection = defineCollection({
       )
       .optional(),
 
+    /* How to display `image` on the detail page. Every other work item ships a
+       compact icon (64-200 viewBox) that reads correctly in the default 144px
+       square. AGASTYA's is a 1824x2320 line illustration, which that slot
+       shrinks into an unreadable smudge. 'illustration' gives it a tall,
+       aspect-preserving hero size instead. */
+    imageDisplay: z.enum(['logo', 'illustration']).default('logo'),
+
     landingUrl: z.string().optional(), // internal one-pager route (e.g. /thittam) — cards link here when set
 
     // Opt-in dark theme for the detail page. Only 'emerald' exists — the
