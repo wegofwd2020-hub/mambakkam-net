@@ -108,7 +108,7 @@ const metadata = { title, description: excerpt };
                   ? /* A detailed line illustration, not an icon: size it by height and
                        let the width follow, so it is legible rather than shrunk into
                        the square logo slot. */
-                    'h-72 sm:h-96 lg:h-[30rem] w-auto object-contain mb-8'
+                    'work-illustration h-72 sm:h-96 lg:h-[30rem] w-auto object-contain mb-8'
                   : 'w-36 h-36 object-contain mb-6'
               }
             />
@@ -199,6 +199,17 @@ const metadata = { title, description: excerpt };
 </Wrapper>
 
 <style>
+  /* Illustrations ship as authored — black line work — which is correct on the
+     cream page and invisible on the dark one (1.11:1 against rgb 18 16 12).
+     Inverting under the site's .dark class turns the black lines white without
+     touching the asset, so the file stays right wherever else it is reused.
+
+     Keyed off .dark, not prefers-color-scheme: the theme is a class driven by
+     the header toggle, and an OS-level media query would disagree with anyone
+     whose toggle differs from their system setting. */
+  .work-illustration { transition: filter .2s; }
+  :global(.dark) .work-illustration { filter: invert(1); }
+
   /* "Emerald Prestige" — the palette the Atri Sangam demo pages use, applied to
      a work detail page that opts in via `theme: emerald`. Scoped entirely under
      .is-emerald, so the other eight catalog entries are untouched.
