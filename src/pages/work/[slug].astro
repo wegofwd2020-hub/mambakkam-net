@@ -207,8 +207,12 @@ const metadata = { title, description: excerpt };
      Keyed off .dark, not prefers-color-scheme: the theme is a class driven by
      the header toggle, and an OS-level media query would disagree with anyone
      whose toggle differs from their system setting. */
-  .work-illustration { transition: filter .2s; }
-  :global(.dark) .work-illustration { filter: invert(1); }
+  .work-illustration {
+    transition: filter 0.2s;
+  }
+  :global(.dark) .work-illustration {
+    filter: invert(1);
+  }
 
   /* "Emerald Prestige" — the palette the Atri Sangam demo pages use, applied to
      a work detail page that opts in via `theme: emerald`. Scoped entirely under
