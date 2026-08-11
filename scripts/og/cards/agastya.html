@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>AGASTYA og:image</title>
+    <!-- render.mjs reads this to know where the PNG lands. -->
+    <meta name="og-out" content="src/assets/images/work/agastya-og.png" />
+    <link rel="stylesheet" href="../card.css" />
+    <style>
+      /* The bronze and near-black the demo console runs on, so a link preview
+         and the thing it opens look like the same product. Cooler and dimmer
+         than Mentible's violet — this one is a security console, not a studio. */
+      .card {
+        --ground:
+          radial-gradient(ellipse 68% 52% at 78% 8%, rgb(232 184 75 / 16%) 0%, transparent 60%),
+          radial-gradient(ellipse 52% 44% at 10% 94%, rgb(57 135 229 / 12%) 0%, transparent 58%),
+          linear-gradient(176deg, #171b23 0%, #0e1116 60%, #07090c 100%);
+        --frame-line: rgb(232 184 75 / 20%);
+        --frame-dot: rgb(232 184 75 / 52%);
+        --rule-line: rgb(232 184 75 / 45%);
+        --rule-dot: rgb(232 184 75 / 72%);
+        --mark-glow: rgb(232 184 75 / 32%);
+        --wordmark: #f1ece1;
+        --accent: #e8b84b;
+        --statement: linear-gradient(100deg, #f4e9cf 0%, #e8b84b 48%, #d9a43c 100%);
+        --sub: #a9b3c1;
+      }
+
+      /* The sage is line work on transparent, drawn in black. Inverted here, as
+         on every other dark surface, rather than shipping a recoloured copy.
+
+         card.css sizes the mark 96x96 for a square logo. This one is a portrait
+         figure at 1824x2320, which that box shrinks to a 75px-wide sliver — too
+         small to read as a person. Sized by height instead, and taller, so the
+         figure is recognisable at the size LinkedIn actually renders a card. */
+      .brand img {
+        width: auto;
+        height: 200px;
+        filter: invert(1) drop-shadow(0 0 26px var(--mark-glow));
+      }
+      .brand {
+        gap: 34px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="card">
+      <div class="frame"><span></span><span></span><span></span><span></span></div>
+      <div class="inner">
+        <div class="brand">
+          <img src="../../../src/assets/images/work/agastya-logo.svg" alt="" />
+          <div class="wordmark">AGASTYA</div>
+        </div>
+        <div class="tagline">DETECTION &amp; RESPONSE</div>
+        <div class="rule"><i></i><b></b><s></s><b></b><i></i></div>
+        <div class="statement">21 events in.<br /><em>Four</em> worth waking someone for.</div>
+        <div class="sub">Scoring · MITRE ATT&amp;CK mapping · campaign correlation — live, read-only</div>
+      </div>
+    </div>
+  </body>
+</html>

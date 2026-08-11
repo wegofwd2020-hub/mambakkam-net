@@ -31,7 +31,7 @@ const { Content } = await render(item);
 const allPeople = await getCollection('people', ({ data }) => !data.draft);
 const author = allPeople.find((p) => p.id === item.data.author);
 
-const { title, excerpt, type, status, url, tags, image, theme, links, imageDisplay } = item.data;
+const { title, excerpt, type, status, url, tags, image, theme, links, imageDisplay, ogImage } = item.data;
 
 /* `links` supersedes `url`. The fallback keeps every entry that only sets a
    url rendering exactly as it did before. */
@@ -76,7 +76,18 @@ const statusLabel: Record<string, string> = {
   archived: 'Archived',
 };
 
-const metadata = { title, description: excerpt };
+/* og:image. Resolved through the same glob as the logos. Without an explicit
+   card a work page inherits the site default, which is the village photo — so
+   every project shared on LinkedIn previewed as Mambakkam rather than as
+   itself. */
+const ogKey = ogImage ? ogImage.replace('~/', '/src/') : null;
+const resolvedOg = ogKey && workImages[ogKey] ? (await workImages[ogKey]()).default : null;
+
+const metadata = {
+  title,
+  description: excerpt,
+  ...(resolvedOg ? { openGraph: { images: [{ url: resolvedOg }] } } : {}),
+};
 ---
 
 <Wrapper metadata={metadata}>

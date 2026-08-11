@@ -191,6 +191,11 @@ const workCollection = defineCollection({
        aspect-preserving hero size instead. */
     imageDisplay: z.enum(['logo', 'illustration']).default('logo'),
 
+    /* Link-preview card, rendered by scripts/og. Without it a work page falls
+       back to the site-wide default, so sharing any project on LinkedIn shows
+       the village photo instead of the project. */
+    ogImage: z.string().optional(),
+
     landingUrl: z.string().optional(), // internal one-pager route (e.g. /thittam) — cards link here when set
 
     // Opt-in dark theme for the detail page. Only 'emerald' exists — the
