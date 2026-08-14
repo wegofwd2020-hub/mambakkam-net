@@ -25,6 +25,7 @@ const metadata = {
 const DEMO_URL = '/demos/mentible/';
 // Full (non-demo) Mentible web app — generate/author/accounts in the browser.
 const APP_URL = '/app/mentible/';
+const WORK_URL = '/app/mentible/work-with-me/';
 // Full Android app, "latest" release (auto-tracks whatever is marked latest).
 const APK_URL = 'https://github.com/wegofwd2020-hub/mambakkam-net/releases/latest/download/Mentible.apk';
 
@@ -143,6 +144,11 @@ const icon = (name: string) =>
         </p>
 
         <div class="mtb-cta-row">
+          <a class="mtb-btn mtb-btn-primary" href={WORK_URL}>
+            Work with me
+            <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor"
+                 stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"></path></svg>
+          </a>
           <a class="mtb-btn mtb-btn-primary" href={APP_URL}>
             Use it in your browser
             <svg
