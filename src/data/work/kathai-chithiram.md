@@ -5,6 +5,7 @@ author: siva-m
 type: product
 status: in-progress
 image: ~/assets/images/work/kathai-chithiram-logo.svg
+ogImage: ~/assets/images/work/kathai-chithiram-og.png
 landingUrl: /kathai-chithiram
 tags:
   - Python

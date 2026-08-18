@@ -1,0 +1,104 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Kathai Chithiram og:image</title>
+    <!-- render.mjs reads this to know where the PNG lands. -->
+    <meta name="og-out" content="src/assets/images/work/kathai-chithiram-og.png" />
+    <link rel="stylesheet" href="../card.css" />
+    <style>
+      /*
+       * The only card on a light ground, deliberately.
+       *
+       * Every other card is dark because every other page is. This page is not:
+       * src/pages/kathai-chithiram.astro sits on the site's cream with a soft
+       * gold wash, and the product is a calm, captioned story for a child with
+       * special needs. A dark console-style card would preview it as something
+       * it is not, and would be the one card whose look contradicts the thing
+       * it opens. It also happens to stand out in a thread of dark previews.
+       *
+       * Everything below is card.css's own custom properties given light
+       * values — no structural override, which is the point of naming tokens by
+       * role rather than by hue.
+       */
+      .card {
+        --ground:
+          radial-gradient(ellipse 82% 58% at 50% 0%, rgb(242 193 78 / 22%) 0%, transparent 62%),
+          radial-gradient(ellipse 55% 45% at 6% 98%, rgb(74 144 217 / 12%) 0%, transparent 58%),
+          linear-gradient(172deg, #fdfaf3 0%, #fbf6ec 58%, #f4ecdc 100%);
+        --frame-line: rgb(43 43 51 / 16%);
+        --frame-dot: rgb(242 193 78 / 90%);
+        --rule-line: rgb(74 144 217 / 40%);
+        --rule-dot: rgb(242 193 78 / 95%);
+        /* A glow behind the mark would read as a smudge on cream. Kept tight
+           and warm so the kolam sits on the ground rather than floating. */
+        --mark-glow: rgb(242 193 78 / 45%);
+        --mark-blur: 12px;
+        --wordmark: #2b2b33;
+        --accent: #2f6fb0;
+        --statement: linear-gradient(168deg, #2f6fb0 4%, #4a90d9 54%, #6aa8e4 96%);
+        --sub: rgb(43 43 51 / 68%);
+      }
+
+      /* The kolam is stroked in its own blue with gold pulli dots, so unlike the
+         Agastya sage it needs no recolouring — it was drawn for a light ground. */
+      .brand img {
+        width: 96px;
+        height: 96px;
+      }
+
+      /* "Kathai Chithiram" is far longer than "Work" or "Thittam"; at the
+         inherited 72px it collides with the mark inside the 1024px of usable
+         width. */
+      .wordmark {
+        font-size: 54px;
+        letter-spacing: 0.06em;
+      }
+
+      /* Merriweather has no Tamil coverage and falls back to a sans silently.
+         Name the face — same trap as default.html. */
+      .tamil {
+        margin-top: 14px;
+        font-family: 'Noto Serif Tamil', serif;
+        font-size: 30px;
+        letter-spacing: 0.02em;
+        line-height: 1.3;
+        color: #b8892a;
+      }
+
+      .tagline {
+        margin-top: 14px;
+        font-size: 22px;
+        letter-spacing: 0.16em;
+      }
+      .rule {
+        margin: 26px 0 30px;
+      }
+      .statement {
+        font-size: 44px;
+      }
+      .sub {
+        margin-top: 24px;
+        font-size: 23px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="card">
+      <div class="frame"><span></span><span></span><span></span><span></span></div>
+      <div class="inner">
+        <div class="brand">
+          <img src="../../../src/assets/images/work/kathai-chithiram-logo.svg" alt="" />
+          <div class="wordmark">Kathai Chithiram</div>
+        </div>
+        <div class="tamil">கதை சித்திரம்</div>
+        <div class="tagline">PERSONAL SOCIAL STORIES</div>
+        <div class="rule"><i></i><b></b><s></s><b></b><i></i></div>
+        <div class="statement">A story your child<br /><em>can understand.</em></div>
+        <!-- Kept under ~80 characters so it sets on one line; longer and it
+             wraps with two words orphaned on the second. -->
+        <div class="sub">A parent’s own words, made into a calm captioned animation — private by design</div>
+      </div>
+    </div>
+  </body>
+</html>

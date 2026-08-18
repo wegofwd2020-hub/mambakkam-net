@@ -1,11 +1,13 @@
 ---
 import Layout from '~/layouts/Layout.astro';
 import kolamLogo from '~/assets/images/work/kathai-chithiram-logo.svg?url';
+import ogImage from '~/assets/images/work/kathai-chithiram-og.png';
 
 const metadata = {
   title: 'Kathai Chithiram — a story your child can understand',
   description:
     'Kathai Chithiram turns a parent’s own story into a calm, captioned animation designed for a child with special needs — the social-stories principle, made personal and on-demand. Private by design, with a human review gate.',
+  openGraph: { type: 'website', images: [{ url: ogImage }] },
 };
 
 const REPO = 'https://github.com/wegofwd2020-hub/kathai-chithiram';
