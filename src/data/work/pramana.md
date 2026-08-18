@@ -5,6 +5,7 @@ author: siva-m
 type: product
 status: in-progress
 image: ~/assets/images/work/pramana-logo.svg
+ogImage: ~/assets/images/work/pramana-og.png
 tags:
   - Python
   - FastAPI

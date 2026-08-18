@@ -6,6 +6,7 @@ type: product
 status: in-progress
 url: https://demo.usestudybuddy.com/
 image: ~/assets/images/work/studybuddy-ondemand-logo.png
+ogImage: ~/assets/images/work/studybuddy-ondemand-og.png
 tags:
   - Python
   - FastAPI
