@@ -4,6 +4,7 @@ import Layout from '~/layouts/Layout.astro';
 import ThemeStyle from '~/components/ThemeStyle.astro';
 import ThemeNav from '~/components/ThemeNav.astro';
 import { themes } from '~/themes';
+import ogImage from '~/assets/images/work-og.png';
 
 // This page is Siva Mambakkam's work. When another person is added to /people,
 // give them their own work page rather than listing everyone here.
@@ -32,7 +33,14 @@ const statusLabel: Record<string, string> = {
   archived: 'Archived',
 };
 
-const metadata = { title: 'Work from Mambakkam' };
+/* Its own card, in the page's own Azure & Gold. Without this the page inherits
+   the site card from config.yaml, so sharing /work and sharing / produced the
+   same green banyan preview and nothing told the two links apart. */
+const metadata = {
+  title: 'Work from Mambakkam',
+  description: 'Software products and projects from people of Mambakkam — built with care, shipped to the world.',
+  openGraph: { type: 'website', images: [{ url: ogImage }] },
+};
 
 /* Azure & Gold. This page renders through the bare layout like the other
    themed pages, so it carries its own breadcrumb home — there is no site
