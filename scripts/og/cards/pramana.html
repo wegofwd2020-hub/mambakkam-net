@@ -1,0 +1,90 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Pramana og:image</title>
+    <!-- render.mjs reads this to know where the PNG lands. -->
+    <meta name="og-out" content="src/assets/images/work/pramana-og.png" />
+    <link rel="stylesheet" href="../card.css" />
+    <style>
+      /* The logo's own #0B3D5C plate darkened into a ground, with its verify
+         green as the accent — the colour of the checkmark in the mark itself,
+         not a hue chosen to sit near it. Cool and evidential; this is an audit
+         trail, not a classroom. */
+      .card {
+        --ground:
+          radial-gradient(ellipse 68% 54% at 78% 6%, rgb(63 215 158 / 13%) 0%, transparent 60%),
+          radial-gradient(ellipse 54% 44% at 8% 96%, rgb(11 61 92 / 55%) 0%, transparent 58%),
+          linear-gradient(174deg, #0c2f47 0%, #071d2c 60%, #04121b 100%);
+        --frame-line: rgb(63 215 158 / 22%);
+        --frame-dot: rgb(63 215 158 / 55%);
+        --rule-line: rgb(63 215 158 / 45%);
+        --rule-dot: rgb(63 215 158 / 72%);
+        --mark-glow: rgb(63 215 158 / 26%);
+        --mark-blur: 22px;
+        --wordmark: #eaf2f6;
+        --accent: #3fd79e;
+        --statement: linear-gradient(168deg, #eaf2f6 6%, #9fe6c8 52%, #3fd79e 96%);
+        --sub: #94aab8;
+      }
+
+      /* Ships with its own rounded plate, like the Thittam mark — no inversion. */
+      .brand img {
+        width: 92px;
+        height: 92px;
+        border-radius: 19px;
+      }
+
+      /* Merriweather has no Devanagari coverage and falls back to a sans without
+         erroring — the same trap as the Tamil lines on the site and Thittam
+         cards. Name the face. */
+      .devanagari {
+        margin-top: 12px;
+        font-family: 'Noto Serif Devanagari', serif;
+        font-size: 30px;
+        letter-spacing: 0.02em;
+        line-height: 1.35;
+        color: #9fe6c8;
+      }
+
+      .wordmark {
+        font-size: 66px;
+      }
+      .tagline {
+        margin-top: 12px;
+        font-size: 22px;
+        letter-spacing: 0.16em;
+      }
+      .rule {
+        margin: 24px 0 28px;
+      }
+      .statement {
+        font-size: 44px;
+      }
+      .sub {
+        margin-top: 22px;
+        font-size: 23px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="card">
+      <div class="frame"><span></span><span></span><span></span><span></span></div>
+      <div class="inner">
+        <div class="brand">
+          <img src="../../../src/assets/images/work/pramana-logo.svg" alt="" />
+          <div class="wordmark">Pramana</div>
+        </div>
+        <div class="devanagari">प्रमाण</div>
+        <!-- v1 is SOX-scoped and the product is in active build, not deployed.
+             Nothing here claims a customer, a deployment or a live system —
+             that claim was stripped from every surface on 2026-07-17 and must
+             not come back through a share card. -->
+        <div class="tagline">COMPLIANCE TRAINING · SOX</div>
+        <div class="rule"><i></i><b></b><s></s><b></b><i></i></div>
+        <div class="statement">Proof the training<br /><em>actually happened.</em></div>
+        <div class="sub">An append-only audit trail on write-once storage — evidence that survives an audit</div>
+      </div>
+    </div>
+  </body>
+</html>
