@@ -2,11 +2,13 @@
 import Layout from '~/layouts/Layout.astro';
 import '@fontsource-variable/space-grotesk';
 import thittamLogo from '~/assets/images/work/thittam-logo.svg?url';
+import ogImage from '~/assets/images/work/thittam-og.png';
 
 const metadata = {
   title: 'Thittam — one plan, every vertical',
   description:
     'Thittam is a multi-tenant SaaS platform for production management. One codebase speaks every industry — film, construction, software, live events — through a declarative vertical config. Nine Go microservices, tenant-per-schema isolation.',
+  openGraph: { type: 'website', images: [{ url: ogImage }] },
 };
 
 const REPO = 'https://github.com/wegofwd2020-hub/thittam';

@@ -1,0 +1,84 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Thittam og:image</title>
+    <!-- render.mjs reads this to know where the PNG lands. -->
+    <meta name="og-out" content="src/assets/images/work/thittam-og.png" />
+    <link rel="stylesheet" href="../card.css" />
+    <style>
+      /* The ink and the three signal colours src/pages/thittam.astro runs on —
+         blue, cyan, amber are the three plan bars, and they are the product's
+         whole idea: one timeline, several verticals. Amber carries the frame so
+         the card is not a third blue rectangle in a WhatsApp thread. */
+      .card {
+        --ground:
+          radial-gradient(ellipse 70% 55% at 76% 4%, rgb(59 130 246 / 18%) 0%, transparent 62%),
+          radial-gradient(ellipse 54% 46% at 8% 98%, rgb(34 211 238 / 12%) 0%, transparent 58%),
+          linear-gradient(160deg, #10203a 0%, #0b1626 60%, #060c17 100%);
+        --frame-line: rgb(245 158 11 / 24%);
+        --frame-dot: rgb(245 158 11 / 58%);
+        --rule-line: rgb(245 158 11 / 48%);
+        --rule-dot: rgb(245 158 11 / 76%);
+        --mark-glow: rgb(59 130 246 / 34%);
+        --mark-blur: 24px;
+        --wordmark: #eaf1fb;
+        --accent: #f59e0b;
+        --statement: linear-gradient(100deg, #eaf1fb 0%, #22d3ee 46%, #3b82f6 100%);
+        --sub: #93a4bb;
+      }
+
+      /* The mark ships with its own #0F1E33 plate, so unlike the Agastya sage it
+         needs no inversion — it is already built for a dark ground. */
+      .brand img {
+        width: 88px;
+        height: 88px;
+        border-radius: 18px;
+      }
+
+      .wordmark {
+        font-size: 68px;
+      }
+      .tagline {
+        margin-top: 14px;
+        font-size: 23px;
+        letter-spacing: 0.16em;
+      }
+
+      /* Merriweather has no Tamil coverage and falls back to a sans without
+         erroring. Name the face, as default.html does. */
+      .tamil {
+        margin-top: 12px;
+        font-family: 'Noto Serif Tamil', serif;
+        font-size: 30px;
+        letter-spacing: 0.02em;
+        line-height: 1.3;
+        color: #22d3ee;
+      }
+
+      .rule {
+        margin: 26px 0 30px;
+      }
+      .sub {
+        margin-top: 24px;
+        font-size: 24px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="card">
+      <div class="frame"><span></span><span></span><span></span><span></span></div>
+      <div class="inner">
+        <div class="brand">
+          <img src="../../../src/assets/images/work/thittam-logo.svg" alt="" />
+          <div class="wordmark">Thittam</div>
+        </div>
+        <div class="tamil">திட்டம்</div>
+        <div class="tagline">PRODUCTION MANAGEMENT</div>
+        <div class="rule"><i></i><b></b><s></s><b></b><i></i></div>
+        <div class="statement">One plan.<br /><em>Every vertical.</em></div>
+        <div class="sub">Film, construction, software, live events — one codebase, a config per industry</div>
+      </div>
+    </div>
+  </body>
+</html>
