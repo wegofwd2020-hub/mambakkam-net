@@ -174,26 +174,27 @@ chown -R "$DEPLOY_USER:$DEPLOY_USER" "$INSTALL_DIR"
 
 # ── 8. host nginx vhost ────────────────────────────────────────────────────
 step "8/14  host nginx vhost"
-VHOST_SRC="$INSTALL_DIR/infra/nginx/mambakkam.net.conf"
-VHOST_AVAIL="/etc/nginx/sites-available/mambakkam.net.conf"
-VHOST_ENABLED="/etc/nginx/sites-enabled/mambakkam.net.conf"
-
-if [[ ! -f "$VHOST_SRC" ]]; then
-  fail "vhost source $VHOST_SRC not found — repo state is broken"
-fi
-
-cp "$VHOST_SRC" "$VHOST_AVAIL"
-info "copied vhost → $VHOST_AVAIL"
-
 # Disable the default catch-all vhost (Ubuntu nginx ships one; it would shadow ours)
 if [[ -L /etc/nginx/sites-enabled/default ]]; then
   rm /etc/nginx/sites-enabled/default
   info "removed default nginx vhost symlink"
 fi
 
-# Enable our vhost
-ln -sf "$VHOST_AVAIL" "$VHOST_ENABLED"
-info "enabled vhost via symlink"
+# Install every host vhost this box serves (mambakkam.net + mentible.app — the
+# Mentible app's own apex domain). mentible.app requires DNS + a Cloudflare
+# Origin Cert SAN for mentible.app (see infra/nginx/mentible.app.conf header);
+# if the cert lacks that SAN, `nginx -t` below fails and the operator fixes it.
+for VHOST in mambakkam.net mentible.app; do
+  VHOST_SRC="$INSTALL_DIR/infra/nginx/${VHOST}.conf"
+  VHOST_AVAIL="/etc/nginx/sites-available/${VHOST}.conf"
+  VHOST_ENABLED="/etc/nginx/sites-enabled/${VHOST}.conf"
+  if [[ ! -f "$VHOST_SRC" ]]; then
+    fail "vhost source $VHOST_SRC not found — repo state is broken"
+  fi
+  cp "$VHOST_SRC" "$VHOST_AVAIL"
+  ln -sf "$VHOST_AVAIL" "$VHOST_ENABLED"
+  info "installed vhost → $VHOST_ENABLED"
+done
 
 # Validate config; if it fails (e.g. cert missing), keep going so the operator
 # can fix the cert and reload manually.
