@@ -109,6 +109,10 @@ scrape_configs:
           - https://mambakkam.net
           - https://mambakkam.net/people/siva-m
           - https://mambakkam.net/sitemap-index.xml
+          # kaundinyalabs.com — third first-party tenant, same
+          # Cloudflare → host nginx → static-export container (127.0.0.1:8082)
+          # path. Homepage probe only; the site is fully static.
+          - https://kaundinyalabs.com
           - https://demo.usestudybuddy.com
           - https://demo.usestudybuddy.com/healthz
     relabel_configs:
