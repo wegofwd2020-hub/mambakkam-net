@@ -45,6 +45,17 @@ groups:
           description: 'blackbox /healthz probe failing >2 min. /healthz returns 200 only when DB+Redis are reachable; this catches both API outages and DB/Redis failures.'
           runbook_url: 'https://github.com/wegofwd2020-hub/mambakkam-net/blob/main/Plans/RUNBOOK.md#studybuddydown'
 
+      - alert: KaundinyaLabsDown
+        expr: probe_success{instance="https://kaundinyalabs.com"} == 0
+        for: 2m
+        labels:
+          severity: page
+          site: kaundinya
+        annotations:
+          summary: 'kaundinyalabs.com not responding to blackbox probes'
+          description: 'blackbox-exporter has reported probe_success=0 for >2 min on https://kaundinyalabs.com. The path is Cloudflare → host nginx → the static-export container on 127.0.0.1:8082; a failure can be at any layer.'
+          runbook_url: 'https://github.com/wegofwd2020-hub/mambakkam-net/blob/main/Plans/RUNBOOK.md#kaundinyalabsdown'
+
   # ── application errors (StudyBuddy /metrics) ───────────────────────────────
   - name: app-errors
     interval: 1m

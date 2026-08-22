@@ -162,6 +162,51 @@ sudo docker compose -f docker-compose.demo.yml up -d
 
 ---
 
+### KaundinyaLabsDown
+
+**Severity:** `[PAGE]`
+**Expr:** `probe_success{instance="https://kaundinyalabs.com"} == 0` for 2 m
+
+**What it means**
+
+blackbox-exporter has been unable to reach `https://kaundinyalabs.com` for >2 min. The probe goes Cloudflare → host nginx → the static-export container on `127.0.0.1:8082`; a failure can be at any layer. The site is fully static, so there is no database or app tier to fail — only the container, host nginx, or the Cloudflare→origin path.
+
+**Likely causes**
+
+1. **kaundinyalabs container died or unhealthy.** Check `docker compose ps` in `/opt/kaundinyalabs`.
+2. **Host nginx down or refusing 443.** Shared with mambakkam + StudyBuddy — if this fires alone, nginx is likely up. Check `systemctl status nginx`.
+3. **Cloudflare→origin path broken** — Origin Cert expired (separate cert from mambakkam's, covers kaundinyalabs.com + \*.kaundinyalabs.com), vhost misconfigured, UFW dropped 443.
+4. **`.env` missing on the box** — the compose file templates `image:` on `${IMAGE_TAG}` from an untracked `/opt/kaundinyalabs/.env`. `git clean` would remove it and break `docker compose`; never run it there.
+
+**First response (≤10 min)**
+
+```bash
+# 1. Confirm site is actually down (rule out a Grafana Cloud false positive):
+curl -I https://kaundinyalabs.com                    # expect 200
+curl -I https://kaundinyalabs.com --resolve kaundinyalabs.com:443:<vps-ip>   # bypass CF
+
+# 2. Check container + host nginx:
+ssh deploy@<vps-ip>
+docker ps | grep kaundinyalabs
+sudo systemctl status nginx
+sudo nginx -t
+
+# 3. Check container logs:
+docker logs --tail 100 kaundinyalabs
+
+# 4. If container died: restart it (needs .env with IMAGE_TAG present).
+cd /opt/kaundinyalabs
+sudo -u deploy docker compose up -d
+```
+
+**Escalation**
+
+- If host nginx config-test fails: revert `infra/nginx/kaundinyalabs.com.conf` in the kaundinyalabs-website repo (`git -C /opt/kaundinyalabs log -p infra/nginx/`); reload nginx. A syntax error here also takes down mambakkam + StudyBuddy — always `nginx -t` first.
+- If the image tag is bad: roll back by pinning a previous SHA — `echo "IMAGE_TAG=<last-good-sha>" > .env && docker compose up -d` (works only if that image is still cached; otherwise re-run the deploy workflow at that SHA).
+- If Origin Cert expired: regenerate at Cloudflare → SSL/TLS → Origin Server (15 min). SAN list: kaundinyalabs.com + \*.kaundinyalabs.com.
+
+---
+
 ### StudyBuddyDown
 
 **Severity:** `[PAGE]`
