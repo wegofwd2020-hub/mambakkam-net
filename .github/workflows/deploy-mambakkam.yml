@@ -64,7 +64,15 @@ jobs:
 
       - name: Run deploy.sh on VPS
         run: |
+          # Keepalive is REQUIRED: deploy.sh runs a full docker/astro build on the
+          # VPS that emits NO stdout for minutes (image compression, compose up).
+          # Without ServerAliveInterval the idle TCP mapping gets dropped by NAT and
+          # the runner's next write fails with "client_loop: send disconnect: Broken
+          # pipe" → exit 255 (a dead transport, not a deploy failure). Probes every
+          # 30s, tolerate 20 missed (~10 min silence) before giving up.
           ssh -i ~/.ssh/id_deploy \
+            -o ServerAliveInterval=30 -o ServerAliveCountMax=20 \
+            -o ConnectTimeout=15 \
             "${{ secrets.MAMBAKKAM_VPS_USER }}@${{ secrets.MAMBAKKAM_VPS_HOST }}" \
             'bash /opt/mambakkam/scripts/launch/deploy.sh'
 
