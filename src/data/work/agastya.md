@@ -7,7 +7,7 @@ excerpt: >
   not a hardened production SOC.
 author: siva-m
 type: product
-status: in-progress
+status: live
 image: ~/assets/images/work/agastya-logo.svg
 # Not an icon like the other work logos — a 1824x2320 line drawing that the
 # default 144px square slot renders as a smudge.
