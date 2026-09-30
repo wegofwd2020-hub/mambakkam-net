@@ -16,7 +16,7 @@ tags:
   - SaaS
   - Next.js
 featured: true
-comingSoon: true
+comingSoon: false
 publishDate: 2026-04-28
 draft: false
 ---
