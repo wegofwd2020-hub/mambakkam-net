@@ -95,6 +95,45 @@ The Day -2 (Fri May 15) test plan in `DEMO_LAUNCH_PLAN.md` includes one end-to-e
 
 ---
 
+## Bringing up the monitoring stack (first-time activation)
+
+**The monitoring stack does not auto-start.** `provision.sh` deliberately leaves it down because Prometheus will not start against the placeholder `.env.monitoring` it scaffolds. Verified 2026-08-22: no monitoring containers were running and `127.0.0.1:9090` refused connection — so nothing was probing or alerting for *any* tenant, even though all the config and rules were committed. The probes, scrapes, `remote_write`, and the ruler uploads below only exist once the stack is up.
+
+Activate it once (it then stays up via `restart: always`):
+
+```bash
+cd /opt/mambakkam/infra/monitoring
+
+# 1. Fill in REAL Grafana Cloud credentials. The scaffolded file is all
+#    <placeholders> — that is what keeps Prometheus from starting.
+#      GRAFANA_CLOUD_REMOTE_WRITE_URL / _USERNAME   (Prometheus push)
+#      GRAFANA_CLOUD_LOKI_URL / _LOKI_USERNAME       (Promtail push)
+#      GRAFANA_CLOUD_API_KEY  (Access Policy token; scopes: metrics:write,
+#                              logs:write, alerts:write — see ACCOUNT_SETUP.md §5.4)
+#      STUDYBUDDY_METRICS_TOKEN
+vi .env.monitoring
+grep -c '=<' .env.monitoring          # MUST print 0 — no <placeholders> left
+
+# 2. Bring the stack up
+docker compose --env-file .env.monitoring up -d
+docker compose ps                      # prometheus, blackbox, promtail, exporters all Up
+
+# 3. Confirm Prometheus is live and shipping
+curl -sf http://127.0.0.1:9090/-/ready && echo ready
+docker logs --tail 20 monitoring-prometheus 2>&1 | grep -i remote_write   # no auth errors
+
+# 4. Upload the alert rules (needs step 1 done)
+cd alerts && bash apply.sh
+```
+
+A `grep -c '=<'` of `1+` in step 1 is the single most common reason this whole
+chain fails: a leftover `<placeholder>` both breaks Prometheus startup and makes
+`apply.sh` die with a bash syntax error when it sources the file.
+
+Only once the stack is up do the per-edit steps below apply.
+
+---
+
 ## Applying the rules
 
 ```bash
